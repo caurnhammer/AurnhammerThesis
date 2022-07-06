@@ -40,7 +40,7 @@ plot_grandavg_ci <- function(
     leg_vals
 ) {
     ###### DATA PROC
-    if (modus %in% c("Quartile", "Condition")) {
+    if (modus %in% c("Quantile", "Condition")) {
         colnames(df)[c(4, 5)] <- c("V", "V_CI")
     } else if (modus == "Coefficient") {
         colnames(df)[c(3, 4)] <- c("V", "V_CI")
@@ -56,9 +56,9 @@ plot_grandavg_ci <- function(
         p <- ggplot(df, aes(x = Timestamp, y = V,
             color = Spec, fill = Spec)) + geom_line()
     }
-    else if (modus %in% c("Condition", "Quartile")) {
+    else if (modus %in% c("Condition", "Quantile")) {
         p <- ggplot(df, aes(x = Timestamp, y = V,
-            color = Quartile, fill = Quartile)) + geom_line()
+            color = Quantile, fill = Quantile)) + geom_line()
     }
 
     # For all plots
@@ -79,12 +79,12 @@ plot_grandavg_ci <- function(
     if (is.vector(ylims) == TRUE) {
         p <- p + ylim(ylims[1], ylims[2])
     }
-    if (modus == "Quartile") {
+    if (modus == "Quantile") {
         p <- p + labs(y=yunit, x = "Time (ms)", title = ttl)
-        p <- p + scale_color_manual(name = "N400 Quartile",
+        p <- p + scale_color_manual(name = "N400 Quantile",
                 labels = leg_labs,
                 values = leg_vals)
-        p <- p + scale_fill_manual(name = "N400 Quartile",
+        p <- p + scale_fill_manual(name = "N400 Quantile",
                 labels = leg_labs,
                 values = leg_vals)
     } else if (modus == "Condition") {
@@ -144,7 +144,7 @@ plot_elec <- function(
     modus = "Condition",
     tws = list(c(250, 400), c(600, 1000))
 ) {
-    if (modus %in% c("Tertile", "Quartile", "Condition")) {
+    if (modus %in% c("Tertile", "Quantile", "Condition")) {
         cols <- c("Spec", "Timestamp", modus)
     } else if (modus %in% c("Coefficient", "t-value")) {
         data[,"Spec"] <- as.factor(data$Spec)
@@ -167,7 +167,7 @@ plot_elec <- function(
                             data[, ..varforward]), e[i], yunit = yunit,
                             ylims = ylims, modus = modus)
         }
-    } else if (modus %in% c("Tertile", "Quartile", "Condition")) {
+    } else if (modus %in% c("Tertile", "Quantile", "Condition")) {
         for (i in 1:length(e)) {
             varforward <- c(e[i], paste0(e[i], "_CI"))
             plotlist[[i]] <- plot_grandavg_ci(cbind(data[, ..cols],
