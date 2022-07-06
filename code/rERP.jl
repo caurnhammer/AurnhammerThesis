@@ -26,13 +26,13 @@ function make_models(desc, nondesc, elec, pred)
 end
 
 struct Ind
-     numpred::Int
-     pred_dict::Dict
-     n::Int
-     mn::Int
-     s::Int
-     e::Int
-     m::Int
+    numpred::Int
+    pred_dict::Dict
+    n::Int
+    mn::Int
+    s::Int
+    e::Int
+    m::Int
 end
 
 function make_Ind(data, models, m_indices, s_ind, e_ind, m_ind) 
@@ -75,25 +75,12 @@ function process_data(infile, outfile, models; baseline_corr = false, sampling_r
         # Add Quartiles, based on the N400 size averaged across electrodes
         # This has the advantage that the bins are the same across electrodes.
         # This means, the N400 predictor is electrode specific, but the binning is not.
-        # for e in models.Electrodes
-        #     print(Symbol(e), "N400")
-        #     print("\n")
-        # end
-        # print(names(data))
-        # print(nrow(data))
-        # n4elnames = [String(e) * "N400" for e in models.Electrodes]
-        # print(n4elnames)
-        # print(data[1:10,["Fp1N400", "Fp2:N400"]])
-
-        # data.AvgN400 = sum(eachcol(data[:,[Symbol(e, "N400") for e in models.Electrodes]]))
-        # print(nrow(data))
-
-        # data.Quantile = levelcode.(cut(data.AvgN400, 4))
-        # select!(data, Not(:AvgN400))
+        data.AvgN400 = sum(eachcol(data[:,[Symbol(e, "N400") for e in models.Electrodes]]))
+        data.Quantile = levelcode.(cut(data.AvgN400, 4))
     end
     
     # Z-standardise predictors
-    data = standardise(data, "none", models);
+    data = standardise(data, components, models);
     
     # Invert predictors
     # NOTE: CURRENTLY ONLY PLAUS IS BEING INVERTED. see function definition
@@ -108,51 +95,6 @@ function process_data(infile, outfile, models; baseline_corr = false, sampling_r
         data
     end
 end
-
-
-# function process_sim_data(infile, outfile, models; baseline_corr = true)
-#     data = DataFrame(File(infile))
-#     rename!(data, :TrialNum => :Item);
-    
-#     # Take subsets at this point (i.e. before any z-scoring takes place)
-#     # data = data[(data.Condition .== "C"),:];
-#     # data = data[(data.Condition .== "C") .| (data.Condition .== "A"),:];
-
-#     # Select columns
-#     data.Intercept = ones(nrow(data));
-#     data = data[:,vcat(models.Descriptors, models.NonDescriptors, models.Predictors, models.Electrodes)];
-
-#     # Baseline correction
-#     if baseline_corr == true
-#         data = baseline_correction(data, models);
-#     end
-
-#     # Collect component predictor
-#     data = collect_component(data, "N400", models; tws=300, twe=500);
-#     #data = collect_component(data, "P600", models; tws=600, twe=800);
-#     data = collect_component(data, "Segment", models ; tws=0, twe=1200);
-
-#     #data[:,[Symbol(e, "P600") for e in models.Electrodes]] = Array(data[:,[Symbol(e, "P600") for e in models.Electrodes]]) .- Array(data[:,[Symbol(e, "N400") for e in models.Electrodes]])
-
-#     # SUBTRACT SEGMENT VOLT FROM N400 VOLT
-#     data[:,[Symbol(e, "N400") for e in models.Electrodes]] = Array(data[:,[Symbol(e, "N400") for e in models.Electrodes]]) .- Array(data[:,[Symbol(e, "Segment") for e in models.Electrodes]])
-
-#     # Add quantiles
-#     data.AvgN400 = sum(eachcol(data[:,[Symbol(e, "N400") for e in models.Electrodes]]))
-#     data.Quantile = levelcode.(cut(data.AvgN400, 4))
-#     select!(data, Not(:AvgN400))
-
-#     # Z-standardise predictors
-#     data = standardise(data, ["N400", "Segment"], models);
-#     # Invert predictors
-#     data = invert(data, ["N400", "Segment"], models)
-    
-#     if typeof(outfile) == String
-#         CSV.write(outfile, data)
-#     else
-#         data
-#     end
-# end
 
 function downsample(data, sampling_rate)
     factor = Int8(1000 / sampling_rate)
@@ -185,19 +127,18 @@ end
 
 function collect_component(data, name, models ; tws = 300, twe = 500)
         # Collect component amplitudes
-        comp = @view data[((data.Timestamp .>= tws) .& (data.Timestamp .<= twe)) ,  vcat([:Subject, :Item, :Timestamp], models.Electrodes)];
+        comp = @view data[((data.Timestamp .>= tws) .& (data.Timestamp .<= twe)), vcat([:Subject, :Item, :Timestamp], models.Electrodes)];
         comp = combine(groupby(comp, [:Subject, :Item]), [x => mean => Symbol(x, name) for x in models.Electrodes]);  
         data = innerjoin(data, comp, on = [:Subject, :Item]);
-
         data
 end
 
 function standardise(data, components, models)
-    for x in models.Predictors[2:end]
-        data[!,x] = zscore(data[!,x])
-    end
-
-    if components != false
+    if length(models.Predictors) > 1
+        for x in models.Predictors[2:end]
+            data[!,x] = zscore(data[!,x])
+        end
+    elseif components != false
         for x in models.Electrodes
             for comp in components
                 data[:,Symbol(x, comp)] = zscore(data[:,Symbol(x, comp)])
@@ -248,12 +189,11 @@ function fit_models(data, models, file)
     out_data = allocate_data(data, models);
     out_models = allocate_models(data, models, ind);
 
-    #print("Fitting models using ", Threads.nthreads(), " threads. \n")   
-    #Threads.@threads for i in 1:length(s_indices)
-    for i in 1:length(s_indices)
+    print("Fitting models using ", Threads.nthreads(), " threads. \n")   
+    Threads.@threads for i in 1:length(s_indices)
+    #for i in 1:length(s_indices)
         local ind = make_Ind(data, models, m_indices, s_indices[i], e_indices[i], m_indices[i]);
         
-        #println([ind.s, ind.e])
         # Take subset
         df = @view data[ind.s:ind.e,:];
 
@@ -287,26 +227,28 @@ function fit_models(data, models, file)
     [out_data, out_models]
 end
 
-function n4(dt, models, file)
+function fit_models_components(dt, models, file)
     out_data = []
     out_models = []
     for (i, e) in enumerate(models.Electrodes)
         print("Electrode $e ")
         models_e = make_models(models.Descriptors, models.NonDescriptors, [e], [:Intercept, Symbol(e, "N400"), Symbol(e, "Segment")]);
-        # models_e = make_models(models.Descriptors, models.NonDescriptors, [e], [:Intercept, Symbol(e, "Segment")]);
-        # models_e = make_models(models.Descriptors, models.NonDescriptors, [e], [:Intercept, Symbol(e, "P600"), Symbol(e, "Segment")]);
-        output = fit_models(dt, models_e, string("elec/N400Segment", e))
+        output = fit_models(dt, models_e, "none")
         if i .== 1
             out_data = output[1]
             out_models = output[2]
         else
-            out_data[[e, Symbol(e, "_CI")]] = output[1][:,[e, Symbol(e, "_CI")]]
-            out_models[[e, Symbol(e, "_CI")]] = output[2][:,[e, Symbol(e, "_CI")]]
+            for k in 1:2
+                out_data[!,e] = output[1][:,e]
+                out_data[!,Symbol(e, "_CI")] = output[1][:,Symbol(e, "_CI")]
+                out_models[!,e] = output[2][:,e]
+                out_models[!,Symbol(e, "_CI")] = output[2][:,Symbol(e, "_CI")]         
+            end
         end
     end
-  
-    write(string("../data/", file, "_data.csv"), out_data)
-    write(string("../data/", file, "_models.csv"), out_models)    
+    
+    write(string("./data/", file, "_data.csv"), out_data)
+    write(string("./data/", file, "_models.csv"), out_models)    
 end
 
 function allocate_data(data, models)
@@ -453,7 +395,9 @@ function write_models(out_models, models, ind, file)
     out_models[!,:Type] = [mtype_dict[x] for x in out_models[:,:Type]];
     out_models[!,:Spec] = [mspec_dict[x] for x in out_models[:,:Spec]];
 
-    write(string("../data/", file, "_models.csv"), out_models)
+    if file != "none"
+        write(string("../data/", file, "_models.csv"), out_models)
+    end
 
     out_models
 end
@@ -474,7 +418,9 @@ function write_data(out_data, models, ind, file)
     out_data[!,:Type] = [dtype_dict[x] for x in out_data[:,:Type]];
     out_data[!,:Spec] = [dspec_dict[x] for x in out_data[:,:Spec]];
 
-    write(string("../data/", file, "_data.csv"), out_data)
+    if file != "none"
+        write(string("../data/", file, "_data.csv"), out_data)
+    end
 
     out_data
 end
