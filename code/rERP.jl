@@ -4,6 +4,14 @@
 # Functions implementing rERP analysis
 ##
 
+using DataFrames
+using Combinatorics: combinations
+using CSV: File, write
+using Distributions: cdf, TDist
+using StatsBase: mean, zscore, std
+using LinearAlgebra: cholesky, diag
+using CategoricalArrays: cut, levelcode
+
 struct Models
     Descriptors::Array
     NonDescriptors::Array
@@ -31,60 +39,20 @@ function make_Ind(data, models, m_indices, s_ind, e_ind, m_ind)
     Ind(length(models.Predictors),  Dict([x => i-1 for (i, x) in enumerate(models.Predictors)]), nrow(data), length(m_indices), s_ind, e_ind, m_ind)
 end
 
-function process_frank_data(infile, outfile, models ; baseline_corr = true)
-    data = DataFrame(CSV.File(infile))
-    # Rename electrode cols. Note that these are not exact mappings of the m10 to the 10-20 system. In particular, P5 and P6 are quite off.
-    rename!(data, :"33" => :F5, :"8" => :Fz, :"22" => :F6, :"31" => :C5, :"1" => :Cz, :"24" => :C6, :"45" => :P5, :"14" => :Pz, :"41" => :P6);
-    rename!(data, :subject => :Subject, :item => :Item, :timestamp => :Timestamp);
+function process_data(infile, outfile, models; baseline_corr = false, sampling_rate = false, invert_preds = false, conds=false, components=false)
+    data = DataFrame(File(infile))
     
-    # Take subsets here
-    data = @view data[(data.wordclass .== "content"),:];
-    
-    # Exclude data with artefacts or other reasons, as flagged by Frank et al. Exclude subjects 19 and 20 as their data exhibits substantial drifts.
-    data = data[(data.artefact .== 0) .& (data.reject .== 0) .& (data.Subject .!= 19) .& (data.Subject .!= 20) .& (data.Timestamp .< 700),:]
-
-    # Select columns
-    data[:,:Intercept] = ones(nrow(data));
-    data = data[:,vcat([:Subject, :Item, :Timestamp], models.Electrodes, models.Predictors)]
-    #data = data[:,vcat([:Subject, :Item, :Itemfirst, :Timestamp], models.Electrodes, models.Predictors)]
-
-    # Baseline correct
-    if baseline_corr == true
-        data = baseline_correction(data, models);
+    # Make ItemNum vs Item coherent across datasets
+    if "ItemNum" in names(data)
+        rename!(data, :ItemNum => :Item);
     end
 
-    # Collect component predictor
-    data = collect_component(data, "N400", models; tws=300, twe=500);
-    data = collect_component(data, "Segment", models ; tws=0, twe=1200);
-
-    # Add quantiles
-    data.AvgN400 = sum(eachcol(data[:,[Symbol(e, "N400") for e in models.Electrodes]]))
-    data.Quantile = levelcode.(cut(data.AvgN400, 4))
-    select!(data, Not(:AvgN400))
-
-    # Z-standardise predictors
-    data = standardise(data, ["N400", "Segment"], models);
-    # Invert predictors
-    data = invert(data, ["N400", "Segment"], models)
-
-    if typeof(outfile) == String
-        CSV.write(outfile, data)
-    else
-        data
-    end
-end
-
-function process_cond_data(infile, outfile, models; baseline_corr = true, sampling_rate = 1000, invert_preds = false, conds=false)
-    data = DataFrame(CSV.File(infile))
-    # rename!(data, :ItemNum => :Item);
-    
     # Downsample
-    if sampling_rate != 1000
+    if sampling_rate != false
         data = downsample(data, sampling_rate)
     end
 
-    # Take subsets at this point (i.e. before any z-scoring takes place)
-
+    # Take condition subsets at this point (i.e. before any z-scoring takes place)
     if conds != false
         data = data[subset_inds(data, conds),:]
     end
@@ -93,70 +61,98 @@ function process_cond_data(infile, outfile, models; baseline_corr = true, sampli
     data.Intercept = ones(nrow(data));
     data = data[:,vcat(models.Descriptors, models.NonDescriptors, models.Predictors, models.Electrodes)];
 
-    # Baseline correction. All our in house data has already been baseline corrected before export!
-    # if baseline_corr == true
-    #    data = baseline_correction(data, models);
-    # end
-
-    # Z-standardise predictors
-    data = standardise(data, "none", models);
-    # NOTE: CURRENTLY ONLY PLAUS IS BEING INVERTED. see function definition
-    # Invert predictors
-    if invert_preds != false
-        data = invert(data, "none", models, invert_preds)
-    end
-    
-    if typeof(outfile) == String
-        CSV.write(outfile, data)
-    else
-        data
-    end
-end
-
-
-function process_sim_data(infile, outfile, models; baseline_corr = true)
-    data = DataFrame(CSV.File(infile))
-    rename!(data, :TrialNum => :Item);
-    
-    # Take subsets at this point (i.e. before any z-scoring takes place)
-    # data = data[(data.Condition .== "C"),:];
-    # data = data[(data.Condition .== "C") .| (data.Condition .== "A"),:];
-
-    # Select columns
-    data.Intercept = ones(nrow(data));
-    data = data[:,vcat(models.Descriptors, models.NonDescriptors, models.Predictors, models.Electrodes)];
-
-    # Baseline correction
+    # Baseline correction. All our in house data has already been baseline corrected before export.
     if baseline_corr == true
         data = baseline_correction(data, models);
     end
 
     # Collect component predictor
-    data = collect_component(data, "N400", models; tws=300, twe=500);
-    #data = collect_component(data, "P600", models; tws=600, twe=800);
-    data = collect_component(data, "Segment", models ; tws=0, twe=1200);
+    if components != false
+        # Add an electrode specific component predictors
+        data = collect_component(data, "N400", models; tws=300, twe=500);
+        data = collect_component(data, "Segment", models ; tws=0, twe=1200);
 
-    #data[:,[Symbol(e, "P600") for e in models.Electrodes]] = Array(data[:,[Symbol(e, "P600") for e in models.Electrodes]]) .- Array(data[:,[Symbol(e, "N400") for e in models.Electrodes]])
+        # Add Quartiles, based on the N400 size averaged across electrodes
+        # This has the advantage that the bins are the same across electrodes.
+        # This means, the N400 predictor is electrode specific, but the binning is not.
+        # for e in models.Electrodes
+        #     print(Symbol(e), "N400")
+        #     print("\n")
+        # end
+        # print(names(data))
+        # print(nrow(data))
+        # n4elnames = [String(e) * "N400" for e in models.Electrodes]
+        # print(n4elnames)
+        # print(data[1:10,["Fp1N400", "Fp2:N400"]])
 
-    # SUBTRACT SEGMENT VOLT FROM N400 VOLT
-    data[:,[Symbol(e, "N400") for e in models.Electrodes]] = Array(data[:,[Symbol(e, "N400") for e in models.Electrodes]]) .- Array(data[:,[Symbol(e, "Segment") for e in models.Electrodes]])
+        # data.AvgN400 = sum(eachcol(data[:,[Symbol(e, "N400") for e in models.Electrodes]]))
+        # print(nrow(data))
 
-    # Add quantiles
-    data.AvgN400 = sum(eachcol(data[:,[Symbol(e, "N400") for e in models.Electrodes]]))
-    data.Quantile = levelcode.(cut(data.AvgN400, 4))
-    select!(data, Not(:AvgN400))
-
-    # Z-standardise predictors
-    data = standardise(data, ["N400", "Segment"], models);
-    # Invert predictors
-    data = invert(data, ["N400", "Segment"], models)
+        # data.Quantile = levelcode.(cut(data.AvgN400, 4))
+        # select!(data, Not(:AvgN400))
+    end
     
+    # Z-standardise predictors
+    data = standardise(data, "none", models);
+    
+    # Invert predictors
+    # NOTE: CURRENTLY ONLY PLAUS IS BEING INVERTED. see function definition
+    if invert_preds != false
+        data = invert(data, "none", models, invert_preds)
+    end
+    
+    # Write data to file or return as data object
     if typeof(outfile) == String
-        CSV.write(outfile, data)
+        write(outfile, data)
     else
         data
     end
 end
+
+
+# function process_sim_data(infile, outfile, models; baseline_corr = true)
+#     data = DataFrame(File(infile))
+#     rename!(data, :TrialNum => :Item);
+    
+#     # Take subsets at this point (i.e. before any z-scoring takes place)
+#     # data = data[(data.Condition .== "C"),:];
+#     # data = data[(data.Condition .== "C") .| (data.Condition .== "A"),:];
+
+#     # Select columns
+#     data.Intercept = ones(nrow(data));
+#     data = data[:,vcat(models.Descriptors, models.NonDescriptors, models.Predictors, models.Electrodes)];
+
+#     # Baseline correction
+#     if baseline_corr == true
+#         data = baseline_correction(data, models);
+#     end
+
+#     # Collect component predictor
+#     data = collect_component(data, "N400", models; tws=300, twe=500);
+#     #data = collect_component(data, "P600", models; tws=600, twe=800);
+#     data = collect_component(data, "Segment", models ; tws=0, twe=1200);
+
+#     #data[:,[Symbol(e, "P600") for e in models.Electrodes]] = Array(data[:,[Symbol(e, "P600") for e in models.Electrodes]]) .- Array(data[:,[Symbol(e, "N400") for e in models.Electrodes]])
+
+#     # SUBTRACT SEGMENT VOLT FROM N400 VOLT
+#     data[:,[Symbol(e, "N400") for e in models.Electrodes]] = Array(data[:,[Symbol(e, "N400") for e in models.Electrodes]]) .- Array(data[:,[Symbol(e, "Segment") for e in models.Electrodes]])
+
+#     # Add quantiles
+#     data.AvgN400 = sum(eachcol(data[:,[Symbol(e, "N400") for e in models.Electrodes]]))
+#     data.Quantile = levelcode.(cut(data.AvgN400, 4))
+#     select!(data, Not(:AvgN400))
+
+#     # Z-standardise predictors
+#     data = standardise(data, ["N400", "Segment"], models);
+#     # Invert predictors
+#     data = invert(data, ["N400", "Segment"], models)
+    
+#     if typeof(outfile) == String
+#         CSV.write(outfile, data)
+#     else
+#         data
+#     end
+# end
 
 function downsample(data, sampling_rate)
     factor = Int8(1000 / sampling_rate)
@@ -188,10 +184,10 @@ function baseline_correction(data, models)
 end
 
 function collect_component(data, name, models ; tws = 300, twe = 500)
-        # Collect N400 amplitudes
-        n4 = @view data[((data.Timestamp .>= tws) .& (data.Timestamp .<= twe)) ,  vcat([:Subject, :Item, :Timestamp], models.Electrodes)];
-        n4 = combine(groupby(n4, [:Subject, :Item]), [x => mean => Symbol(x, name) for x in models.Electrodes]);  
-        data = innerjoin(data, n4, on = [:Subject, :Item]);
+        # Collect component amplitudes
+        comp = @view data[((data.Timestamp .>= tws) .& (data.Timestamp .<= twe)) ,  vcat([:Subject, :Item, :Timestamp], models.Electrodes)];
+        comp = combine(groupby(comp, [:Subject, :Item]), [x => mean => Symbol(x, name) for x in models.Electrodes]);  
+        data = innerjoin(data, comp, on = [:Subject, :Item]);
 
         data
 end
@@ -201,11 +197,13 @@ function standardise(data, components, models)
         data[!,x] = zscore(data[!,x])
     end
 
-    # for x in models.Electrodes
-    #     for comp in components
-    #         data[:,Symbol(x, comp)] = zscore(data[:,Symbol(x, comp)])
-    #     end
-    # end
+    if components != false
+        for x in models.Electrodes
+            for comp in components
+                data[:,Symbol(x, comp)] = zscore(data[:,Symbol(x, comp)])
+            end
+        end
+    end
 
     data
 end
@@ -215,17 +213,19 @@ function invert(data, components, models, invert_preds)
         data[!,x] = (data[!,x]) .* -1
     end
 
-    # for x in models.Electrodes
-    #     for comp in components
-    #         data[:,Symbol(x, comp)] = data[:,Symbol(x, comp)] .* -1
-    #     end
-    # end
+    if components != false
+        for x in models.Electrodes
+            for comp in components
+                data[:,Symbol(x, comp)] = data[:,Symbol(x, comp)] .* -1
+            end
+        end
+    end
 
     data
 end
 
 function read_data(infile, models)
-    data = DataFrame(CSV.File(infile))
+    data = DataFrame(File(infile))
 
     sort!(data, [x for x in reverse(models.Descriptors)])
 end
@@ -305,8 +305,8 @@ function n4(dt, models, file)
         end
     end
   
-    CSV.write(string("../data/", file, "_data.csv"), out_data)
-    CSV.write(string("../data/", file, "_models.csv"), out_models)    
+    write(string("../data/", file, "_data.csv"), out_data)
+    write(string("../data/", file, "_models.csv"), out_models)    
 end
 
 function allocate_data(data, models)
@@ -453,7 +453,7 @@ function write_models(out_models, models, ind, file)
     out_models[!,:Type] = [mtype_dict[x] for x in out_models[:,:Type]];
     out_models[!,:Spec] = [mspec_dict[x] for x in out_models[:,:Spec]];
 
-    CSV.write(string("../data/", file, "_models.csv"), out_models)
+    write(string("../data/", file, "_models.csv"), out_models)
 
     out_models
 end
@@ -474,7 +474,7 @@ function write_data(out_data, models, ind, file)
     out_data[!,:Type] = [dtype_dict[x] for x in out_data[:,:Type]];
     out_data[!,:Spec] = [dspec_dict[x] for x in out_data[:,:Spec]];
 
-    CSV.write(string("../data/", file, "_data.csv"), out_data)
+    write(string("../data/", file, "_data.csv"), out_data)
 
     out_data
 end
