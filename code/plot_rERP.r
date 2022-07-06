@@ -35,7 +35,9 @@ plot_grandavg_ci <- function(
     yunit = paste0("Amplitude (", "\u03BC", "Volt\u29"),
     ylims = NULL,
     modus = "Condition",
-    tws = list(c(300, 500), c(600, 1000))
+    tws = list(c(300, 500), c(600, 1000)),
+    leg_labs,
+    leg_vals
 ) {
     ###### DATA PROC
     if (modus %in% c("Quartile", "Condition")) {
@@ -80,27 +82,27 @@ plot_grandavg_ci <- function(
     if (modus == "Quartile") {
         p <- p + labs(y=yunit, x = "Time (ms)", title = ttl)
         p <- p + scale_color_manual(name = "N400 Quartile",
-                labels = c(1, 2, 3, 4),
-                values = c("blue", "black", "red", "orange"))
+                labels = leg_labs,
+                values = leg_vals)
         p <- p + scale_fill_manual(name = "N400 Quartile",
-                labels = c(1, 2, 3, 4),
-                values = c("blue", "black", "red", "orange"))
+                labels = leg_labs,
+                values = leg_vals)
     } else if (modus == "Condition") {
         p <- p + labs(y=yunit, x = "Time (ms)", title = ttl)
         p <- p + scale_color_manual(name = "Condition",
-                labels = c("A", "B", "C"),
-                values = c("black", "red", "blue"))
+                labels = leg_labs, values = leg_vals)
         p <- p + scale_fill_manual(name = "Condition",
-            labels = c("A", "B", "C"),
-            values = c("black", "red", "blue"))
+                labels = leg_labs, values = leg_vals)
     } else if (modus == "Coefficient") {
         p <- p + labs(y="Intercept + Coefficient", x = "Time (ms)", title = ttl)
         p <- p + scale_color_manual(name = modus,
-                labels = c("Intercept", "Plausibility", "Distractor Cloze"),
-                values = c("#000000", "#E349F6", "#00FFFF"))
+                labels = leg_labs, values = leg_vals)
+                #labels = c("Intercept", "Plausibility", "Distractor Cloze"),
+                #values = c("#000000", "#E349F6", "#00FFFF"))
         p <- p + scale_fill_manual(name = modus,
-                labels = c("Intercept", "Plausibility", "Distractor Cloze"),
-                values = c("#000000", "#E349F6", "#00FFFF"))
+                labels = leg_labs, values = leg_vals)
+                #labels = c("Intercept", "Plausibility", "Distractor Cloze"),
+                #values = c("#000000", "#E349F6", "#00FFFF"))
         # p <- p + scale_color_manual(name = modus,
         #         labels = c("Intercept", "Reading Time"),
         #         values = c("#000000", "#E349F6"))
@@ -110,11 +112,13 @@ plot_grandavg_ci <- function(
     } else if (modus == "t-value") {
         p <- p + labs(y="T-value", x = "Time (ms)", title = ttl)
         p <- p + scale_color_manual(name = "Predictor",
-                labels = c("Plausibility", "Distractor Cloze"),
-                values = c("#E349F6", "#00FFFF"))
+                labels = leg_labs, values = leg_vals)
+                #labels = c("Plausibility", "Distractor Cloze"),
+                #values = c("#E349F6", "#00FFFF"))
         p <- p + scale_fill_manual(name = "Predictor",
-                labels = c("Plausibility", "Distractor Cloze"),
-                values = c("#E349F6", "#00FFFF"))
+                labels = leg_labs, values = leg_vals)
+                #labels = c("Plausibility", "Distractor Cloze"),
+                #values = c("#E349F6", "#00FFFF"))
         # p <- p + scale_color_manual(name = "Predictor",
         #         labels = c("Reading Time"),
         #         values = c("#E349F6"))

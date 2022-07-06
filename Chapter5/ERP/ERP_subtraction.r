@@ -6,14 +6,19 @@ library(dplyr)
 library(ggplot2)
 source("../../code/plot_rERP.r")
 
+# helper function to average data down to the level of one value per condition,
+# per electrode, per time step. Works with one or more electrodes.
 avg_quart_dt <- function(df, elec){
     df_s_avg <- df[, lapply(.SD, mean), by = list(Subject, Quartile, Timestamp),
         .SDcols = elec]
-    df_avg <- df_s_avg[, lapply(.SD, mean), by = list(Quartile, Timestamp), .SDcols = elec]
-    df_avg[,paste0(elec, "_CI")] <- df_s_avg[, lapply(.SD, se), by = list(Quartile, Timestamp), .SDcols = elec][,..elec]
+    df_avg <- df_s_avg[, lapply(.SD, mean), by = list(Quartile, Timestamp),
+        .SDcols = elec]
+    df_avg[, paste0(elec, "_CI")] <- df_s_avg[, lapply(.SD, se),
+        by = list(Quartile, Timestamp), .SDcols = elec][,..elec]
     df_avg$Quartile <- as.factor(df_avg$Quartile)
     df_avg$Spec <- df_avg$Quartile
-    df_avg <- df_avg[,c("Spec", "Timestamp", "Quartile", ..elec, paste0(..elec, "_CI"))]
+    df_avg <- df_avg[, c("Spec", "Timestamp", "Quartile", ..elec,
+        paste0(..elec, "_CI"))]
 
     df_avg
 }
@@ -22,6 +27,10 @@ avg_quart_dt <- function(df, elec){
 dt <- fread("../../data/ERP_Design1.csv")
 elec <- "Cz"
 cond <- "C"
+
+# Shared plotting properties
+quart_labels <- c(1, 2, 3, 4)
+quart_values <- c("blue", "black", "red", "orange")
 
 #####################################
 # Plot quartile bins computed from  #
@@ -37,7 +46,7 @@ dta <- merge(dta, n400[, c("Trial", "Quartile")], on = "Trial")
 
 dt_avg <- avg_quart_dt(dta, elec)
 source("../../code/plot_rERP.r")
-p <- plot_grandavg_ci(dt_avg, modus = "Quartile", ttl = "Raw N400 Quartiles (Cz)")
+p <- plot_grandavg_ci(dt_avg, modus = "Quartile", ttl = "Raw N400 Quartiles (Cz)", leg_labs = quart_labels, leg_vals = quart_values)
 p <- p + theme(legend.position = "bottom")
 p
 f <- "plots/Subtration_RawN400_Quartiles.pdf"
@@ -62,7 +71,7 @@ dta <- merge(dta, n4seg[, c("Trial", "Quartile")], on = "Trial")
 
 dt_avg <- avg_quart_dt(dta, elec)
 source("../../code/plot_rERP.r")
-p <- plot_grandavg_ci(dt_avg, modus = "Quartile", ttl = "N400 - Segment Quartiles (Cz)")
+p <- plot_grandavg_ci(dt_avg, modus = "Quartile", ttl = "N400 - Segment Quartiles (Cz)", leg_labs = quart_labels, leg_val = quart_values)
 p <- p + theme(legend.position = "bottom")
 p
 f <- "plots/Subtration_N400minusSegment_Quartiles.pdf"
