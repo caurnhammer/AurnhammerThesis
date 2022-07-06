@@ -38,7 +38,7 @@ plot_grandavg_ci <- function(
     tws = list(c(300, 500), c(600, 1000))
 ) {
     ###### DATA PROC
-    if (modus %in% c("Tertile", "Condition")) {
+    if (modus %in% c("Quartile", "Condition")) {
         colnames(df)[c(4, 5)] <- c("V", "V_CI")
     } else if (modus == "Coefficient") {
         colnames(df)[c(3, 4)] <- c("V", "V_CI")
@@ -47,7 +47,6 @@ plot_grandavg_ci <- function(
         sig_dt <- df[,c("Spec", "Timestamp", "V_sig")]
         sig_dt$posit <- rep(seq(ylims[1]-2, ylims[1], length=length(unique(sig_dt$Spec))), each=length(unique(sig_dt$Timestamp)))
         sig_dt$sig <- factor(sig_dt$V_sig, levels=c("0", "1"), labels=c("insign", "sign"))
-
     }
     ##### PLOTTING
     # Initial plot call
@@ -55,10 +54,11 @@ plot_grandavg_ci <- function(
         p <- ggplot(df, aes(x = Timestamp, y = V,
             color = Spec, fill = Spec)) + geom_line()
     }
-    else if (modus == "Condition") {
+    else if (modus %in% c("Condition", "Quartile")) {
         p <- ggplot(df, aes(x = Timestamp, y = V,
-            color = Condition, fill = Condition)) + geom_line()
+            color = Quartile, fill = Quartile)) + geom_line()
     }
+
     # For all plots
     p <- p + geom_ribbon(aes(x = Timestamp,
             ymax = V + V_CI, ymin = V - V_CI), alpha = 0.20, color = NA)
@@ -72,16 +72,19 @@ plot_grandavg_ci <- function(
                 panel.grid.minor = element_line(size = 0.15,
                     linetype = "solid", color = "#A9A9A9"),
             legend.position = "top")
-    # Specific plot calls
+    
+    # Conditional modifications
     if (is.vector(ylims) == TRUE) {
         p <- p + ylim(ylims[1], ylims[2])
     }
-    if (modus == "Tertile") {
+    if (modus == "Quartile") {
         p <- p + labs(y=yunit, x = "Time (ms)", title = ttl)
-        p <- p + scale_color_manual(name = "Surprisal Tertile",
-                values = c("blue", "black", "red"))
-        p <- p + scale_fill_manual(name = "Surprisal Tertile",
-                values = c("blue", "black", "red"))
+        p <- p + scale_color_manual(name = "N400 Quartile",
+                labels = c(1, 2, 3, 4),
+                values = c("blue", "black", "red", "orange"))
+        p <- p + scale_fill_manual(name = "N400 Quartile",
+                labels = c(1, 2, 3, 4),
+                values = c("blue", "black", "red", "orange"))
     } else if (modus == "Condition") {
         p <- p + labs(y=yunit, x = "Time (ms)", title = ttl)
         p <- p + scale_color_manual(name = "Condition",
@@ -126,7 +129,7 @@ plot_grandavg_ci <- function(
     p
 }
 
-# Plot midline electrodes.
+# Plot nine electrode grid
 plot_elec <- function(
     data,
     e,

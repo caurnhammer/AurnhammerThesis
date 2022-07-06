@@ -444,15 +444,10 @@ function write_models(out_models, models, ind, file)
 
     for x in models.Electrodes
         out_models[:,Symbol(x,"_CI")] = zeros(nrow(out_models))
-        out_models[out_models.Type .== 1,Symbol(x, "_CI")] = combine(groupby(out_models_cp[(out_models_cp.Type .== 1),:], [:Timestamp, :Type, :Spec]), [x => ci => x])[!,x]
         out_models[out_models.Type .== 3,Symbol(x, "_CI")] = combine(groupby(out_models_cp[(out_models_cp.Type .== 3),:], [:Timestamp, :Type, :Spec]), [x => ci => x])[!,x]
         out_models[out_models.Type .== 4,Symbol(x, "_CI")] = combine(groupby(out_models_cp[(out_models_cp.Type .== 4),:], [:Timestamp, :Type, :Spec]), [x => count_sig => x])[!,x]
     end
-    #out_models[!,![Symbol(x, "_CI") for x in models.Electrodes]] = zeros(nrow(out_models));
-    #out_models[out_models.Type .== 1,[Symbol(x, "_CI") for x in models.Electrodes]] = combine(groupby(out_models_cp[(out_models_cp.Type .== 1),:], [:Timestamp, :Type, :Spec]), [x => ci => x for x in models.Electrodes])[models.Electrodes]
-    #out_models[out_models.Type .== 3,[Symbol(x, "_CI") for x in models.Electrodes]] = combine(groupby(out_models_cp[(out_models_cp.Type .== 3),:], [:Timestamp, :Type, :Spec]), [x => ci => x for x in models.Electrodes])[models.Electrodes]
-    #out_models[out_models.Type .== 4,[Symbol(x, "_CI") for x in models.Electrodes]] = combine(groupby(out_models_cp[(out_models_cp.Type .== 4),:], [:Timestamp, :Type, :Spec]), [x => count_sig => x for x in models.Electrodes])[models.Electrodes]
-    
+
     mtype_dict = Dict(1 => "Coefficient", 2 => "SE", 3 => "t-value", 4 => "p-value");
     mspec_dict = Dict([i-1 => x for (i, x) in enumerate(models.Predictors)])
     out_models[!,:Type] = [mtype_dict[x] for x in out_models[:,:Type]];
@@ -470,7 +465,7 @@ function write_data(out_data, models, ind, file)
     for x in models.Electrodes
         out_data[!,Symbol(x, "_CI")] = zeros(nrow(out_data));    
         out_data_subj = combine(groupby(out_data_cp, [:Timestamp, :Type, :Spec, :Condition, :Subject]), [x => mean => x])
-        out_data[!,Symbol(x, "_CI")] = combine(groupby(out_data_subj, [:Timestamp, :Type, :Spec, :Condition]), [x => ci => x])[!,x]
+        out_data[!,Symbol(x, "_CI")] = combine(groupby(out_data_subj, [:Timestamp, :Type, :Spec, :Condition]), [x => se => x])[!,x]
     end
 
     dtype_dict = Dict(1 => "EEG", 2 => "est", 3 => "res");
