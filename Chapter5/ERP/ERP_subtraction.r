@@ -3,7 +3,6 @@
 # Generate N400s bins by N400-Segment
 library(data.table)
 library(dplyr)
-library(ggplot2)
 source("../../code/plot_rERP.r")
 
 # helper function to average data down to the level of one value per condition,

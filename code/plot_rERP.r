@@ -4,6 +4,10 @@
 # Including my adaption of topography plotting from craddm
 ##
 
+library(data.table)
+library(ggplot2)
+library(gridExtra)
+
 # compute standard error
 se <- function(
     x,
@@ -395,4 +399,32 @@ theme_topo <- function(
           axis.text = element_blank(),
           axis.title = element_blank()
     )
+}
+
+items_and_means <- function(data, Predictor) {
+    data_items <- data[, lapply(.SD, mean), by = list(Item, Condition),
+                    .SDcols = c(Predictor)]
+    data_means <- data[, lapply(.SD, mean), by = list(Condition),
+                    .SDcols = c(Predictor)]
+    data_means <- aggregate(as.formula(paste0(Predictor, "~ Condition")),
+                    data, FUN = mean)
+
+    list(data_items, data_means)
+}
+
+plot_density <- function(data, data_means, ylab, xlab, predictor,
+                        leg_labs, leg_vals, ylimits, xbreaks) {
+    p <- ggplot(data, aes_string(x = predictor, color = "Condition",
+                fill = "Condition"))
+    p <- p + geom_density(alpha = 0.4) + theme_minimal()
+    p <- p + ylim(ylimits)
+    p <- p + geom_vline(data = data_means, aes_string(xintercept = predictor,
+                color = "Condition"), linetype = "dashed") +
+                scale_x_continuous(breaks = seq(1, 7))
+    p <- p + scale_color_manual(labels = leg_labs, values = leg_vals)
+    p <- p + scale_fill_manual(labels = leg_labs, values = leg_vals)
+    p <- p + scale_x_continuous(name = xlab, breaks = xbreaks)
+    p <- p + labs(y = ylab)
+    p <- p + theme(legend.position = "bottom")
+    p
 }
