@@ -178,23 +178,24 @@ plot_elec <- function(
     # Get the legend
     legend <- get_legend(plotlist[[1]])
     # Arrange
+    nl <- theme(legend.position = "none")
     gg <- arrangeGrob(arrangeGrob(
-        plotlist[[1]] + theme(legend.position = "none")
+        plotlist[[1]] + nl
             + labs(x = ""),
-        plotlist[[2]] + theme(legend.position = "none")
+        plotlist[[2]] + nl
             + labs(x = "", y = ""),
-        plotlist[[3]] + theme(legend.position = "none")
+        plotlist[[3]] + nl
             + labs(x = "", y = ""),
-        plotlist[[4]] + theme(legend.position = "none")
+        plotlist[[4]] + nl
             + labs(x = ""),
-        plotlist[[5]] + theme(legend.position = "none")
+        plotlist[[5]] + nl
             + labs(x = "", y = ""),
-        plotlist[[6]] + theme(legend.position = "none")
+        plotlist[[6]] + nl
             + labs(x = "", y = ""),
-        plotlist[[7]] + theme(legend.position = "none"),
-        plotlist[[8]] + theme(legend.position = "none")
+        plotlist[[7]] + nl,
+        plotlist[[8]] + nl
             + labs(y = ""),
-        plotlist[[9]] + theme(legend.position = "none")
+        plotlist[[9]] + nl
             + labs(y = ""),
         layout_matrix = matrix(1:9, ncol = 3, byrow = TRUE)), legend,
             heights = c(10, 1), top = textGrob(title))
