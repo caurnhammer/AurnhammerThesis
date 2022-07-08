@@ -178,7 +178,6 @@ function fit_models(data, models, file)
     elseif length(unique(data.Subject)) == 1
         Index = flatten_ar([data[[x for x in 1:nrow(data)-1] .+ 1, models.Descriptors[2]] - data[[x for x in 1:nrow(data)-1], models.Descriptors[2]], 1]);
     end
-    # TODO remove subsets with n <= dof here (in "data"), such that no conditions and exclusions are necessary downstream
 
     e_indices = findall(Index .!= 0);
     s_indices = flatten_ar([1, e_indices[1:end-1].+1]);
@@ -191,7 +190,6 @@ function fit_models(data, models, file)
 
     print("Fitting models using ", Threads.nthreads(), " threads. \n")   
     Threads.@threads for i in 1:length(s_indices)
-    #for i in 1:length(s_indices)
         local ind = make_Ind(data, models, m_indices, s_indices[i], e_indices[i], m_indices[i]);
         
         # Take subset
@@ -380,6 +378,15 @@ function count_sig(pvals; alpha = 0.05)
     sum(pvals .< alpha) / length(pvals)
 end
 
+function se(x)
+    std(x) / sqrt(length(x))
+end
+
+# The sample mean plus or minus 1.96 times its standard error gives ci
+function ci(x)
+    1.96 * se(x)
+end
+
 function write_models(out_models, models, ind, file)
     out_models_cp = out_models[:,:]
     out_models = combine(groupby(out_models_cp, [:Timestamp, :Type, :Spec]), [x => mean => x for x in models.Electrodes]);
@@ -409,7 +416,7 @@ function write_data(out_data, models, ind, file)
     for x in models.Electrodes
         out_data[!,Symbol(x, "_CI")] = zeros(nrow(out_data));    
         out_data_subj = combine(groupby(out_data_cp, [:Timestamp, :Type, :Spec, :Condition, :Subject]), [x => mean => x])
-        out_data[!,Symbol(x, "_CI")] = combine(groupby(out_data_subj, [:Timestamp, :Type, :Spec, :Condition]), [x => se => x])[!,x]
+        out_data[!,Symbol(x, "_CI")] = combine(groupby(out_data_subj, [:Timestamp, :Type, :Spec, :Condition]), [x => ci => x])[!,x]
     end
 
     dtype_dict = Dict(1 => "EEG", 2 => "est", 3 => "res");
@@ -425,10 +432,3 @@ function write_data(out_data, models, ind, file)
     out_data
 end
 
-function se(x)
-    std(x) / sqrt(length(x))
-end
-
-function ci(x)
-    1.96 * se(x)
-end

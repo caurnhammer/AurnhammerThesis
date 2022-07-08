@@ -6,13 +6,10 @@ elec = [:Fp1, :Fp2, :F7, :F3, :Fz, :F4, :F8, :FC5, :FC1, :FC2, :FC6, :C3,
 elec = [:Fz, :Cz, :Pz];        
 models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Intercept]);
 
-include("../../code/rERP.jl");
 @time process_data("../../data/ERP_Design1.csv", "data/ERP_Design1_C_rERP.csv", models, conds=["C"], components=[:N400, :Segment]);
 
 @time dt = read_data("data/ERP_Design1_C_rERP.csv", models);
-
 select!(dt, Not(:Condition));
 dt[:,:Condition] = dt[:,:Quantile];
 
-include("../../code/rERP.jl");
 @time fit_models_components(dt, models, "ERP_Design1_N400Segment")
