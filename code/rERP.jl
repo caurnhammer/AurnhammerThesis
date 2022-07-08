@@ -40,6 +40,7 @@ function make_Ind(data, models, m_indices, s_ind, e_ind, m_ind)
 end
 
 function process_data(infile, outfile, models; baseline_corr = false, sampling_rate = false, invert_preds = false, conds=false, components=false)
+    # Load Data from disk
     data = DataFrame(File(infile))
     
     # Make ItemNum vs Item coherent across datasets
@@ -85,7 +86,7 @@ function process_data(infile, outfile, models; baseline_corr = false, sampling_r
     # Invert predictors
     # NOTE: CURRENTLY ONLY PLAUS IS BEING INVERTED. see function definition
     if invert_preds != false
-        data = invert(data, "none", models, invert_preds)
+        data = invert(data, components, models, invert_preds)
     end
     
     # Write data to file or return as data object
@@ -172,6 +173,9 @@ function read_data(infile, models)
 end
 
 function fit_models(data, models, file)
+    # Turn condition labels to numbers. Set Verbose to show them.
+    data = transform_conds(data, verbose=true);
+    
     # Get subset indices
     if length(unique(data.Subject)) > 1
         Index = flatten_ar([data[[x for x in 1:nrow(data)-1] .+ 1, models.Descriptors[1]] - data[[x for x in 1:nrow(data)-1], models.Descriptors[1]], 1]);
@@ -188,7 +192,9 @@ function fit_models(data, models, file)
     out_data = allocate_data(data, models);
     out_models = allocate_models(data, models, ind);
 
-    print("Fitting models using ", Threads.nthreads(), " threads. \n")   
+    # Get number of models, for showing off.
+    num = num_mod(data, models)
+    print("Fitting ", num, " models using ", Threads.nthreads(), " threads. \n")   
     Threads.@threads for i in 1:length(s_indices)
         local ind = make_Ind(data, models, m_indices, s_indices[i], e_indices[i], m_indices[i]);
         
@@ -249,6 +255,19 @@ function fit_models_components(dt, models, file)
     write(string("./data/", file, "_models.csv"), out_models)    
 end
 
+function transform_conds(data ; verbose=false)
+    # Turn conditions into numbers
+    cond_labels = unique(data.Condition);
+    cond_dict = Dict(zip(cond_labels, [x for x in 1:length(cond_labels)]));
+    data[!,:Condition] = [cond_dict[x] for x in data[:,:Condition]];
+
+    if verbose
+        println(cond_dict)
+    end
+
+    data
+end
+
 function allocate_data(data, models)
     nperms = length(models.Sets);
 
@@ -281,6 +300,15 @@ end
 
 function pred_sets(models)
     flatten_ar([[[:Intercept]], [flatten_ar([[:Intercept], x]) for x in combinations(models.Predictors[2:end])]])
+end
+
+function num_mod(data, models)
+    num_mod = length(models.Electrodes)
+    for desc in models.Descriptors
+        num_mod = num_mod * length(unique(data[:,desc]))
+    end
+
+    num_mod
 end
 
 function coef(out_models, df, models, ind)

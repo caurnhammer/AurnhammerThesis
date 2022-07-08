@@ -61,8 +61,8 @@ plot_grandavg_ci <- function(
             color = Spec, fill = Spec)) + geom_line()
     }
     else if (modus %in% c("Condition", "Quantile")) {
-        p <- ggplot(df, aes(x = Timestamp, y = V,
-            color = Quantile, fill = Quantile)) + geom_line()
+        p <- ggplot(df, aes_string(x = "Timestamp", y = "V",
+            color = modus, fill = modus)) + geom_line()
     }
 
     # For all plots
@@ -78,7 +78,7 @@ plot_grandavg_ci <- function(
                 panel.grid.minor = element_line(size = 0.15,
                     linetype = "solid", color = "#A9A9A9"),
             legend.position = "top")
-    
+
     # Conditional modifications
     if (is.vector(ylims) == TRUE) {
         p <- p + ylim(ylims[1], ylims[2])
@@ -101,39 +101,20 @@ plot_grandavg_ci <- function(
         p <- p + labs(y="Intercept + Coefficient", x = "Time (ms)", title = ttl)
         p <- p + scale_color_manual(name = modus,
                 labels = leg_labs, values = leg_vals)
-                #labels = c("Intercept", "Plausibility", "Distractor Cloze"),
-                #values = c("#000000", "#E349F6", "#00FFFF"))
         p <- p + scale_fill_manual(name = modus,
                 labels = leg_labs, values = leg_vals)
-                #labels = c("Intercept", "Plausibility", "Distractor Cloze"),
-                #values = c("#000000", "#E349F6", "#00FFFF"))
-        # p <- p + scale_color_manual(name = modus,
-        #         labels = c("Intercept", "Reading Time"),
-        #         values = c("#000000", "#E349F6"))
-        # p <- p + scale_fill_manual(name = modus,
-        #         labels = c("Intercept", "Reading Time"),
-        #         values = c("#000000", "#E349F6"))
     } else if (modus == "t-value") {
         p <- p + labs(y="T-value", x = "Time (ms)", title = ttl)
         p <- p + scale_color_manual(name = "Predictor",
                 labels = leg_labs, values = leg_vals)
-                #labels = c("Plausibility", "Distractor Cloze"),
-                #values = c("#E349F6", "#00FFFF"))
         p <- p + scale_fill_manual(name = "Predictor",
                 labels = leg_labs, values = leg_vals)
-                #labels = c("Plausibility", "Distractor Cloze"),
-                #values = c("#E349F6", "#00FFFF"))
-        # p <- p + scale_color_manual(name = "Predictor",
-        #         labels = c("Reading Time"),
-        #         values = c("#E349F6"))
-        # p <- p + scale_fill_manual(name = "Predictor",
-        #         labels = c("Reading Time"),
-        #         values = c("#E349F6"))
         p <- p + geom_point(data=sig_dt, aes(x=Timestamp, y=posit, shape=sig), size=2) 
         p <- p + scale_shape_manual(values=c(32, 108), name="Corrected p-values", labels=c("Nonsignificant", "Significant"))
         p <- p + annotate("rect", xmin = tws[1][[1]][1], xmax = tws[1][[1]][2], ymin = ylims[1], ymax = ylims[2], alpha = .15)
         p <- p + annotate("rect", xmin = tws[2][[1]][1], xmax = tws[2][[1]][2], ymin = ylims[1], ymax = ylims[2], alpha = .15) 
     }
+
     p
 }
 
@@ -146,7 +127,9 @@ plot_elec <- function(
     yunit = paste0("Amplitude (", "\u03BC", "Volt\u29"),
     ylims = NULL,
     modus = "Condition",
-    tws = list(c(250, 400), c(600, 1000))
+    tws = list(c(250, 400), c(600, 1000)),
+    leg_labs,
+    leg_vals
 ) {
     if (modus %in% c("Tertile", "Quantile", "Condition")) {
         cols <- c("Spec", "Timestamp", modus)
@@ -161,22 +144,22 @@ plot_elec <- function(
         for (i in 1:length(e)) {
             varforward <- c(e[i], paste0(e[i], "_CI"), paste0(e[i], "_sig"))
             plotlist[[i]] <- plot_grandavg_ci(cbind(data[, ..cols],
-                            data[, ..varforward]), e[i], yunit = yunit,
-                            ylims = ylims, modus = modus, tws)
+                            data[, ..varforward]), e[i], yunit,
+                            ylims, modus, tws, leg_labs=leg_labs, leg_vals=leg_vals)
         }
     } else if (modus %in% c("Coefficient", "Tertile")) {
         for (i in 1:length(e)) {
             varforward <- c(e[i], paste0(e[i], "_CI"))
             plotlist[[i]] <- plot_grandavg_ci(cbind(data[, ..cols],
                             data[, ..varforward]), e[i], yunit = yunit,
-                            ylims = ylims, modus = modus)
+                            ylims = ylims, modus = modus, leg_labs=leg_labs, leg_vals=leg_vals)
         }
     } else if (modus %in% c("Tertile", "Quantile", "Condition")) {
         for (i in 1:length(e)) {
             varforward <- c(e[i], paste0(e[i], "_CI"))
             plotlist[[i]] <- plot_grandavg_ci(cbind(data[, ..cols],
                             data[, ..varforward]), e[i], yunit = yunit,
-                            ylims = ylims, modus = modus)
+                            ylims = ylims, modus = modus, leg_labs=leg_labs, leg_vals=leg_vals)
         }
     }
     # Get the legend
@@ -234,10 +217,6 @@ plot_topo <- function(
 
     # select time and descriptors
     data_m_tw <- data_m[(Timestamp >= tw[1] & Timestamp <= tw[2]), ]
-    #desc_cond <- ifelse(cond_man == "B", "B", ifelse(cond_man == "C", "C",
-    #                ifelse(cond_man == "D", "D", "desc error")))
-    #desc_base <- ifelse(cond_base == "A", "A", ifelse(cond_base == "C", "C",
-    #                ifelse(cond_base == "D", "D", "desc error")))
 
     generate_topo(data_m_tw, file, tw, cond_man, cond_base,
                 amplim = 2.8, elec = electrodes,
@@ -300,14 +279,11 @@ generate_topo <- function(
 
     # TODO find out why there is an NA
     interpol_m <- interpol_m[!is.na(interpol_m$EEG), ]
-    #print(range(interpol_m$EEG))
 
     ###### Prepare v4 Plot
     amplim_plusmin <- c(-amplim, amplim) # compute limits
 
     # Define color spectrum
-    # my_spectrum <- colorRampPalette(c("#00007F", "blue", "#0080ff", "#9e98e3",
-    #                                 "white", "#eeb3b3", "#ff6969", "red", "#a90101"))
     my_spectrum <- colorRampPalette(c("#00007F", "blue", "#0080ff", "white",
                                     "white", "white", "#ff6969", "red", "#a90101"))
 
