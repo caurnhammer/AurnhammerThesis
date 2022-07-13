@@ -6,6 +6,7 @@
 
 library(data.table)
 library(ggplot2)
+library(grid)
 library(gridExtra)
 
 # compute standard error
@@ -68,7 +69,6 @@ plot_grandavg_ci <- function(
     # For all plots
     p <- p + geom_ribbon(aes(x = Timestamp,
             ymax = V + V_CI, ymin = V - V_CI), alpha = 0.20, color = NA)
-    p <- p + scale_y_reverse()
     p <- p + geom_hline(yintercept = 0, linetype = "dashed")
     p <- p + geom_vline(xintercept = 0, linetype = "dashed")
     p <- p + theme(panel.background = element_rect(fill = "#FFFFFF",
@@ -81,7 +81,9 @@ plot_grandavg_ci <- function(
 
     # Conditional modifications
     if (is.vector(ylims) == TRUE) {
-        p <- p + ylim(ylims[1], ylims[2])
+        p <- p + scale_y_reverse(limits = c(ylims[1], ylims[2]))
+    } else {
+        p <- p + scale_y_reverse()
     }
     if (modus == "Quantile") {
         p <- p + labs(y=yunit, x = "Time (ms)", title = ttl)
@@ -223,6 +225,7 @@ plot_topo <- function(
                 title = paste0(cond_man, " minus ", cond_base), label = label)
 }
 
+# Code based on other people's work
 generate_topo <- function(
     data,
     file,
@@ -395,8 +398,7 @@ plot_density <- function(data, data_means, ylab, xlab, predictor,
     p <- p + geom_density(alpha = 0.4) + theme_minimal()
     p <- p + ylim(ylimits)
     p <- p + geom_vline(data = data_means, aes_string(xintercept = predictor,
-                color = "Condition"), linetype = "dashed") +
-                scale_x_continuous(breaks = seq(1, 7))
+                color = "Condition"), linetype = "dashed")
     p <- p + scale_color_manual(labels = leg_labs, values = leg_vals)
     p <- p + scale_fill_manual(labels = leg_labs, values = leg_vals)
     p <- p + scale_x_continuous(name = xlab, breaks = xbreaks)
