@@ -29,7 +29,7 @@ cond <- "C"
 
 # Shared plotting properties
 quart_labels <- c(1, 2, 3, 4)
-quart_values <- c("blue", "black", "red", "orange")
+quart_values <- c("black", "blue", "red", "orange")
 
 #####################################
 # Plot Quantile bins computed from  #
@@ -44,8 +44,9 @@ n400$Quantile <- ntile(n400[,..elec], 4)
 dta <- merge(dta, n400[, c("Trial", "Quantile")], on = "Trial")
 
 dt_avg <- avg_quart_dt(dta, elec)
-source("../../code/plot_rERP.r")
-p <- plot_grandavg_ci(dt_avg, modus = "Quantile", ttl = "Raw N400 Quantiles (Cz)", leg_labs = quart_labels, leg_vals = quart_values)
+p <- plot_grandavg_ci(dt_avg, modus = "Quantile",
+        ttl = "Raw N400 Quantiles (Cz)", ylims = c(17, -16.2),
+        leg_labs = quart_labels, leg_vals = quart_values)
 p <- p + theme(legend.position = "bottom")
 p
 f <- "plots/Subtration_RawN400_Quantiles.pdf"
@@ -66,11 +67,13 @@ n4seg <- merge(n400, segment, by = "Trial")
 colnames(n4seg)[2:3] <- c("N400", "Segment")
 n4seg$N4minSeg <- n4seg$N400 - n4seg$Segment
 n4seg$Quantile <- ntile(n4seg$N4minSeg, 4)
-dta <- merge(dta, n4seg[, c("Trial", "Quantile")], on = "Trial")
+dta <- merge(dta, n4seg[, c("Trial", "Quantile")], by = "Trial")
 
 dt_avg <- avg_quart_dt(dta, elec)
 source("../../code/plot_rERP.r")
-p <- plot_grandavg_ci(dt_avg, modus = "Quantile", ttl = "N400 - Segment Quantiles (Cz)", leg_labs = quart_labels, leg_val = quart_values)
+p <- plot_grandavg_ci(dt_avg, modus = "Quantile",
+        ttl = "N400 - Segment Quantiles (Cz)", ylims = c(17, -16.2),
+        leg_labs = quart_labels, leg_val = quart_values)
 p <- p + theme(legend.position = "bottom")
 p
 f <- "plots/Subtration_N400minusSegment_Quantiles.pdf"
