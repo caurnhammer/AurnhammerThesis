@@ -84,7 +84,6 @@ function process_data(infile, outfile, models; baseline_corr = false, sampling_r
     data = standardise(data, components, models);
     
     # Invert predictors
-    # NOTE: CURRENTLY ONLY PLAUS IS BEING INVERTED. see function definition
     if invert_preds != false
         data = invert(data, components, models, invert_preds)
     end
@@ -421,10 +420,14 @@ function write_models(out_models, models, ind, file)
 
     for x in models.Electrodes
         out_models[:,Symbol(x,"_CI")] = zeros(nrow(out_models))
+        out_models[out_models.Type .== 1,Symbol(x,"_CI")] = out_models[out_models.Type .== 2,x];
         out_models[out_models.Type .== 3,Symbol(x, "_CI")] = combine(groupby(out_models_cp[(out_models_cp.Type .== 3),:], [:Timestamp, :Type, :Spec]), [x => ci => x])[!,x]
         out_models[out_models.Type .== 4,Symbol(x, "_CI")] = combine(groupby(out_models_cp[(out_models_cp.Type .== 4),:], [:Timestamp, :Type, :Spec]), [x => count_sig => x])[!,x]
     end
 
+    # delete SE rows (they are now cols next to their coef)
+    out_models = @view out_models[out_models.Type .!= 2,:];
+    
     mtype_dict = Dict(1 => "Coefficient", 2 => "SE", 3 => "t-value", 4 => "p-value");
     mspec_dict = Dict([i-1 => x for (i, x) in enumerate(models.Predictors)])
     out_models[!,:Type] = [mtype_dict[x] for x in out_models[:,:Type]];
