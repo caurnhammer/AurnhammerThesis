@@ -436,7 +436,7 @@ function write_models(out_models, models, ind, file)
     if file != "none"
         write(string("../data/", file, "_models.csv"), out_models)
     end
-
+    
     out_models
 end
 
