@@ -7,7 +7,7 @@
 
 # Load the functions in rERPs.jl
 # Packages are loaded from within rERPs.jl
-include("../code/rERP.jl");
+include("../../code/rERP.jl");
 
 # Define an array of electrodes on which to fit the models.
 elec = [:Fp1, :Fp2, :F7, :F3, :Fz, :F4, :F8, :FC5, :FC1, :FC2, :FC6, :C3,
@@ -30,25 +30,25 @@ models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Interc
 # - invert_preds: Takes an array of predictor Symbols (e.g., [:Cloze, :Association]) to invert. Default false.
 # - conds: Takes an array of condition labels to subset to (e.g. ["A", "B"]). Default false.
 # - components: Collect the average N400 and Segment amplitude (Special sauce for one of my projects). Default false.
-@time process_data("../data/ERP_Design1.csv", "data/ERP_Design1_AC_rERP.csv", models, conds=["A", "C"]);
+@time process_data("../../data/ERP_Design1.csv", "../data/ERP_Design1_AC_rERP.csv", models, conds=["A", "C"]);
 
 # Read in processed data.
-@time dt = read_data("data/ERP_Design1_AC_rERP.csv", models);
+@time dt = read_data("../data/ERP_Design1_AC_rERP.csv", models);
 
 # Fit the rERP models, using the three arguments:
 # - data: data as processed by process_data()
 # - models: models Structure
 # - file: path to output file. Filenames will be automatically extended to *_data.csv and *_models.csv.
-@time fit_models(dt, models, "data/ERP_Design1_AC_rERP");
+@time fit_models(dt, models, "../data/ERP_Design1_AC_rERP");
 
 ##########################
 # rERPs as ERP averaging #
 ##########################
 ##### Fit intercept only models = compute grand-averaged ERP
 models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Intercept]);
-@time process_data("../data/ERP_Design1.csv", "data/ERP_Design1_AC_rERP.csv", models, conds=["A", "C"]);
-@time dt = read_data("data/ERP_Design1_AC_rERP.csv", models);
-@time fit_models(dt, models, "data/ERP_Design1_AC_Intercept_rERP");
+@time process_data("../../data/ERP_Design1.csv", "../data/ERP_Design1_AC_rERP.csv", models, conds=["A", "C"]);
+@time dt = read_data("../data/ERP_Design1_AC_rERP.csv", models);
+@time fit_models(dt, models, "../data/ERP_Design1_AC_Intercept_rERP");
 
 ##### Fit A vs. C condition coding models = compute per-condition grand-averaged ERP
 # Create A vs C condition coding predictor. B and D rows are going to be discarded.
@@ -58,24 +58,26 @@ dt.CondCode = [cond_coding[x] for x in dt.Condition];
 write("../data/ERP_Design1.csv", dt);
 
 models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Intercept, :CondCode]);
-@time process_data("../data/ERP_Design1.csv", "data/ERP_Design1_AC_rERP.csv", models, conds=["A", "C"]);
-@time dt = read_data("data/ERP_Design1_AC_rERP.csv", models);
-@time fit_models(dt, models, "data/ERP_Design1_AC_CondCode_rERP");
+@time process_data("../../data/ERP_Design1.csv", "../data/ERP_Design1_AC_rERP.csv", models, conds=["A", "C"]);
+@time dt = read_data("../data/ERP_Design1_AC_rERP.csv", models);
+@time fit_models(dt, models, "../data/ERP_Design1_AC_CondCode_rERP");
 
 ########################
 # Continous predictors #
 ########################
 # Fit models on conditions A and C using cloze probability
 models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Intercept, :Cloze]);
-@time process_data("../data/ERP_Design1.csv", "data/ERP_Design1_AC_cloze_rERP.csv", models, invert_preds=[:Cloze], conds=["A", "C"]);
-@time dt = read_data("data/ERP_Design1_AC_cloze_rERP.csv", models);
-@time fit_models(dt, models, "data/ERP_Design1_AC_cloze_rERP");
+@time process_data("../../data/ERP_Design1.csv", "../data/ERP_Design1_AC_cloze_rERP.csv", models, invert_preds=[:Cloze], conds=["A", "C"]);
+@time dt = read_data("../data/ERP_Design1_AC_cloze_rERP.csv", models);
+@time fit_models(dt, models, "../data/ERP_Design1_AC_cloze_rERP");
 
 # Fit models on all conditions using cloze probability and association
 # In order to not take any condition subset, set conds = false.
-# models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Intercept, :Cloze, :rcnoun]);
+models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Intercept, :Cloze]);
+#models = Models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Intercept, :Cloze, :rcnoun], [[:Intercept], [:Intercept, :rcnoun]]);
 
-models = Models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Intercept, :Cloze, :rcnoun], [[:Intercept], [:Intercept, :rcnoun]]);
-@time process_data("../data/ERP_Design1.csv", "data/ERP_Design1_cloze_rcnoun_rERP.csv", models, invert_preds=[:Cloze]);
-@time dt = read_data("data/ERP_Design1_cloze_rcnoun_rERP.csv", models);
-@time fit_models(dt, models, "data/ERP_Design1_cloze_rcnoun_rERP");
+@time process_data("../../data/ERP_Design1.csv", "../data/ERP_Design1_cloze_rcnoun_rERP.csv", models, invert_preds=[:Cloze]);
+@time dt = read_data("../data/ERP_Design1_cloze_rcnoun_rERP.csv", models);
+
+include("../../code/rERP.jl");
+@time fit_models(dt, models, "../data/ERP_Design1_cloze_rcnoun_rERP");

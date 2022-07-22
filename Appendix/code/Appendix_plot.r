@@ -1,5 +1,5 @@
-source("../code/plot_rERP.r")
-source("../code/benjamini-hochberg.r")
+source("../../code/plot_rERP.r")
+source("../../code/benjamini-hochberg.r")
 
 make_plots <- function(
     file,
@@ -114,10 +114,10 @@ make_plots <- function(
 }
 
 
-make_plots("CAPEXP_AC_Intercept_rERP", predictor = c("Intercept"))
+#make_plots("CAPEXP_AC_Intercept_rERP", predictor = c("Intercept"))
 
 # make_plots("CAPEXP_AC_CondCode_rERP", predictor = c("Intercept", "CondCode"))
 
 # make_plots("CAPEXP_AC_cloze_rERP", predictor = c("Intercept", "Cloze"))
 
-# make_plots("CAPEXP_cloze_rcnoun_rERP", predictor = c("Intercept", "Cloze", "rcnoun"))
+make_plots("ERP_Design1_cloze_rcnoun_rERP", predictor = c("Intercept", "Cloze", "rcnoun"))
