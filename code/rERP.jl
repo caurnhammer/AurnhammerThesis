@@ -176,12 +176,7 @@ function fit_models(data, models, file)
     data = transform_conds(data, verbose=true);
     
     # Get subset indices
-    if length(unique(data.Subject)) > 1
-        Index = flatten_ar([data[[x for x in 1:nrow(data)-1] .+ 1, models.Descriptors[1]] - data[[x for x in 1:nrow(data)-1], models.Descriptors[1]], 1]);
-    elseif length(unique(data.Subject)) == 1
-        Index = flatten_ar([data[[x for x in 1:nrow(data)-1] .+ 1, models.Descriptors[2]] - data[[x for x in 1:nrow(data)-1], models.Descriptors[2]], 1]);
-    end
-
+    Index = get_index(data, models)
     e_indices = findall(Index .!= 0);
     s_indices = flatten_ar([1, e_indices[1:end-1].+1]);
     m_indices = 1:length(e_indices);
@@ -190,7 +185,7 @@ function fit_models(data, models, file)
     # allocate output data frames
     out_data = allocate_data(data, models);
     out_models = allocate_models(data, models, ind);
-
+    
     # Get number of models, for showing off.
     num = num_mod(data, models)
     print("Fitting ", num, " models using ", Threads.nthreads(), " threads. \n")   
@@ -265,6 +260,16 @@ function transform_conds(data ; verbose=false)
     end
 
     data
+end
+
+function get_index(data, models)
+    if length(unique(data.Subject)) > 1
+        Index = flatten_ar([data[[x for x in 1:nrow(data)-1] .+ 1, models.Descriptors[1]] - data[[x for x in 1:nrow(data)-1], models.Descriptors[1]], 1]);
+    elseif length(unique(data.Subject)) == 1
+        Index = flatten_ar([data[[x for x in 1:nrow(data)-1] .+ 1, models.Descriptors[2]] - data[[x for x in 1:nrow(data)-1], models.Descriptors[2]], 1]);
+    end
+
+    Index
 end
 
 function allocate_data(data, models)
@@ -436,7 +441,7 @@ function write_models(out_models, models, ind, file)
     if file != "none"
         write(string("../data/", file, "_models.csv"), out_models)
     end
-    
+
     out_models
 end
 
