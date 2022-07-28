@@ -185,7 +185,7 @@ function fit_models(data, models, file)
     # allocate output data frames
     out_data = allocate_data(data, models);
     out_models = allocate_models(data, models, ind);
-    
+
     # Get number of models, for showing off.
     num = num_mod(data, models)
     print("Fitting ", num, " models using ", Threads.nthreads(), " threads. \n")   

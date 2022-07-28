@@ -1,4 +1,3 @@
-
 # Christoph Aurnhammer, 2022
 # This is the inital version of my rERP.jl primer.
 # rERPs have initially been described by Smith and Kutas (2015a, 2015b).
@@ -74,10 +73,8 @@ models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Interc
 # Fit models on all conditions using cloze probability and association
 # In order to not take any condition subset, set conds = false.
 models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Intercept, :Cloze]);
-#models = Models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Intercept, :Cloze, :rcnoun], [[:Intercept], [:Intercept, :rcnoun]]);
+models = Models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Intercept, :Cloze, :rcnoun, :rcverb, :ACC, :RT], [[:Intercept], [:Intercept, :rcnoun]]);
 
 @time process_data("../../data/ERP_Design1.csv", "../data/ERP_Design1_cloze_rcnoun_rERP.csv", models, invert_preds=[:Cloze]);
 @time dt = read_data("../data/ERP_Design1_cloze_rcnoun_rERP.csv", models);
-
-include("../../code/rERP.jl");
 @time fit_models(dt, models, "../data/ERP_Design1_cloze_rcnoun_rERP");
