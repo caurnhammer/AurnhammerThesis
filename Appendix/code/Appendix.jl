@@ -52,9 +52,9 @@ models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Interc
 ##### Fit A vs. C condition coding models = compute per-condition grand-averaged ERP
 # Create A vs C condition coding predictor. B and D rows are going to be discarded.
 cond_coding = Dict("A" => -0.5, "B" => 0, "C" => 0.5, "D" => 0);
-dt = DataFrame(File("../data/ERP_Design1.csv"));
+dt = DataFrame(File("../../data/ERP_Design1.csv"));
 dt.CondCode = [cond_coding[x] for x in dt.Condition];
-write("../data/ERP_Design1.csv", dt);
+write("../../data/ERP_Design1.csv", dt);
 
 models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Intercept, :CondCode]);
 @time process_data("../../data/ERP_Design1.csv", "../data/ERP_Design1_AC_rERP.csv", models, conds=["A", "C"]);

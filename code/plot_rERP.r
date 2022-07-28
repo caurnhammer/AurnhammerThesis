@@ -120,6 +120,62 @@ plot_grandavg_ci <- function(
     p
 }
 
+plot_single_elec <- function(
+    data,
+    e,
+    file = FALSE,
+    title = "ERPs",
+    yunit = paste0("Amplitude (", "\u03BC", "Volt\u29"),
+    ylims = NULL,
+    modus = "Condition",
+    tws = list(c(250, 400), c(600, 1000)),
+    leg_labs,
+    leg_vals
+) {
+    if (modus %in% c("Tertile", "Quantile", "Condition")) {
+        cols <- c("Spec", "Timestamp", modus)
+    } else if (modus %in% c("Coefficient", "t-value")) {
+        data[,"Spec"] <- as.factor(data$Spec)
+        cols <- c("Spec", "Timestamp")
+    }
+
+    # Make individual plots
+    plotlist <- vector(mode = "list", length = length(e))
+    if (modus == "t-value") {
+        for (i in 1:length(e)) {
+            varforward <- c(e[i], paste0(e[i], "_CI"), paste0(e[i], "_sig"))
+            plotlist[[i]] <- plot_grandavg_ci(cbind(data[, ..cols],
+                            data[, ..varforward]), e[i], yunit,
+                            ylims, modus, tws, leg_labs=leg_labs, leg_vals=leg_vals)
+        }
+    } else if (modus %in% c("Coefficient", "Tertile")) {
+        for (i in 1:length(e)) {
+            varforward <- c(e[i], paste0(e[i], "_CI"))
+            plotlist[[i]] <- plot_grandavg_ci(cbind(data[, ..cols],
+                            data[, ..varforward]), e[i], yunit = yunit,
+                            ylims = ylims, modus = modus, leg_labs=leg_labs, leg_vals=leg_vals)
+        }
+    } else if (modus %in% c("Tertile", "Quantile", "Condition")) {
+        for (i in 1:length(e)) {
+            varforward <- c(e[i], paste0(e[i], "_CI"))
+            plotlist[[i]] <- plot_grandavg_ci(cbind(data[, ..cols],
+                            data[, ..varforward]), e[i], yunit = yunit,
+                            ylims = ylims, modus = modus, leg_labs=leg_labs, leg_vals=leg_vals)
+        }
+    }
+
+    legend <- get_legend(plotlist[[1]])
+    nl <- theme(legend.position = "none")
+    gg <- plotlist[[1]]
+    gg <- arrangeGrob(gg + nl, legend, heights = c(10, 1))
+
+    if (file != FALSE) {
+       ggsave(file, gg, device = cairo_pdf, width = 3, height = 3)
+    } else {
+       gg
+    }
+}
+
 # Plot nine electrode grid
 plot_elec <- function(
     data,
@@ -248,7 +304,7 @@ generate_topo <- function(
     }
 
     # Load electrode location data
-    elec_locs <- fread("../data/biosemi70elecs.loc", sep = "\t",
+    elec_locs <- fread("../../data/biosemi70elecs.loc", sep = "\t",
                     col.names = c("ElecNum", "Theta", "Radius", "Electrode"))
     elec_locs <- elec_locs[Electrode %in% elec]
     elec_locs$RadianTheta <- pi / 180 * elec_locs$Theta
