@@ -32,6 +32,13 @@ make_plots <- function(
         "/Waveforms/Coefficients.pdf"),
         title = "Coefficients", modus = "Coefficient",
         ylims = c(9, -5.5), leg_labs = model_labs, leg_vals = model_vals)
+
+    source("../../code/plot_rERP.r")
+    plot_full_elec(data = coef, e = elec, file = paste0("../plots/", file,
+        "/Waveforms/Coefficients_Full.pdf"),
+        title = "Coefficients", modus = "Coefficient",
+        ylims = c(7, -5), leg_labs = model_labs, leg_vals = model_vals)
+    
     # plot_topo(coef, file = paste0("../plots/", file, "/Topos/Coefficients"),
     #             tw = c(300, 500), cond_man = predictor[2],
     #             cond_base = "Intercept", label = "Coefficient")
@@ -62,15 +69,15 @@ make_plots <- function(
     ########
     eeg <- fread(paste0("../data/", file, "_data.csv"))
 
-    # eeg$Condition <- factor(plyr::mapvalues(eeg$Condition, c(1, 2),
-    #                 c("A", "C")), levels = c("A", "C"))
-    # data_labs <- c("A", "C")
-    # data_vals <- c("black", "#004488")
+    eeg$Condition <- factor(plyr::mapvalues(eeg$Condition, c(1, 2),
+                    c("A", "C")), levels = c("A", "C"))
+    data_labs <- c("A", "C")
+    data_vals <- c("black", "#004488")
 
-    eeg$Condition <- factor(plyr::mapvalues(eeg$Condition, c(4, 1, 3, 2),
-                     c("B", "A", "C", "D")), levels = c("A", "B", "C", "D"))
-    data_labs <- c("A", "B", "C", "D")
-    data_vals <- c("#000000", "#BB5566", "#004488", "#DDAA33")
+    # eeg$Condition <- factor(plyr::mapvalues(eeg$Condition, c(4, 1, 3, 2),
+    #                  c("B", "A", "C", "D")), levels = c("A", "B", "C", "D"))
+    # data_labs <- c("A", "B", "C", "D")
+    # data_vals <- c("#000000", "#BB5566", "#004488", "#DDAA33")
 
     # Data: Observed
     obs <- eeg[Type == "EEG",]
@@ -141,4 +148,10 @@ make_plots <- function(
 
 # make_plots("ERP_Design1_AC_cloze_rERP", predictor = c("Intercept", "Cloze"))
 
-make_plots("ERP_Design1_cloze_rcnoun_rERP", predictor = c("Intercept", "Cloze", "rcnoun"))
+# make_plots("ERP_Design1_cloze_rcnoun_rERP", predictor = c("Intercept", "Cloze", "rcnoun"))
+
+elec_all <- c("Fp1", "Fp2", "F7", "F3", "Fz", "F4", "F8", "FC5",
+                "FC1", "FC2", "FC6", "C3", "Cz", "C4", "CP5", "CP1",
+                "CP2", "CP6", "P7", "P3", "Pz", "P4", "P8", "O1", "Oz", "O2")
+make_plots("ERP_Design1_AC_cloze_rERP", elec_all,
+            predictor = c("Intercept", "Cloze"))

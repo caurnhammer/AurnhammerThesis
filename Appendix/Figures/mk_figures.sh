@@ -21,3 +21,5 @@ montage -mode concatenate -density 500 \
     ../plots/ERP_Design1_cloze_rcnoun_rERP/Waveforms/Estimated_InterceptClozercnoun.pdf ../plots/ERP_Design1_cloze_rcnoun_rERP/Waveforms/Residual_InterceptClozercnoun.pdf \
 	-tile 2x4 \
 	final_pdf/ERP_Est_Res_Full.pdf
+
+cp ../plots/ERP_Design1_AC_cloze_rERP/Waveforms/Coefficients_Full.pdf final_pdf/ERP_Coef_Cloze_Grid.pdf

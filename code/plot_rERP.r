@@ -41,6 +41,7 @@ plot_grandavg_ci <- function(
     ylims = NULL,
     modus = "Condition",
     tws = list(c(300, 500), c(600, 1000)),
+    ci = TRUE,
     leg_labs,
     leg_vals
 ) {
@@ -67,8 +68,10 @@ plot_grandavg_ci <- function(
     }
 
     # For all plots
+    if (ci == TRUE) {
     p <- p + geom_ribbon(aes(x = Timestamp,
-            ymax = V + V_CI, ymin = V - V_CI), alpha = 0.20, color = NA)
+        ymax = V + V_CI, ymin = V - V_CI), alpha = 0.20, color = NA)
+    }
     p <- p + geom_hline(yintercept = 0, linetype = "dashed")
     p <- p + geom_vline(xintercept = 0, linetype = "dashed")
     p <- p + theme(panel.background = element_rect(fill = "#FFFFFF",
@@ -184,7 +187,7 @@ plot_single_elec <- function(
 }
 
 # Plot nine electrode grid
-plot_elec <- function(
+plot_nine_elec <- function(
     data,
     e,
     file = FALSE,
@@ -253,6 +256,120 @@ plot_elec <- function(
             heights = c(10, 1), top = textGrob(title))
     if (file != FALSE) {
        ggsave(file, gg, device = cairo_pdf, width = 7, height = 7)
+    } else {
+       gg
+    }
+}
+
+plot_full_elec <- function(
+    data,
+    e,
+    file = FALSE,
+    title = "ERPs",
+    yunit = paste0("Amplitude (", "\u03BC", "Volt\u29"),
+    ylims = NULL,
+    modus = "Condition",
+    tws = list(c(250, 400), c(600, 1000)),
+    leg_labs,
+    leg_vals
+) {
+    if (modus %in% c("Tertile", "Quantile", "Condition")) {
+        cols <- c("Spec", "Timestamp", modus)
+    } else if (modus %in% c("Coefficient", "t-value")) {
+        data[,"Spec"] <- as.factor(data$Spec)
+        cols <- c("Spec", "Timestamp")
+    }
+
+    # Make individual plots
+    plotlist <- vector(mode = "list", length = length(e))
+    if (modus == "t-value") {
+        for (i in 1:length(e)) {
+            varforward <- c(e[i], paste0(e[i], "_CI"), paste0(e[i], "_sig"))
+            plotlist[[i]] <- plot_grandavg_ci(cbind(data[, ..cols],
+                            data[, ..varforward]), e[i], yunit,
+                            ylims, modus, tws, ci = FALSE,
+                            leg_labs = leg_labs, leg_vals = leg_vals)
+        }
+    } else if (modus %in% c("Coefficient", "Tertile")) {
+        for (i in 1:length(e)) {
+            varforward <- c(e[i], paste0(e[i], "_CI"))
+            plotlist[[i]] <- plot_grandavg_ci(cbind(data[, ..cols],
+                            data[, ..varforward]), e[i], yunit = yunit,
+                            ylims = ylims, modus = modus, ci = FALSE,
+                            leg_labs = leg_labs, leg_vals = leg_vals)
+        }
+    } else if (modus %in% c("Tertile", "Quantile", "Condition")) {
+        for (i in 1:length(e)) {
+            varforward <- c(e[i], paste0(e[i], "_CI"))
+            plotlist[[i]] <- plot_grandavg_ci(cbind(data[, ..cols],
+                            data[, ..varforward]), e[i], yunit = yunit,
+                            ylims = ylims, modus = modus, ci=FALSE,
+                            leg_labs = leg_labs, leg_vals = leg_vals)
+        }
+    }
+
+    no <- ggplot(data.frame()) + theme_minimal()
+    legend_theme <- theme(legend.key.size = unit(4, 'cm'),
+        legend.key.height = unit(1, 'cm'),
+        legend.key.width = unit(1, 'cm'),
+        legend.title = element_text(size = 20),
+        legend.text = element_text(size = 18))
+    legend <- get_legend(plotlist[[1]] + legend_theme) # Get the legend
+    
+    nl <- theme(legend.position = "none") # No legend
+    nla <- labs(x = "", y = "")
+    ngrid <- theme(panel.background = element_rect(fill=NA, color = NA),
+                   panel.grid.major.x = element_blank(),
+                   panel.grid.minor.x = element_blank(),
+                   panel.grid.major.y = element_blank(),
+                   panel.grid.minor.y = element_blank())
+    axes <- theme(axis.line.x = element_line(color = "black", size = 0.2),
+                  axis.line.y = element_line(color = "black", size = 0.2))
+    for (i in 1:length(e)) {
+        plotlist[[i]] <- plotlist[[i]] + nl + nla + ngrid + axes
+    }
+
+    gg <- arrangeGrob(arrangeGrob(
+        no,
+        plotlist[[1]], #Fp1
+        no,
+        plotlist[[2]], #Fp2
+        no,
+        plotlist[[3]], #F7
+        plotlist[[4]], #F3
+        plotlist[[5]], #Fz
+        plotlist[[6]], #F4
+        plotlist[[7]], #F8
+        plotlist[[8]], #FC5
+        plotlist[[9]], #FC1
+        no,
+        plotlist[[10]], #FC2
+        plotlist[[11]], #FC6
+        no,
+        plotlist[[12]], #C3
+        plotlist[[13]], #Cz
+        plotlist[[14]], #C4
+        no,
+        plotlist[[15]], #CP5
+        plotlist[[16]], #CP1
+        no,
+        plotlist[[17]], #CP2
+        plotlist[[18]], #CP6
+        plotlist[[19]], #P7
+        plotlist[[20]], #P3
+        plotlist[[21]], #Pz
+        plotlist[[22]], #P4
+        plotlist[[23]], #P8
+        no,
+        plotlist[[24]], #O1
+        plotlist[[25]], #Oz
+        plotlist[[26]], #O2
+        no,
+        layout_matrix = matrix(1:35, ncol = 5, byrow = TRUE)),
+            legend,
+            heights = c(15, 1), top = textGrob(title, gp = gpar(fontsize = 20)))
+    if (file != FALSE) {
+       ggsave(file, gg, device = cairo_pdf, width = 12, height = 12)
     } else {
        gg
     }
