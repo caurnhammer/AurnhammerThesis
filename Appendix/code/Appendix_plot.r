@@ -21,13 +21,16 @@ make_plots <- function(
     coef <- mod[Type == "Coefficient", ]
     coef$Condition <- coef$Spec
 
-    model_labs <- predictor
+    #model_labs <- predictor
+    #model_labs <- c("Intercept", "Condition Coding")
+    model_labs <- c("Intercept", "Cloze", "Noun Association")
     model_vals <- c("black", "#E349F6", "#00FFFF")
     # plot_elec(data = coef, e = elec, file = paste0("../plots/", file,
     #     "/Waveforms/Coefficients.pdf"), modus = "Coefficient",
     #     ylims = c(10, -5.5), leg_labs = model_labs, leg_vals = model_vals)
     plot_single_elec(data = coef, e = c("Pz"), file = paste0("../plots/", file,
-        "/Waveforms/Coefficients.pdf"), modus = "Coefficient",
+        "/Waveforms/Coefficients.pdf"),
+        title = "Coefficients", modus = "Coefficient",
         ylims = c(9, -5.5), leg_labs = model_labs, leg_vals = model_vals)
     # plot_topo(coef, file = paste0("../plots/", file, "/Topos/Coefficients"),
     #             tw = c(300, 500), cond_man = predictor[2],
@@ -59,25 +62,26 @@ make_plots <- function(
     ########
     eeg <- fread(paste0("../data/", file, "_data.csv"))
 
-    eeg$Condition <- factor(plyr::mapvalues(eeg$Condition, c(1, 2),
-                    c("A", "C")), levels = c("A", "C"))
-    data_labs <- c("A", "C")
-    data_vals <- c("black", "#004488")
-    
-    # eeg$Condition <- factor(plyr::mapvalues(eeg$Condition, c(4, 1, 3, 2),
-    #                  c("B", "A", "C", "D")), levels = c("A", "B", "C", "D"))
-    # data_labs <- c("A", "B", "C", "D")
-    # data_vals <- c("#000000", "#BB5566", "#004488", "#DDAA33")
+    # eeg$Condition <- factor(plyr::mapvalues(eeg$Condition, c(1, 2),
+    #                 c("A", "C")), levels = c("A", "C"))
+    # data_labs <- c("A", "C")
+    # data_vals <- c("black", "#004488")
+
+    eeg$Condition <- factor(plyr::mapvalues(eeg$Condition, c(4, 1, 3, 2),
+                     c("B", "A", "C", "D")), levels = c("A", "B", "C", "D"))
+    data_labs <- c("A", "B", "C", "D")
+    data_vals <- c("#000000", "#BB5566", "#004488", "#DDAA33")
 
     # Data: Observed
-    obs <- eeg[Type == "EEG", ]
+    obs <- eeg[Type == "EEG",]
     # plot_elec(obs, elec,
     #     file = paste0("../plots/", file,  "/Waveforms/Observed.pdf"),
     #     modus = "Condition", ylims=c(8, -5.5),
     #     leg_labs = data_labs, leg_vals = data_vals)
     plot_single_elec(obs, c("Pz"),
         file = paste0("../plots/", file,  "/Waveforms/Observed.pdf"),
-        modus = "Condition", ylims=c(9, -5.5),
+        title = "Observed",
+        modus = "Condition", ylims = c(9, -5.5),
         leg_labs = data_labs, leg_vals = data_vals)
 
 
@@ -85,6 +89,7 @@ make_plots <- function(
                 tw = c(300, 500), cond_man = "C", cond_base = "A")
 
     # Data: Estimated
+    combo <- c("Intercept", "Intercept + Cloze", "Intercept + Noun Association", "Intercept + Cloze + Noun Association")
     est <- eeg[Type == "est",]
     for (i in seq(1, length(unique(est$Spec)))) {
         spec <- unique(est$Spec)[i]
@@ -99,6 +104,7 @@ make_plots <- function(
         plot_single_elec(est_set, c("Pz"),
                 file = paste0("../plots/", file,
                 "/Waveforms/Estimated_", name, ".pdf"),
+                title = paste("Estimates", combo[i]),
                 modus = "Condition", ylims = c(9, -5.5),
                 leg_labs = data_labs, leg_vals = data_vals)
         plot_topo(est_set, file = paste0("../plots/",
@@ -119,7 +125,8 @@ make_plots <- function(
         #         leg_labs = data_labs, leg_vals = data_vals)
         plot_single_elec(res_set, c("Pz"),
                  file = paste0("../plots/", file, "/Waveforms/Residual_",
-                 name, ".pdf"), modus = "Condition", ylims = c(4.7, -4),
+                 name, ".pdf"), title = paste("Residuals", combo[i]),
+                 modus = "Condition", ylims = c(3.5, -3.5),
                  leg_labs = data_labs, leg_vals = data_vals)
         plot_topo(res_set, 
                 file = paste0("../plots/", file, "/Topos/Residual_", name),
@@ -130,8 +137,8 @@ make_plots <- function(
 
 # make_plots("ERP_Design1_AC_Intercept_rERP", predictor = c("Intercept"))
 
-make_plots("ERP_Design1_AC_CondCode_rERP", predictor = c("Intercept", "CondCode"))
+# make_plots("ERP_Design1_AC_CondCode_rERP", predictor = c("Intercept", "CondCode"))
 
-# make_plots("CAPEXP_AC_cloze_rERP", predictor = c("Intercept", "Cloze"))
+# make_plots("ERP_Design1_AC_cloze_rERP", predictor = c("Intercept", "Cloze"))
 
-# make_plots("ERP_Design1_cloze_rcnoun_rERP", predictor = c("Intercept", "Cloze", "rcnoun"))
+make_plots("ERP_Design1_cloze_rcnoun_rERP", predictor = c("Intercept", "Cloze", "rcnoun"))

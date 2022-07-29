@@ -164,10 +164,17 @@ plot_single_elec <- function(
         }
     }
 
-    legend <- get_legend(plotlist[[1]])
-    nl <- theme(legend.position = "none")
     gg <- plotlist[[1]]
-    gg <- arrangeGrob(gg + nl, legend, heights = c(10, 1))
+    gg <- gg + theme(legend.key.size = unit(0.5, 'cm'), #change legend key size
+        legend.key.height = unit(0.5, 'cm'), #change legend key height
+        legend.key.width = unit(0.5, 'cm'), #change legend key width
+        legend.title = element_text(size=9), #change legend title font size
+        legend.text = element_text(size=7))
+    gg <- gg + theme(plot.title = element_text(size = 7.5))
+    legend <- get_legend(gg)
+    nl <- theme(legend.position = "none")
+    gg <- arrangeGrob(gg + nl + ggtitle(paste0(e, ": ", title)),
+            legend, heights = c(10, 1))
 
     if (file != FALSE) {
        ggsave(file, gg, device = cairo_pdf, width = 3, height = 3)
