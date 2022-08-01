@@ -375,6 +375,7 @@ plot_full_elec <- function(
     }
 }
 
+
 # Plot topographic map
 plot_topo <- function(
     data,
@@ -382,7 +383,10 @@ plot_topo <- function(
     tw = c(600, 1000),
     cond_man,
     cond_base,
-    label = "Amplitude (μV)"
+    label = "Amplitude (μV)",
+    add_title = "",
+    omit_legend = FALSE,
+    save_legend = FALSE
 ) {
     # get elec vector
     first_elec_ind <- grep("Fp1$", colnames(data))
@@ -402,10 +406,10 @@ plot_topo <- function(
 
     generate_topo(data_m_tw, file, tw, cond_man, cond_base,
                 amplim = 2.8, elec = electrodes,
-                title = paste0(cond_man, " minus ", cond_base), label = label)
+                title = paste0(cond_man, " minus ", cond_base, add_title),
+                label = label, omit_legend, save_legend)
 }
 
-# Code based on other people's work
 generate_topo <- function(
     data,
     file,
@@ -415,7 +419,9 @@ generate_topo <- function(
     amplim,
     elec,
     title,
-    label
+    label,
+    omit_legend,
+    save_legend
 ) {
     # Average, compute difference, add topo sites
     data_agg <- data[, lapply(.SD, mean), by = list(Electrode, Condition),
@@ -472,7 +478,6 @@ generate_topo <- function(
 
 
     # Create head and nose shape
-    # TODO figure out why I now need to set the *2.35
     head_shape <- circle_fun(c(0, 0), round(max(data_diff_locs$x) * 2.35, 4),
                              npoints = 100)
     nose <- data.table(x = c(-0.075, 0, .075), y = c(.495, .575, .495))
@@ -498,9 +503,17 @@ generate_topo <- function(
     p <- p + geom_path(data = nose, aes(x, y, z = NULL, fill = NULL),
                        size = 1.5)
     p <- p + coord_equal()
+    if (omit_legend) {
+        if (save_legend) {
+            lgnd <- get_legend(p)
+            ggsave(paste0(file, "_topolegend.pdf"), lgnd, device = cairo_pdf,
+                    width = 1.5, height = 4)
+        }
+        p <- p + theme(legend.position = "none")
+    }
 
     ggsave(paste0(file, "_", cond_man, "_", tw[1], "-", tw[2], ".pdf"),
-            p, device = cairo_pdf, width = 7, height = 7)
+            p, device = cairo_pdf, width = 4, height = 4)
 }
 
 compute_difference <- function(
