@@ -94,7 +94,7 @@ make_plots <- function(
 
     plot_topo(obs, file = paste0("../plots/", file, "/Topos/Observed"),
                 tw = c(300, 500), cond_man = "C", cond_base = "A")
-
+    
     # Data: Estimated
     combo <- c("Intercept", "Intercept + Cloze", "Intercept + Noun Association", "Intercept + Cloze + Noun Association")
     est <- eeg[Type == "est",]

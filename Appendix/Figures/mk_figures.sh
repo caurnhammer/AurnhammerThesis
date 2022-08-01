@@ -23,3 +23,6 @@ montage -mode concatenate -density 500 \
 	final_pdf/ERP_Est_Res_Full.pdf
 
 cp ../plots/ERP_Design1_AC_cloze_rERP/Waveforms/Coefficients_Full.pdf final_pdf/ERP_Coef_Cloze_Grid.pdf
+
+cp ../plots/ERP_Design1_AC_cloze_rERP/Topos/Observed_C_300-500.pdf final_pdf/ERP_Data_AC_Topo.pdf
+
