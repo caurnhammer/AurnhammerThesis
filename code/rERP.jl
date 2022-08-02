@@ -39,7 +39,7 @@ function make_Ind(data, models, m_indices, s_ind, e_ind, m_ind)
     Ind(length(models.Predictors),  Dict([x => i-1 for (i, x) in enumerate(models.Predictors)]), nrow(data), length(m_indices), s_ind, e_ind, m_ind)
 end
 
-function process_data(infile, outfile, models; baseline_corr = false, sampling_rate = false, invert_preds = false, conds=false, components=false)
+function process_data(infile, outfile, models; baseline_corr = false, sampling_rate = false, invert_preds = false, conds = false, components = false)
     # Load Data from disk
     data = DataFrame(File(infile))
     
