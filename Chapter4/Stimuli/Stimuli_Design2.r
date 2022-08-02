@@ -40,7 +40,7 @@ quad_density <- function(path, file, leg_labs, leg_vals) {
 
 quad_density(
     "../../data/Stimuli_Design2.csv",
-    "../Figures/Stimuli/Design2_Densities.pdf",
+    "../Figures/final_pdf/Design2_Densities.pdf",
     c("A", "B", "C"),
     c("black", "red", "blue")
 )
