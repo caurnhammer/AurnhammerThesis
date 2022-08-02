@@ -42,7 +42,6 @@ function gat(data; cond = "C")
 
     num = num_ts^2
     print("Fitting ", num, " models using ", Threads.nthreads(), " threads. \n")  
-    #for i in collect(1:num_ts)
     Threads.@threads for i in collect(1:num_ts)
         m = hcat(intercept, y_ts_pred[:,i], seg) \ y_ts
         coefs[i,:,1] = m[1,:]
@@ -54,14 +53,12 @@ function gat(data; cond = "C")
 end
 
 function plot_gat(betas, ts, ttl)
-    p = heatmap(x=ts, y=ts, z=betas, title=ttl, xlabel="Y", ylabel="x", c=cgrad([:blue, :white,:red]), clims=(-8.5, 8.5))
+	p = heatmap(ts, ts, betas, ticks=range(-200, 1200, 15), title=ttl, xlabel="Dependent (x)", ylabel="Predictor (Y)", c=cgrad([:blue, :white,:red]), clims=(-17.5, 17.5))
     gui(p)
 
     p
 end
 
-function plot_waveform(betas)
-    ts = collect(range(start=-200, stop=1198, length=700))
-    p = plot(ts, betas[1,:,1])
-    gui(p)
+function plot_waveform(betas, ts)
+    p = plot(ts, betas[1,:,1] .* -1)
 end
