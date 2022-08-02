@@ -434,8 +434,13 @@ generate_topo <- function(
     }
 
     # Load electrode location data
-    elec_locs <- fread("../../data/biosemi70elecs.loc", sep = "\t",
+    if (file.exists("../../data/biosemi70elecs.loc")) {
+        elec_locs <- fread("../../data/biosemi70elecs.loc", sep = "\t",
                     col.names = c("ElecNum", "Theta", "Radius", "Electrode"))
+    } else {
+        elec_locs <- fread("../../../data/biosemi70elecs.loc", sep = "\t",
+                    col.names = c("ElecNum", "Theta", "Radius", "Electrode"))
+    }
     elec_locs <- elec_locs[Electrode %in% elec]
     elec_locs$RadianTheta <- pi / 180 * elec_locs$Theta
     elec_locs$x <- elec_locs$Radius * sin(elec_locs$RadianTheta)
