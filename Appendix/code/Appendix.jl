@@ -76,3 +76,13 @@ models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Interc
 @time process_data("../../data/ERP_Design1.csv", "../data/ERP_Design1_cloze_rcnoun_rERP.csv", models, invert_preds=[:Cloze, :rcnoun]);
 @time dt = read_data("../data/ERP_Design1_cloze_rcnoun_rERP.csv", models);
 @time fit_models(dt, models, "../data/ERP_Design1_cloze_rcnoun_rERP");
+
+
+################################
+# Modeling Scalp Distributions #
+################################
+models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Intercept, :Plaus, :Cloze_distractor]);
+@time process_data("../../data/ERP_Design2.csv", "../data/ERP_Design2_rERP.csv", models, invert_preds=[:Plaus]);
+@time dt = read_data("../data/ERP_Design2_rERP.csv", models);
+
+@time fit_models(dt, models, "ERP_Design2_Plaus_Clozedist");

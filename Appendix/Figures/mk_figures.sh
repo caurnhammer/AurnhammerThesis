@@ -26,3 +26,10 @@ cp ../plots/ERP_Design1_AC_cloze_rERP/Waveforms/Coefficients_Full.pdf final_pdf/
 
 cp ../plots/ERP_Design1_AC_cloze_rERP/Topos/Observed_C_300-500.pdf final_pdf/ERP_Data_AC_Topo.pdf
 
+convert -density 500 ../plots/ERP_Design2_Plaus_Clozedist/Topos/Estimated_InterceptCloze_distractor_B_600-1000.pdf \
+    ../plots/ERP_Design2_Plaus_Clozedist/Topos/Estimated_InterceptPlaus_B_600-1000.pdf \
+	../plots/ERP_Design2_Plaus_Clozedist/Topos/Estimated_InterceptPlausCloze_distractor_B_600-1000.pdf \
+    ../plots/ERP_Design2_Plaus_Clozedist/Topos/Observed_B_600-1000.pdf \
+	../plots/ERP_Design2_Plaus_Clozedist/Topos/Observed_topolegend.pdf \
+	+append -page 350:80 \
+	final_pdf/ERP_Estimated_Topos_B.pdf
