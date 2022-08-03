@@ -63,6 +63,11 @@ make_plots <- function(
         modus = "Condition", ylims = c(10.5, -5.5),
         leg_labs = data_labs, leg_vals = data_vals)
 
+    plot_full_elec(data = obs, e = elec_all, 
+        file = paste0("../plots/", file, "/Waveforms/Observed_Full.pdf"),
+        title = "Observed", modus = "Condition",
+        ylims = c(10.5, -5.5), leg_labs = data_labs, leg_vals = data_vals)
+
     plot_topo(obs, file = paste0("../plots/", file, "/Topos/Observed"),
                 tw = c(250, 400), cond_man = "B", cond_base = "A",
                 add_title = "\nObserved", omit_legend = TRUE,
