@@ -84,7 +84,7 @@ function process_data(infile, outfile, models; baseline_corr = false, sampling_r
     data = standardise(data, components, models);
     
     # Invert predictors
-    if invert_preds != false
+    if ((invert_preds != false) | (components != false))
         data = invert(data, components, models, invert_preds)
     end
 
@@ -155,9 +155,6 @@ function standardise(data, components, models)
 end
 
 function invert(data, components, models, invert_preds)
-    for x in invert_preds
-        data[!,x] = (data[!,x]) .* -1
-    end
 
     if components != false
         for x in models.Electrodes
@@ -165,8 +162,12 @@ function invert(data, components, models, invert_preds)
                 data[:,Symbol(x, comp)] = data[:,Symbol(x, comp)] .* -1
             end
         end
+    else     
+        for x in invert_preds
+            data[!,x] = (data[!,x]) .* -1
+        end
     end
-
+    
     data
 end
 
@@ -231,7 +232,7 @@ function fit_models_components(dt, models, file)
     out_data = []
     out_models = []
     for (i, e) in enumerate(models.Electrodes)
-        print("Electrode $e ")
+        println("Electrode $e ")
         models_e = make_models(models.Descriptors, models.NonDescriptors, [e], [:Intercept, Symbol(e, "N400"), Symbol(e, "Segment")]);
         output = fit_models(dt, models_e, "none")
         if i .== 1
