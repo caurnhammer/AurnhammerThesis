@@ -50,8 +50,8 @@ make_plots <- function(
 
     ## DATA
     eeg <- fread(paste0("../data/", file, "_data.csv"))
-    eeg$Condition <- factor(plyr::mapvalues(eeg$Condition, c(1, 2, 3),
-                             c("A", "B", "C")), levels = c("A", "B", "C"))
+    eeg$Condition <- factor(plyr::mapvalues(eeg$Condition, c(2, 1, 3),
+                             c("B", "A", "C")), levels = c("A", "B", "C"))
 
     data_labs <- c("A", "B", "C")
     data_vals <- c("black", "red", "blue")
@@ -66,7 +66,7 @@ make_plots <- function(
     plot_full_elec(data = obs, e = elec_all, 
         file = paste0("../plots/", file, "/Waveforms/Observed_Full.pdf"),
         title = "Observed", modus = "Condition",
-        ylims = c(10.5, -5.5), leg_labs = data_labs, leg_vals = data_vals)
+        ylims = c(9, -5), leg_labs = data_labs, leg_vals = data_vals)
 
     plot_topo(obs, file = paste0("../plots/", file, "/Topos/Observed"),
                 tw = c(250, 400), cond_man = "B", cond_base = "A",
@@ -117,10 +117,15 @@ make_plots <- function(
     }
 }
 
-make_plots("Design2_Plaus_Clozedist",
+elec_all <- c("Fp1", "Fp2", "F7", "F3", "Fz", "F4", "F8", "FC5",
+                "FC1", "FC2", "FC6", "C3", "Cz", "C4", "CP5", "CP1",
+                "CP2", "CP6", "P7", "P3", "Pz", "P4", "P8", "O1", "Oz", "O2")
+
+make_plots("Design2_Plaus_Clozedist", elec_all,
     predictor = c("Intercept", "Plaus", "Cloze_dist"))
 
-make_plots("Design2_Plaus_Clozedist_across",
+make_plots("Design2_Plaus_Clozedist_across", elec_all,
     predictor = c("Intercept", "Plaus", "Cloze_dist"))
 
-make_plots("Design2_RT", predictor = c("Intercept", "ReadingTime"))
+make_plots("Design2_RT", elec_all,
+    predictor = c("Intercept", "ReadingTime"))
