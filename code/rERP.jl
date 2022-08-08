@@ -39,7 +39,7 @@ function make_Ind(data, models, m_indices, s_ind, e_ind, m_ind)
     Ind(length(models.Predictors),  Dict([x => i-1 for (i, x) in enumerate(models.Predictors)]), nrow(data), length(m_indices), s_ind, e_ind, m_ind)
 end
 
-function process_data(infile, outfile, models; baseline_corr = false, sampling_rate = false, invert_preds = false, conds = false, components = false)
+function process_data(infile, outfile, models; baseline_corr = false, sampling_rate = false, invert_preds = false, conds = false, components = false, keep_conds = false)
     # Load Data from disk
     data = DataFrame(File(infile))
     
@@ -87,7 +87,12 @@ function process_data(infile, outfile, models; baseline_corr = false, sampling_r
     if invert_preds != false
         data = invert(data, components, models, invert_preds)
     end
-    
+
+    # Turn condition labels to numbers. Set Verbose to show them.
+    if keep_conds == false
+        data = transform_conds(data, verbose=true);
+    end
+
     # Write data to file or return as data object
     if typeof(outfile) == String
         write(outfile, data)
@@ -172,9 +177,6 @@ function read_data(infile, models)
 end
 
 function fit_models(data, models, file)
-    # Turn condition labels to numbers. Set Verbose to show them.
-    data = transform_conds(data, verbose=true);
-    
     # Get subset indices
     Index = get_index(data, models)
     e_indices = findall(Index .!= 0);
