@@ -247,8 +247,8 @@ function fit_models_components(dt, models, file)
         end
     end
     
-    write(string("./data/", file, "_data.csv"), out_data)
-    write(string("./data/", file, "_models.csv"), out_models)    
+    write(string("../data/", file, "_data.csv"), out_data)
+    write(string("../data/", file, "_models.csv"), out_models)    
 end
 
 function transform_conds(data ; verbose=false)
