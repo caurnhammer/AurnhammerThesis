@@ -44,21 +44,19 @@ make_plots <- function(
     #     leg_labs = model_labs[2:length(model_vals)],
     #     leg_vals = model_vals[2:length(model_vals)])
 
-    # ## DATA
-    #eeg <- fread(paste0("../data/", file, "_data.csv"))
-    #eeg$Condition <- factor(plyr::mapvalues(eeg$Condition, c(2, 1, 3),
-    #                         c("B", "A", "C")), levels = c("A", "B", "C"))
+    ## DATA
+    eeg <- fread(paste0("../data/", file, "_data.csv"))
+    eeg <- factor(eeg$Quantile)
+    data_labs <- c(1, 2, 3, 4)
+    data_vals <- c("blue", "red", "orange", "black")
 
-    # data_labs <- c("A", "B", "C")
-    # data_vals <- c("black", "red", "blue")
-
-    # # Observed
-    # obs <- eeg[Type == "EEG", ]
-    # plot_nine_elec(obs, elec,
-    #     file = paste0("../plots/", file,  "/Waveforms/Observed.pdf"),
-    #     modus = "Condition", ylims = c(10.5, -5.5),
-    #     leg_labs = data_labs, leg_vals = data_vals)
-
+    # Estimates
+    obs <- eeg[Type == "EEG", ]
+    plot_single_elec(est_n4, elec,
+        file = paste0("../plots/", file,  "/Waveforms/Observed.pdf"),
+        modus = "Quantile", ylims = c(20, -20),
+        leg_labs = data_labs, leg_vals = data_vals)
+    
     # plot_full_elec(data = obs, e = elec_all, 
     #     file = paste0("../plots/", file, "/Waveforms/Observed_Full.pdf"),
     #     title = "Observed", modus = "Condition",
@@ -78,24 +76,19 @@ make_plots <- function(
     #             tw = c(600, 1000), cond_man = "C", cond_base = "A",
     #             add_title = "\nObserved", omit_legend = TRUE)
 
-    # # Estimated
-    # est <- eeg[Type == "est",]
-    # pred <- c("Intercept", "Tar. Plaus.", "Dist. Cloze",
-    #           "Dist. Cloze + Tar. Plaus.")
-    # for (i in seq(1, length(unique(est$Spec)))) {
-    #     spec <- unique(est$Spec)[i]
-    #     est_set <- est[Spec == spec, ]
-    #     spec <- unique(est_set$Spec)
-    #     name <- gsub("\\[|\\]|:|,| ", "", spec)
-    #     plot_nine_elec(est_set, elec,
-    #               file = paste0("../plots/", file, "/Waveforms/Estimated_",
-    #               name, ".pdf"), modus = "Condition", ylims = c(10.5, -5.5),
-    #               leg_labs = data_labs, leg_vals = data_vals)
-    #     plot_topo(est_set, 
-    #         file = paste0("../plots/", file, "/Topos/Estimated_", name),
-    #         tw = c(600, 1000), cond_man = "B", cond_base = "A",
-    #         add_title = paste("\nEstimate", pred[i]), omit_legend = TRUE)
-    # }
+    # Estimated
+    est <- eeg[Type == "est",]
+    pred <- c("1", "1 + N400", "1 + Segment", "1 + N400 + Segment")
+    for (i in seq(1, length(unique(est$Spec)))) {
+        spec <- unique(est$Spec)[i]
+        est_set <- est[Spec == spec, ]
+        spec <- unique(est_set$Spec)
+        name <- gsub("\\[|\\]|:|,| ", "", spec)
+        plot_single_elec(est_set, elec,
+                  file = paste0("../plots/", file, "/Waveforms/Estimated_",
+                  name, ".pdf"), modus = "Quantile", ylims = c(20, -20),
+                  leg_labs = data_labs, leg_vals = data_vals)
+    }
 
     # # Residual
     # res <- eeg[Type == "res", ]

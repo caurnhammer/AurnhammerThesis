@@ -239,12 +239,10 @@ function fit_models_components(dt, models, file)
             out_data = output[1]
             out_models = output[2]
         else
-            for k in 1:2
-                out_data[!,e] = output[1][:,e]
-                out_data[!,Symbol(e, "_CI")] = output[1][:,Symbol(e, "_CI")]
-                out_models[!,e] = output[2][:,e]
-                out_models[!,Symbol(e, "_CI")] = output[2][:,Symbol(e, "_CI")]         
-            end
+            out_data[!,e] = output[1][:,e]
+            out_data[!,Symbol(e, "_CI")] = output[1][:,Symbol(e, "_CI")]
+            out_models[!,e] = output[2][:,e]
+            out_models[!,Symbol(e, "_CI")] = output[2][:,Symbol(e, "_CI")]     
         end
     end
     

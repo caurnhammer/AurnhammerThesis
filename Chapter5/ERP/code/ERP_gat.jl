@@ -53,7 +53,9 @@ function gat(data; cond = "C")
 end
 
 function plot_gat(betas, ts, ttl)
-	p = heatmap(ts, ts, betas, ticks=range(-200, 1200, 15), title=ttl, xlabel="Dependent (x)", ylabel="Predictor (Y)", c=cgrad([:blue, :white,:red]), clims=(-17.5, 17.5))
+    println("Maximum Abs value: ", maximum(abs.([minimum(betas), maximum(betas)])))
+
+    p = heatmap(ts, ts, betas, ticks=range(-200, 1200, 15), title=ttl, xlabel="Dependent (Y)", ylabel="Predictor (x)", c=cgrad([:blue, :white,:red]), clims=(-16.5, 16.5))
     gui(p)
 
     p
@@ -61,4 +63,19 @@ end
 
 function plot_waveform(betas, ts)
     p = plot(ts, betas[1,:,1] .* -1)
+
+    p
+end
+
+function save_gat_plots(beta_3d, dt)
+    ts = unique(dt.Timestamp)
+
+    p1 = plot_gat(beta_3d[:,:,1], ts, "Intercept")
+    savefig(p1, "../plots/GAT/GAT_coef_intercept.pdf")
+
+    p2 = plot_gat(beta_3d[:,:,2], ts, "Time-step Voltage")
+    savefig(p2, "../plots/GAT/GAT_coef_timestep.pdf")
+    
+    p3 = plot_gat(beta_3d[:,:,3], ts, "Segment Voltage")
+    savefig(p3, "../plots/GAT/GAT_coef_segment.pdf")
 end

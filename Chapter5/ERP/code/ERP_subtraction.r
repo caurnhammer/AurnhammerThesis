@@ -3,7 +3,7 @@
 # Generate N400s bins by N400-Segment
 library(data.table)
 library(dplyr)
-source("../../code/plot_rERP.r")
+source("../../../code/plot_rERP.r")
 
 # helper function to average data down to the level of one value per condition,
 # per electrode, per time step. Works with one or more electrodes.
@@ -23,13 +23,13 @@ avg_quart_dt <- function(df, elec){
 }
 
 # Load data of Design 1, baseline condition
-dt <- fread("../../data/ERP_Design1.csv")
+dt <- fread("../../../data/ERP_Design1.csv")
 elec <- "Cz"
 cond <- "C"
 
 # Shared plotting properties
 quart_labels <- c(1, 2, 3, 4)
-quart_values <- c("black", "blue", "red", "orange")
+quart_values <- c("blue", "red", "orange", "black")
 
 #####################################
 # Plot Quantile bins computed from  #
@@ -44,13 +44,10 @@ n400$Quantile <- ntile(n400[,..elec], 4)
 dta <- merge(dta, n400[, c("Trial", "Quantile")], on = "Trial")
 
 dt_avg <- avg_quart_dt(dta, elec)
-p <- plot_grandavg_ci(dt_avg, modus = "Quantile",
-        ttl = "Raw N400 Quantiles (Cz)", ylims = c(17, -16.2),
-        leg_labs = quart_labels, leg_vals = quart_values)
-p <- p + theme(legend.position = "bottom")
-p
-f <- "plots/Subtration_RawN400_Quantiles.pdf"
-ggsave(f, p, device = cairo_pdf, width = 4, height = 4)
+plot_single_elec(dt_avg, elec,
+    file = paste0("../plots/Subtraction/Subtration_RawN400_Quantiles.pdf"),
+    modus = "Quantile", ylims = c(20, -20),
+    leg_labs = quart_labels, leg_vals = quart_values)
 
 #####################################
 # Plot Quantile bins computed from  #
@@ -70,11 +67,7 @@ n4seg$Quantile <- ntile(n4seg$N4minSeg, 4)
 dta <- merge(dta, n4seg[, c("Trial", "Quantile")], by = "Trial")
 
 dt_avg <- avg_quart_dt(dta, elec)
-source("../../code/plot_rERP.r")
-p <- plot_grandavg_ci(dt_avg, modus = "Quantile",
-        ttl = "N400 - Segment Quantiles (Cz)", ylims = c(17, -16.2),
-        leg_labs = quart_labels, leg_val = quart_values)
-p <- p + theme(legend.position = "bottom")
-p
-f <- "plots/Subtration_N400minusSegment_Quantiles.pdf"
-ggsave(f, p, device = cairo_pdf, width = 4, height = 4)
+plot_single_elec(dt_avg, elec,
+    file = paste0("../plots/Subtraction/Subtration_N400minusSegment_Quantiles.pdf"),
+    modus = "Quantile", ylims = c(20, -20),
+    leg_labs = quart_labels, leg_vals = quart_values)

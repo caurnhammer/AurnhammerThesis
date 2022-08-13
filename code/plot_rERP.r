@@ -375,7 +375,6 @@ plot_full_elec <- function(
     }
 }
 
-
 # Plot topographic map
 plot_topo <- function(
     data,
