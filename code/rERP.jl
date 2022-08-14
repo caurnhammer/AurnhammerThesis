@@ -155,7 +155,6 @@ function standardise(data, components, models)
 end
 
 function invert(data, components, models, invert_preds)
-
     if components != false
         for x in models.Electrodes
             for comp in components
