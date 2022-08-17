@@ -26,10 +26,59 @@ avg_quart_dt <- function(df, elec){
 dt <- fread("../../../data/ERP_Design1.csv")
 elec <- "Cz"
 cond <- "C"
-
-# Shared plotting properties
+# Condition plotting properties
+cond_labels <- c("A: Expected", "C: Unexpected")
+cond_values <- c("black", "#004488")
+# Shared Quantile plotting properties
 quart_labels <- c(1, 2, 3, 4)
 quart_values <- c("blue", "red", "orange", "black")
+
+############################
+# Plot a few single trials #
+############################
+n <- 4
+dt_condc <- dt[Condition == "C",]
+rand_trials <- sample(dt_condc$TrialNum, n)
+dt_rtrials <- dt_condc[TrialNum %in% rand_trials,]
+dt_rtrials$TrialNum <- factor(dt_rtrials$TrialNum)
+p_list <- vector(mode = "list", length = length(n))
+lims <- c(max(dt_rtrials$Cz), min(dt_rtrials$Cz))
+for (i in 1:n) {
+    single_trial <- dt_rtrials[TrialNum == unique(dt_rtrials$TrialNum)[i], ]
+    p_list[[i]] <- ggplot(single_trial, aes(x = Timestamp, y = Cz,
+            color = TrialNum, group = TrialNum)) + geom_line() +
+            theme_minimal() + scale_y_reverse(limits = c(lims[1], lims[2])) +
+            theme(legend.position = "none") +
+            scale_color_manual(values = "black") +
+            geom_hline(yintercept = 0, linetype = "dashed") +
+            geom_vline(xintercept = 0, linetype = "dashed") +
+            labs(y = paste0("Amplitude (", "\u03BC", "Volt\u29"), title = "Cz")
+}
+gg <- arrangeGrob(p_list[[1]] + labs(x = ""),
+                  p_list[[2]] + labs(x = "", y = ""),
+                  p_list[[3]] + labs(title = "") + theme(plot.margin = margin(t=-20, r=5, b=0, l=5)),
+                  p_list[[4]] + labs(y = "", title = "") + theme(plot.margin = margin(t=-20, r=5, b=0, l=5)),
+        layout_matrix = matrix(1:4, ncol = 2, byrow = TRUE))
+ggsave("../plots/Subtraction/ERP_Design1_randtrials_Cz.pdf", gg,
+    device = cairo_pdf, width = 5, height = 5)
+
+##########################
+# Plot Design 1 Cond A/C #
+##########################
+ci <- function(vec) {
+    1.96 * se(vec)
+}
+dt_c_s <- dt[Condition %in% c("A", "C"), lapply(.SD, mean),
+    by = list(Subject, Condition, Timestamp), .SDcols = c("Cz")]
+dt_c <- dt[Condition %in% c("A", "C"), lapply(.SD, mean),
+    by = list(Condition, Timestamp), .SDcols = c("Cz")]
+dt_c$Cz_CI <- dt[Condition %in% c("A", "C"), lapply(.SD, ci),
+    by = list(Condition, Timestamp), .SDcols = c("Cz")]$Cz
+dt_c$Spec <- dt_c$Condition
+plot_single_elec(dt_c, elec,
+    file = paste0("../plots/Subtraction/ERP_Design1_AC_Cz.pdf"),
+    modus = "Condition", ylims = c(9, -5.5),
+    leg_labs = cond_labels, leg_vals = cond_values)
 
 #####################################
 # Plot Quantile bins computed from  #
