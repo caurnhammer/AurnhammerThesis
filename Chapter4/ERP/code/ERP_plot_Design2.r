@@ -11,6 +11,9 @@ make_plots <- function(
     system(paste0("mkdir ../plots/", file, "/Waveforms"))
     system(paste0("mkdir ../plots/", file, "/Topos"))
 
+    # nine elecs
+    elec_nine <-  c("F3", "Fz", "F4", "C3", "Cz", "C4", "P3", "Pz", "P4")
+
     # MODELS
     mod <- fread(paste0("../data/", file, "_models.csv"))
     mod$Spec <- factor(mod$Spec, levels = predictor)
@@ -42,7 +45,7 @@ make_plots <- function(
     mod$Spec <- factor(mod$Spec, levels = predictor)
     tval$Condition <- tval$Spec
 
-    plot_nine_elec(tval, elec,
+    plot_nine_elec(tval, elec_nine,
         file = paste0("../plots/", file, "/Waveforms/t-values.pdf"),
         modus = "t-value", ylims = c(7, -5), tws = time_windows,
         leg_labs = model_labs[2:length(model_vals)],
@@ -58,7 +61,7 @@ make_plots <- function(
 
     # Observed
     obs <- eeg[Type == "EEG", ]
-    plot_nine_elec(obs, elec,
+    plot_nine_elec(obs, elec_nine,
         file = paste0("../plots/", file,  "/Waveforms/Observed.pdf"),
         modus = "Condition", ylims = c(10.5, -5.5),
         leg_labs = data_labs, leg_vals = data_vals)
@@ -99,7 +102,7 @@ make_plots <- function(
         est_set <- est[Spec == spec, ]
         spec <- unique(est_set$Spec)
         name <- gsub("\\[|\\]|:|,| ", "", spec)
-        plot_nine_elec(est_set, elec,
+        plot_nine_elec(est_set, elec_nine,
                   file = paste0("../plots/", file, "/Waveforms/Estimated_",
                   name, ".pdf"), modus = "Condition", ylims = c(10.5, -5.5),
                   leg_labs = data_labs, leg_vals = data_vals)
@@ -118,7 +121,7 @@ make_plots <- function(
         res_set <- res[Spec == spec, ]
         spec <- unique(res_set$Spec)
         name <- gsub("\\[|\\]|:|,| ", "", spec)
-        plot_nine_elec(res_set, elec,
+        plot_nine_elec(res_set, elec_nine,
                   file = paste0("../plots/", file, "/Waveforms/Residual_",
                   name, ".pdf"), modus = "Condition", ylims = c(4.7, -4),
                   leg_labs = data_labs, leg_vals = data_vals)
