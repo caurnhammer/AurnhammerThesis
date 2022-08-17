@@ -36,6 +36,9 @@ function gat(data; cond = "C")
     intercept = ones(nrow_ts)
     seg = zscore(Array(data.CzSegment)[1:nrow_ts,1])
 
+    # invert predictors
+    seg = seg .* -1
+    y_ts_pred = y_ts_pred .* -1
 
     # Output
     coefs = zeros(num_ts, num_ts, 3)
@@ -53,9 +56,13 @@ function gat(data; cond = "C")
 end
 
 function plot_gat(betas, ts, ttl)
-    println("Maximum Abs value: ", maximum(abs.([minimum(betas), maximum(betas)])))
+    maxabs = maximum(abs.([minimum(betas), maximum(betas)]))
+    symlims = 16.5
+    if maxabs > symlims
+        println("Warning: absolute values ranging until ", maxabs, " clipped at", symlims)
+    end
 
-    p = heatmap(ts, ts, betas, ticks=range(-200, 1200, 15), title=ttl, xlabel="Dependent (Y)", ylabel="Predictor (x)", c=cgrad([:blue, :white,:red]), clims=(-16.5, 16.5))
+    p = heatmap(ts, ts, betas, ticks=range(-200, 1200, 15), title=ttl, xlabel="Dependent (Y)", ylabel="Predictor (x)", c=cgrad([:blue, :white,:red]), clims=(-symlims, symlims))
     gui(p)
 
     p
