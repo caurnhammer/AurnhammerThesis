@@ -84,15 +84,14 @@ plot_single_elec(dt_c, elec,
 # Plot Quantile bins computed from  #
 # raw N400 per-trial averages       #
 #####################################
-dta <- dt[Condition == cond,]
-dta$Trial <- paste(dta$ItemNum, dta$Subject)
-elec <- "Cz"
-n400 <- dta[(Timestamp > 300 & Timestamp < 500), lapply(.SD, mean),
+dt_cond <- dt[Condition == cond,]
+dt_cond$Trial <- paste(dt_cond$ItemNum, dt_cond$Subject)
+n400 <- dt_cond[(Timestamp > 300 & Timestamp < 500), lapply(.SD, mean),
     by = list(Trial, Subject, ItemNum, Condition, NumInSess), .SDcols = elec]
 n400$Quantile <- ntile(n400[,..elec], 4)
-dta <- merge(dta, n400[, c("Trial", "Quantile")], on = "Trial")
+dt_cond <- merge(dt_cond, n400[, c("Trial", "Quantile")], on = "Trial")
 
-dt_avg <- avg_quart_dt(dta, elec)
+dt_avg <- avg_quart_dt(dt_cond, elec)
 plot_single_elec(dt_avg, elec,
     file = paste0("../plots/Subtraction/Subtration_RawN400_Quantiles.pdf"),
     modus = "Quantile", ylims = c(20, -20),
@@ -102,20 +101,20 @@ plot_single_elec(dt_avg, elec,
 # Plot Quantile bins computed from  #
 # N400 - Segment per-trial averages #
 #####################################
-dta <- dt[Condition == cond,]
-dta$Trial <- paste(dta$ItemNum, dta$Subject)
+dt_cond <- dt[Condition == cond,]
+dt_cond$Trial <- paste(dt_cond$ItemNum, dt_cond$Subject)
 
-n400 <- dta[(Timestamp > 300 & Timestamp < 500), lapply(.SD, mean),
+n400 <- dt_cond[(Timestamp > 300 & Timestamp < 500), lapply(.SD, mean),
     by = list(Trial), .SDcols = elec]
-segment <- dta[(Timestamp > 0), lapply(.SD, mean),
+segment <- dt_cond[(Timestamp > 0), lapply(.SD, mean),
     by = list(Trial), .SDcols = elec]
 n4seg <- merge(n400, segment, by = "Trial")
 colnames(n4seg)[2:3] <- c("N400", "Segment")
 n4seg$N4minSeg <- n4seg$N400 - n4seg$Segment
 n4seg$Quantile <- ntile(n4seg$N4minSeg, 4)
-dta <- merge(dta, n4seg[, c("Trial", "Quantile")], by = "Trial")
+dt_cond <- merge(dt_cond, n4seg[, c("Trial", "Quantile")], by = "Trial")
 
-dt_avg <- avg_quart_dt(dta, elec)
+dt_avg <- avg_quart_dt(dt_cond, elec)
 plot_single_elec(dt_avg, elec,
     file = paste0("../plots/Subtraction/Subtration_N400minusSegment_Quantiles.pdf"),
     modus = "Quantile", ylims = c(20, -20),
