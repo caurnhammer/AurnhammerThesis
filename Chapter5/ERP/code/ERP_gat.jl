@@ -18,6 +18,8 @@ function proc_for_gat(file; sampling_rate = false)
     data = data[:,[:Item, :Condition, :Subject, :Timestamp, :Cz, :CzSegment, :Cloze]]
 
     sort!(data, [:Timestamp])
+    
+    GC.gc()
 
     data
 end
@@ -39,16 +41,15 @@ function gat(data; cond = "C")
 
     # Output
     coefs = zeros(num_ts, num_ts, 3)
+    m = Nothing
 
     num = num_ts^2
     print("Fitting ", num, " models using ", Threads.nthreads(), " threads. \n")  
     Threads.@threads for i in collect(1:num_ts)
-        m = hcat(intercept, y_ts_pred[:,i], seg) \ y_ts
-        coefs[i,:,1] = m[1,:]
-        coefs[i,:,2] = m[2,:]
-        coefs[i,:,3] = m[3,:]
+        coefs[i,:,:] = transpose(hcat(intercept, y_ts_pred[:,i], seg) \ y_ts)
     end
-
+    GC.gc()
+    
     coefs
 end
 
