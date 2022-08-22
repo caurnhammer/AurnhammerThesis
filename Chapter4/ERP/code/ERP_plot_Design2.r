@@ -17,7 +17,7 @@ make_plots <- function(
     # MODELS
     mod <- fread(paste0("../data/", file, "_models.csv"))
     mod$Spec <- factor(mod$Spec, levels = predictor)
-    model_labs <- predictor
+    model_labs <- c("Intercept", "Plausibility", "Distractor Cloze")
     model_vals <- c("black", "#E349F6", "#00FFFF")
 
     # Models: coefficent
@@ -103,9 +103,13 @@ make_plots <- function(
         spec <- unique(est_set$Spec)
         name <- gsub("\\[|\\]|:|,| ", "", spec)
         plot_nine_elec(est_set, elec_nine,
-                  file = paste0("../plots/", file, "/Waveforms/Estimated_",
-                  name, ".pdf"), modus = "Condition", ylims = c(10.5, -5.5),
-                  leg_labs = data_labs, leg_vals = data_vals)
+            file = paste0("../plots/", file, "/Waveforms/Estimated_",
+            name, ".pdf"), modus = "Condition", ylims = c(10.5, -5.5),
+            leg_labs = data_labs, leg_vals = data_vals)
+        plot_single_elec(est_set, "Pz",
+            file = paste0("../plots/", file, "/Waveforms/EstimatedPz_",
+            name, ".pdf"), modus = "Condition", ylims = c(10, -5.5),
+            leg_labs = data_labs, leg_vals = data_vals)
         plot_topo(est_set, 
             file = paste0("../plots/", file, "/Topos/Estimated_", name),
             tw = c(600, 1000), cond_man = "B", cond_base = "A",
@@ -122,9 +126,13 @@ make_plots <- function(
         spec <- unique(res_set$Spec)
         name <- gsub("\\[|\\]|:|,| ", "", spec)
         plot_nine_elec(res_set, elec_nine,
-                  file = paste0("../plots/", file, "/Waveforms/Residual_",
-                  name, ".pdf"), modus = "Condition", ylims = c(4.7, -4),
-                  leg_labs = data_labs, leg_vals = data_vals)
+            file = paste0("../plots/", file, "/Waveforms/Residual_",
+            name, ".pdf"), modus = "Condition", ylims = c(4.7, -4),
+            leg_labs = data_labs, leg_vals = data_vals)
+        plot_single_elec(res_set, "Pz",
+            file = paste0("../plots/", file, "/Waveforms/ResidualPz_",
+            name, ".pdf"), modus = "Condition", ylims = c(4.7, -4),
+            leg_labs = data_labs, leg_vals = data_vals)
     }
 }
 
@@ -133,10 +141,10 @@ elec_all <- c("Fp1", "Fp2", "F7", "F3", "Fz", "F4", "F8", "FC5",
                 "CP2", "CP6", "P7", "P3", "Pz", "P4", "P8", "O1", "Oz", "O2")
 
 make_plots("Design2_Plaus_Clozedist", elec_all,
-    predictor = c("Intercept", "Plaus", "Cloze_dist"))
-
-make_plots("Design2_Plaus_Clozedist_across",
     predictor = c("Intercept", "Plaus", "Cloze_distractor"))
 
-make_plots("Design2_RT", elec_all,
-   predictor = c("Intercept", "ReadingTime"))
+# make_plots("Design2_Plaus_Clozedist_across",
+#     predictor = c("Intercept", "Plaus", "Cloze_distractor"))
+
+# make_plots("Design2_RT", elec_all,
+#    predictor = c("Intercept", "ReadingTime"))
