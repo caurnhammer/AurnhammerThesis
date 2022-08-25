@@ -7,7 +7,7 @@ cp ../ERP/plots/Subtraction/Subtration_N400minusSegment_Quantiles.pdf final_pdf/
 
 cp ../ERP/plots/ERP_Design1_N400Segment/Waveforms/Coefficients_Cz.pdf final_pdf/ERP_Interdependence_Coefs.pdf
 
-montage -mode concatenate -density 125 \
+montage -mode concatenate -density 60 \
 	../ERP/plots/GAT/GAT_coef_intercept.pdf \
     ../ERP/plots/GAT/GAT_coef_timestep.pdf ../ERP/plots/GAT/GAT_coef_segment.pdf \
 	-tile 2x2 \

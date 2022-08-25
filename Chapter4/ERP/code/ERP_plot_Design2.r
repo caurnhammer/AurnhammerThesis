@@ -76,7 +76,7 @@ make_plots <- function(
                 add_title = "\nObserved", omit_legend = TRUE,
                 save_legend = TRUE)
     plot_topo(obs, file = paste0("../plots/", file, "/Topos/Observed"),
-                tw = c(350, 450), cond_man = "B", cond_base = "A",
+                tw = c(300, 500), cond_man = "B", cond_base = "A",
                 add_title = "\nObserved", omit_legend = TRUE,
                 save_legend = TRUE)
     plot_topo(obs, file = paste0("../plots/", file, "/Topos/Observed"),
@@ -86,7 +86,7 @@ make_plots <- function(
                 tw = c(250, 350), cond_man = "C", cond_base = "A",
                 add_title = "\nObserved", omit_legend = TRUE)
     plot_topo(obs, file = paste0("../plots/", file, "/Topos/Observed"),
-                tw = c(350, 450), cond_man = "C", cond_base = "A",
+                tw = c(300, 500), cond_man = "C", cond_base = "A",
                 add_title = "\nObserved", omit_legend = TRUE,
                 save_legend = TRUE)
     plot_topo(obs, file = paste0("../plots/", file, "/Topos/Observed"),
@@ -143,8 +143,8 @@ elec_all <- c("Fp1", "Fp2", "F7", "F3", "Fz", "F4", "F8", "FC5",
 make_plots("Design2_Plaus_Clozedist", elec_all,
     predictor = c("Intercept", "Plaus", "Cloze_distractor"))
 
-# make_plots("Design2_Plaus_Clozedist_across",
-#     predictor = c("Intercept", "Plaus", "Cloze_distractor"))
+make_plots("Design2_Plaus_Clozedist_across",
+     predictor = c("Intercept", "Plaus", "Cloze_distractor"))
 
 # make_plots("Design2_RT", elec_all,
 #    predictor = c("Intercept", "ReadingTime"))
