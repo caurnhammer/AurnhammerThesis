@@ -12,9 +12,9 @@ library(gridExtra)
 # compute standard error
 se <- function(
     x,
-    na.rm = FALSE
+    na_rm = FALSE
 ) {
-    if (na.rm == TRUE) {
+    if (na_rm == TRUE) {
         sd(x, na.rm = TRUE) / sqrt(length(x[!is.na(x)]))
     } else {
         sd(x) / sqrt(length(x))
@@ -52,9 +52,12 @@ plot_grandavg_ci <- function(
         colnames(df)[c(3, 4)] <- c("V", "V_CI")
     } else if (modus == "t-value") {
         colnames(df)[c(3, 4, 5)] <- c("V", "V_CI", "V_sig")
-        sig_dt <- df[,c("Spec", "Timestamp", "V_sig")]
-        sig_dt$posit <- rep(seq(ylims[1]-2, ylims[1], length=length(unique(sig_dt$Spec))), each=length(unique(sig_dt$Timestamp)))
-        sig_dt$sig <- factor(sig_dt$V_sig, levels=c("0", "1"), labels=c("insign", "sign"))
+        sig_dt <- df[, c("Spec", "Timestamp", "V_sig")]
+        sig_dt$posit <- rep(seq(ylims[1]-2, ylims[1],
+            length = length(unique(sig_dt$Spec))),
+            each = length(unique(sig_dt$Timestamp)))
+        sig_dt$sig <- factor(sig_dt$V_sig, levels=c("0", "1"),
+            labels=c("insign", "sign"))
     }
     ##### PLOTTING
     # Initial plot call
@@ -89,7 +92,7 @@ plot_grandavg_ci <- function(
         p <- p + scale_y_reverse()
     }
     if (modus == "Quantile") {
-        p <- p + labs(y=yunit, x = "Time (ms)", title = ttl)
+        p <- p + labs(y = yunit, x = "Time (ms)", title = ttl)
         p <- p + scale_color_manual(name = "N400 Quantile",
                 labels = leg_labs,
                 values = leg_vals)
@@ -103,21 +106,27 @@ plot_grandavg_ci <- function(
         p <- p + scale_fill_manual(name = "Condition",
                 labels = leg_labs, values = leg_vals)
     } else if (modus == "Coefficient") {
-        p <- p + labs(y="Intercept + Coefficient", x = "Time (ms)", title = ttl)
+        p <- p + labs(y = "Intercept + Coefficient", x = "Time (ms)",
+                    title = ttl)
         p <- p + scale_color_manual(name = modus,
                 labels = leg_labs, values = leg_vals)
         p <- p + scale_fill_manual(name = modus,
                 labels = leg_labs, values = leg_vals)
     } else if (modus == "t-value") {
-        p <- p + labs(y="T-value", x = "Time (ms)", title = ttl)
+        p <- p + labs(y = "T-value", x = "Time (ms)", title = ttl)
         p <- p + scale_color_manual(name = "Predictor",
                 labels = leg_labs, values = leg_vals)
         p <- p + scale_fill_manual(name = "Predictor",
                 labels = leg_labs, values = leg_vals)
-        p <- p + geom_point(data=sig_dt, aes(x=Timestamp, y=posit, shape=sig), size=2) 
-        p <- p + scale_shape_manual(values=c(32, 108), name="Corrected p-values", labels=c("Nonsignificant", "Significant"))
-        p <- p + annotate("rect", xmin = tws[1][[1]][1], xmax = tws[1][[1]][2], ymin = ylims[1], ymax = ylims[2], alpha = .15)
-        p <- p + annotate("rect", xmin = tws[2][[1]][1], xmax = tws[2][[1]][2], ymin = ylims[1], ymax = ylims[2], alpha = .15) 
+        p <- p + geom_point(data=sig_dt,
+                    aes(x = Timestamp, y = posit, shape = sig), size = 2)
+        p <- p + scale_shape_manual(values = c(32, 108),
+                    name = "Corrected p-values",
+                    labels = c("Nonsignificant", "Significant"))
+        p <- p + annotate("rect", xmin = tws[1][[1]][1], xmax = tws[1][[1]][2],
+                    ymin = ylims[1], ymax = ylims[2], alpha = .15)
+        p <- p + annotate("rect", xmin = tws[2][[1]][1], xmax = tws[2][[1]][2],
+                    ymin = ylims[1], ymax = ylims[2], alpha = .15)
     }
 
     p
@@ -148,22 +157,25 @@ plot_single_elec <- function(
         for (i in 1:length(e)) {
             varforward <- c(e[i], paste0(e[i], "_CI"), paste0(e[i], "_sig"))
             plotlist[[i]] <- plot_grandavg_ci(cbind(data[, ..cols],
-                            data[, ..varforward]), e[i], yunit,
-                            ylims, modus, tws, leg_labs=leg_labs, leg_vals=leg_vals)
+                    data[, ..varforward]), e[i], yunit,
+                    ylims, modus, tws, 
+                    leg_labs = leg_labs, leg_vals = leg_vals)
         }
     } else if (modus %in% c("Coefficient", "Tertile")) {
         for (i in 1:length(e)) {
             varforward <- c(e[i], paste0(e[i], "_CI"))
             plotlist[[i]] <- plot_grandavg_ci(cbind(data[, ..cols],
-                            data[, ..varforward]), e[i], yunit = yunit,
-                            ylims = ylims, modus = modus, leg_labs=leg_labs, leg_vals=leg_vals)
+                    data[, ..varforward]), e[i], yunit = yunit,
+                    ylims = ylims, modus = modus,
+                    leg_labs = leg_labs, leg_vals = leg_vals)
         }
     } else if (modus %in% c("Tertile", "Quantile", "Condition")) {
         for (i in 1:length(e)) {
             varforward <- c(e[i], paste0(e[i], "_CI"))
             plotlist[[i]] <- plot_grandavg_ci(cbind(data[, ..cols],
-                            data[, ..varforward]), e[i], yunit = yunit,
-                            ylims = ylims, modus = modus, leg_labs=leg_labs, leg_vals=leg_vals)
+                    data[, ..varforward]), e[i], yunit = yunit,
+                    ylims = ylims, modus = modus,
+                    leg_labs = leg_labs, leg_vals = leg_vals)
         }
     }
 
@@ -171,8 +183,8 @@ plot_single_elec <- function(
     gg <- gg + theme(legend.key.size = unit(0.5, 'cm'), #change legend key size
         legend.key.height = unit(0.5, 'cm'), #change legend key height
         legend.key.width = unit(0.5, 'cm'), #change legend key width
-        legend.title = element_text(size=9), #change legend title font size
-        legend.text = element_text(size=7))
+        legend.title = element_text(size = 8), #change legend title font size
+        legend.text = element_text(size = 7))
     gg <- gg + theme(plot.title = element_text(size = 7.5))
     legend <- get_legend(gg)
     nl <- theme(legend.position = "none")
@@ -212,22 +224,25 @@ plot_nine_elec <- function(
         for (i in 1:length(e)) {
             varforward <- c(e[i], paste0(e[i], "_CI"), paste0(e[i], "_sig"))
             plotlist[[i]] <- plot_grandavg_ci(cbind(data[, ..cols],
-                            data[, ..varforward]), e[i], yunit,
-                            ylims, modus, tws, leg_labs=leg_labs, leg_vals=leg_vals)
+                    data[, ..varforward]), e[i], yunit,
+                    ylims, modus, tws,
+                    leg_labs = leg_labs, leg_vals = leg_vals)
         }
     } else if (modus %in% c("Coefficient", "Tertile")) {
         for (i in 1:length(e)) {
             varforward <- c(e[i], paste0(e[i], "_CI"))
             plotlist[[i]] <- plot_grandavg_ci(cbind(data[, ..cols],
-                            data[, ..varforward]), e[i], yunit = yunit,
-                            ylims = ylims, modus = modus, leg_labs=leg_labs, leg_vals=leg_vals)
+                    data[, ..varforward]), e[i], yunit = yunit,
+                    ylims = ylims, modus = modus,
+                    leg_labs = leg_labs, leg_vals = leg_vals)
         }
     } else if (modus %in% c("Tertile", "Quantile", "Condition")) {
         for (i in 1:length(e)) {
             varforward <- c(e[i], paste0(e[i], "_CI"))
             plotlist[[i]] <- plot_grandavg_ci(cbind(data[, ..cols],
-                            data[, ..varforward]), e[i], yunit = yunit,
-                            ylims = ylims, modus = modus, leg_labs=leg_labs, leg_vals=leg_vals)
+                    data[, ..varforward]), e[i], yunit = yunit,
+                    ylims = ylims, modus = modus,
+                    leg_labs = leg_labs, leg_vals = leg_vals)
         }
     }
     # Get the legend
@@ -374,7 +389,6 @@ plot_full_elec <- function(
        gg
     }
 }
-
 
 # Plot topographic map
 plot_topo <- function(

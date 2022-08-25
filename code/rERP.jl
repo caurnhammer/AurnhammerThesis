@@ -39,7 +39,7 @@ function make_Ind(data, models, m_indices, s_ind, e_ind, m_ind)
     Ind(length(models.Predictors),  Dict([x => i-1 for (i, x) in enumerate(models.Predictors)]), nrow(data), length(m_indices), s_ind, e_ind, m_ind)
 end
 
-function process_data(infile, outfile, models; baseline_corr = false, sampling_rate = false, invert_preds = false, conds = false, components = false)
+function process_data(infile, outfile, models; baseline_corr = false, sampling_rate = false, invert_preds = false, conds = false, components = false, keep_conds = false)
     # Load Data from disk
     data = DataFrame(File(infile))
     
@@ -84,10 +84,15 @@ function process_data(infile, outfile, models; baseline_corr = false, sampling_r
     data = standardise(data, components, models);
     
     # Invert predictors
-    if invert_preds != false
+    if ((invert_preds != false) | (components != false))
         data = invert(data, components, models, invert_preds)
     end
-    
+
+    # Turn condition labels to numbers. Set Verbose to show them.
+    if keep_conds == false
+        data = transform_conds(data, verbose=true);
+    end
+
     # Write data to file or return as data object
     if typeof(outfile) == String
         write(outfile, data)
@@ -150,18 +155,18 @@ function standardise(data, components, models)
 end
 
 function invert(data, components, models, invert_preds)
-    for x in invert_preds
-        data[!,x] = (data[!,x]) .* -1
-    end
-
     if components != false
         for x in models.Electrodes
             for comp in components
                 data[:,Symbol(x, comp)] = data[:,Symbol(x, comp)] .* -1
             end
         end
+    else     
+        for x in invert_preds
+            data[!,x] = (data[!,x]) .* -1
+        end
     end
-
+    
     data
 end
 
@@ -172,9 +177,6 @@ function read_data(infile, models)
 end
 
 function fit_models(data, models, file)
-    # Turn condition labels to numbers. Set Verbose to show them.
-    data = transform_conds(data, verbose=true);
-    
     # Get subset indices
     Index = get_index(data, models)
     e_indices = findall(Index .!= 0);
@@ -229,24 +231,22 @@ function fit_models_components(dt, models, file)
     out_data = []
     out_models = []
     for (i, e) in enumerate(models.Electrodes)
-        print("Electrode $e ")
+        println("Electrode $e ")
         models_e = make_models(models.Descriptors, models.NonDescriptors, [e], [:Intercept, Symbol(e, "N400"), Symbol(e, "Segment")]);
         output = fit_models(dt, models_e, "none")
         if i .== 1
             out_data = output[1]
             out_models = output[2]
         else
-            for k in 1:2
-                out_data[!,e] = output[1][:,e]
-                out_data[!,Symbol(e, "_CI")] = output[1][:,Symbol(e, "_CI")]
-                out_models[!,e] = output[2][:,e]
-                out_models[!,Symbol(e, "_CI")] = output[2][:,Symbol(e, "_CI")]         
-            end
+            out_data[!,e] = output[1][:,e]
+            out_data[!,Symbol(e, "_CI")] = output[1][:,Symbol(e, "_CI")]
+            out_models[!,e] = output[2][:,e]
+            out_models[!,Symbol(e, "_CI")] = output[2][:,Symbol(e, "_CI")]     
         end
     end
     
-    write(string("./data/", file, "_data.csv"), out_data)
-    write(string("./data/", file, "_models.csv"), out_models)    
+    write(string("../data/", file, "_data.csv"), out_data)
+    write(string("../data/", file, "_models.csv"), out_models)    
 end
 
 function transform_conds(data ; verbose=false)
