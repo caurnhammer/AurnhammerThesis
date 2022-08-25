@@ -1,4 +1,4 @@
-# Christoph Aurnhammer, 2022
+j# Christoph Aurnhammer, 2022
 # This is the inital version of my rERP.jl primer.
 # rERPs have initially been described by Smith and Kutas (2015a, 2015b).
 # DO NOT DISTRIBUTED THIS CODE.

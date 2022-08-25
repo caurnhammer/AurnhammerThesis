@@ -70,7 +70,7 @@ make_plots <- function(
     # data_labs <- c("A", "B", "C", "D")
     # data_vals <- c("#000000", "#BB5566", "#004488", "#DDAA33")
 
-    eeg$Condition <- factor(plyr::mapvalues(eeg$Condition, c(1, 2, 3),
+    eeg$Condition <- factor(plyr::mapvalues(eeg$Condition, c(2, 1, 3),
                      c("B", "A", "C")), levels = c("A", "B", "C"))
     data_labs <- c("A", "B", "C")
     data_vals <- c("#000000", "red", "blue")
@@ -89,6 +89,7 @@ make_plots <- function(
 
     plot_topo(obs, file = paste0("../plots/", file, "/Topos/Observed"),
                 tw = c(600, 1000), cond_man = "B", cond_base = "A",
+                add_title = "\nObserved",
                 omit_legend = TRUE, save_legend = TRUE)
     plot_topo(obs, file = paste0("../plots/", file, "/Topos/Observed"),
                 tw = c(300, 500), cond_man = "C", cond_base = "A",

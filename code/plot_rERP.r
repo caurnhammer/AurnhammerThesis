@@ -182,7 +182,7 @@ plot_single_elec <- function(
     if (file != FALSE) {
        ggsave(file, gg, device = cairo_pdf, width = 3, height = 3)
     } else {
-       gg
+       plotlist[[1]]
     }
 }
 
