@@ -65,11 +65,14 @@ make_plots <- function(
         file = paste0("../plots/", file,  "/Waveforms/Observed.pdf"),
         modus = "Condition", ylims = c(10.5, -5.5),
         leg_labs = data_labs, leg_vals = data_vals)
-
     plot_full_elec(data = obs, e = elec_all, 
         file = paste0("../plots/", file, "/Waveforms/Observed_Full.pdf"),
         title = "Observed", modus = "Condition",
         ylims = c(9, -5), leg_labs = data_labs, leg_vals = data_vals)
+    plot_single_elec(obs, "Pz",
+            file = paste0("../plots/", file, "/Waveforms/Observed_Pz.pdf"),
+            modus = "Condition", ylims = c(10, -5.5),
+            leg_labs = data_labs, leg_vals = data_vals)
 
     plot_topo(obs, file = paste0("../plots/", file, "/Topos/Observed"),
                 tw = c(250, 350), cond_man = "B", cond_base = "A",
@@ -133,6 +136,10 @@ make_plots <- function(
             file = paste0("../plots/", file, "/Waveforms/ResidualPz_",
             name, ".pdf"), modus = "Condition", ylims = c(4.7, -4),
             leg_labs = data_labs, leg_vals = data_vals)
+        plot_topo(res_set, 
+            file = paste0("../plots/", file, "/Topos/Residual_", name),
+            tw = c(600, 1000), cond_man = "B", cond_base = "A",
+            add_title = paste("\nEstimate", pred[i]), omit_legend = TRUE)
     }
 }
 
