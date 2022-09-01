@@ -24,11 +24,11 @@ make_plots <- function(
     coef <- mod[Type == "Coefficient", ]
     coef$Condition <- coef$Spec
     plot_single_elec(coef, "C3",
-        file = paste0("../plots/", file, "/Waveforms/Coefficients_C3.pdf"),
+        file = paste0("../plots/", file, "/Waveforms/Coefficients_C3_noci.pdf"),
         modus = "Coefficient", ylims = c(10, -5.5),
         leg_labs = model_labs, leg_vals = model_vals)
     plot_single_elec(coef, "Pz", 
-        file = paste0("../plots/", file, "/Waveforms/Coefficients_Pz.pdf"),
+        file = paste0("../plots/", file, "/Waveforms/Coefficients_Pz_noci.pdf"),
         modus = "Coefficient", ylims = c(10, -5.5),
         leg_labs = model_labs, leg_vals = model_vals)
 

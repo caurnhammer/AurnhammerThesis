@@ -167,7 +167,7 @@ plot_single_elec <- function(
             plotlist[[i]] <- plot_grandavg_ci(cbind(data[, ..cols],
                     data[, ..varforward]), e[i], yunit = yunit,
                     ylims = ylims, modus = modus,
-                    leg_labs = leg_labs, leg_vals = leg_vals)
+                    leg_labs = leg_labs, leg_vals = leg_vals, ci=FALSE)
         }
     } else if (modus %in% c("Tertile", "Quantile", "Condition")) {
         for (i in 1:length(e)) {
