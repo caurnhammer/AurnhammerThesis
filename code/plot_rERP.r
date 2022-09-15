@@ -330,7 +330,7 @@ plot_full_elec <- function(
         legend.title = element_text(size = 20),
         legend.text = element_text(size = 18))
     legend <- get_legend(plotlist[[1]] + legend_theme) # Get the legend
-    
+
     nl <- theme(legend.position = "none") # No legend
     nla <- labs(x = "", y = "")
     ngrid <- theme(panel.background = element_rect(fill=NA, color = NA),

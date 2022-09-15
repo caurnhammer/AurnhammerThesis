@@ -13,6 +13,11 @@ convert -density 250 ../ERP/plots/Design2_Plaus_Clozedist/Waveforms/Coefficients
 	+append -page 400:200 \
 	final_pdf/ERP_Coef_C3Pz.pdf
 
+convert -density 250 ../ERP/plots/Design2_Plaus_Clozedist/Waveforms/EstimatedPz_InterceptCloze_distractor.pdf \
+	../ERP/plots/Design2_Plaus_Clozedist/Waveforms/EstimatedPz_InterceptPlaus.pdf \
+	+append -page 400:200 \
+	final_pdf/ERP_Est_Iso_Pz.pdf
+
 convert -density 125 ../ERP/plots/Design2_Plaus_Clozedist/Topos/Observed_B_250-400.pdf \
 	../ERP/plots/Design2_Plaus_Clozedist/Topos/Observed_B_300-500.pdf \
     ../ERP/plots/Design2_Plaus_Clozedist/Topos/Observed_B_600-1000.pdf \
@@ -37,4 +42,3 @@ convert -density 125 ../ERP/plots/Design2_Plaus_Clozedist/Topos/Estimated_Interc
 
 convert -density 250 ../ERP/plots/Design2_Plaus_Clozedist_across/Waveforms/t-values.pdf \
 	final_pdf/ERP_across_tvalues.pdf
-

@@ -75,7 +75,7 @@ function process_data(infile, outfile, models; baseline_corr = false, sampling_r
 
         # Add Quartiles, based on the N400 size averaged across electrodes
         # This has the advantage that the bins are the same across electrodes.
-        # This means, the N400 predictor is electrode specific, but the binning is not.
+        # This means the N400 predictor is electrode specific, but the binning is not.
         data.AvgN400 = sum(eachcol(data[:,[Symbol(e, "N400") for e in models.Electrodes]]))
         data.Quantile = levelcode.(cut(data.AvgN400, 4))
     end
@@ -93,7 +93,7 @@ function process_data(infile, outfile, models; baseline_corr = false, sampling_r
         data = transform_conds(data, verbose=true);
     end
 
-    # Write data to file or return as data object
+    # Write data to file or return as DataFrame
     if typeof(outfile) == String
         write(outfile, data)
     else

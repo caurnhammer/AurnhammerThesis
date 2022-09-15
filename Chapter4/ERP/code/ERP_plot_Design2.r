@@ -39,7 +39,7 @@ make_plots <- function(
     sig <- mod[Type == "p-value" & Spec != "Intercept", ]
     colnames(sig) <- gsub("_CI", "_sig", colnames(sig))
 
-    sig_corr <- bh_apply_wide(sig, elec, alpha=0.05, tws=time_windows)
+    sig_corr <- bh_apply_wide(sig, elec, alpha=0.05, tws = time_windows)
     sigcols <- grepl("_sig", colnames(sig_corr))
     tval <- cbind(tval, sig_corr[,..sigcols])
     mod$Spec <- factor(mod$Spec, levels = predictor)
@@ -100,6 +100,8 @@ make_plots <- function(
     est <- eeg[Type == "est",]
     pred <- c("Intercept", "Tar. Plaus.", "Dist. Cloze",
               "Dist. Cloze + Tar. Plaus.")
+    predictor <- c("Intercept", "target plausibility", "distractor cloze",
+              "distractor cloze + target plausibility")
     for (i in seq(1, length(unique(est$Spec)))) {
         spec <- unique(est$Spec)[i]
         est_set <- est[Spec == spec, ]
@@ -112,7 +114,13 @@ make_plots <- function(
         plot_single_elec(est_set, "Pz",
             file = paste0("../plots/", file, "/Waveforms/EstimatedPz_",
             name, ".pdf"), modus = "Condition", ylims = c(10, -5.5),
-            leg_labs = data_labs, leg_vals = data_vals)
+            leg_labs = data_labs, leg_vals = data_vals,
+            title = paste("Isolated contribution of", predictor[i]))
+        plot_single_elec(est_set, "Fp1",
+            file = paste0("../plots/", file, "/Waveforms/EstimatedFp1_",
+            name, ".pdf"), modus = "Condition", ylims = c(10, -5.5),
+            leg_labs = data_labs, leg_vals = data_vals,
+            title = paste("Isolated contribution of", predictor[i]))
         plot_topo(est_set, 
             file = paste0("../plots/", file, "/Topos/Estimated_", name),
             tw = c(600, 1000), cond_man = "B", cond_base = "A",
@@ -147,8 +155,8 @@ elec_all <- c("Fp1", "Fp2", "F7", "F3", "Fz", "F4", "F8", "FC5",
                 "FC1", "FC2", "FC6", "C3", "Cz", "C4", "CP5", "CP1",
                 "CP2", "CP6", "P7", "P3", "Pz", "P4", "P8", "O1", "Oz", "O2")
 
-make_plots("Design2_Plaus_Clozedist", elec_all,
-    predictor = c("Intercept", "Plaus", "Cloze_distractor"))
+# make_plots("Design2_Plaus_Clozedist", elec_all,
+#     predictor = c("Intercept", "Plaus", "Cloze_distractor"))
 
 make_plots("Design2_Plaus_Clozedist_across",
      predictor = c("Intercept", "Plaus", "Cloze_distractor"))
