@@ -53,11 +53,11 @@ plot_grandavg_ci <- function(
     } else if (modus == "t-value") {
         colnames(df)[c(3, 4, 5)] <- c("V", "V_CI", "V_sig")
         sig_dt <- df[, c("Spec", "Timestamp", "V_sig")]
-        sig_dt$posit <- rep(seq(ylims[1]-2, ylims[1],
+        sig_dt$posit <- rep(seq(ylims[1], ylims[1]-2,
             length = length(unique(sig_dt$Spec))),
-            each = length(unique(sig_dt$Timestamp)))
-        sig_dt$sig <- factor(sig_dt$V_sig, levels=c("0", "1"),
-            labels=c("insign", "sign"))
+            length = nrow(sig_dt))
+        sig_dt$sig <- factor(sig_dt$V_sig, levels = c("0", "1"),
+            labels = c("insign", "sign"))
     }
     ##### PLOTTING
     # Initial plot call
@@ -100,7 +100,7 @@ plot_grandavg_ci <- function(
                 labels = leg_labs,
                 values = leg_vals)
     } else if (modus == "Condition") {
-        p <- p + labs(y=yunit, x = "Time (ms)", title = ttl)
+        p <- p + labs(y = yunit, x = "Time (ms)", title = ttl)
         p <- p + scale_color_manual(name = "Condition",
                 labels = leg_labs, values = leg_vals)
         p <- p + scale_fill_manual(name = "Condition",
@@ -141,6 +141,7 @@ plot_single_elec <- function(
     ylims = NULL,
     modus = "Condition",
     tws = list(c(250, 400), c(600, 1000)),
+    ci = TRUE,
     leg_labs,
     leg_vals
 ) {
@@ -158,7 +159,7 @@ plot_single_elec <- function(
             varforward <- c(e[i], paste0(e[i], "_CI"), paste0(e[i], "_sig"))
             plotlist[[i]] <- plot_grandavg_ci(cbind(data[, ..cols],
                     data[, ..varforward]), e[i], yunit,
-                    ylims, modus, tws, 
+                    ylims, modus, tws, ci = FALSE,
                     leg_labs = leg_labs, leg_vals = leg_vals)
         }
     } else if (modus %in% c("Coefficient", "Tertile")) {
@@ -166,15 +167,15 @@ plot_single_elec <- function(
             varforward <- c(e[i], paste0(e[i], "_CI"))
             plotlist[[i]] <- plot_grandavg_ci(cbind(data[, ..cols],
                     data[, ..varforward]), e[i], yunit = yunit,
-                    ylims = ylims, modus = modus,
-                    leg_labs = leg_labs, leg_vals = leg_vals, ci=FALSE)
+                    ylims = ylims, modus = modus, ci = ci,
+                    leg_labs = leg_labs, leg_vals = leg_vals)
         }
     } else if (modus %in% c("Tertile", "Quantile", "Condition")) {
         for (i in 1:length(e)) {
             varforward <- c(e[i], paste0(e[i], "_CI"))
             plotlist[[i]] <- plot_grandavg_ci(cbind(data[, ..cols],
                     data[, ..varforward]), e[i], yunit = yunit,
-                    ylims = ylims, modus = modus,
+                    ylims = ylims, modus = modus, ci = ci,
                     leg_labs = leg_labs, leg_vals = leg_vals)
         }
     }
@@ -208,6 +209,7 @@ plot_nine_elec <- function(
     ylims = NULL,
     modus = "Condition",
     tws = list(c(250, 400), c(600, 1000)),
+    ci = TRUE,
     leg_labs,
     leg_vals
 ) {
@@ -225,7 +227,7 @@ plot_nine_elec <- function(
             varforward <- c(e[i], paste0(e[i], "_CI"), paste0(e[i], "_sig"))
             plotlist[[i]] <- plot_grandavg_ci(cbind(data[, ..cols],
                     data[, ..varforward]), e[i], yunit,
-                    ylims, modus, tws,
+                    ylims, modus, tws, ci = FALSE,
                     leg_labs = leg_labs, leg_vals = leg_vals)
         }
     } else if (modus %in% c("Coefficient", "Tertile")) {
@@ -233,7 +235,7 @@ plot_nine_elec <- function(
             varforward <- c(e[i], paste0(e[i], "_CI"))
             plotlist[[i]] <- plot_grandavg_ci(cbind(data[, ..cols],
                     data[, ..varforward]), e[i], yunit = yunit,
-                    ylims = ylims, modus = modus,
+                    ylims = ylims, modus = modus, ci = ci,
                     leg_labs = leg_labs, leg_vals = leg_vals)
         }
     } else if (modus %in% c("Tertile", "Quantile", "Condition")) {
@@ -241,7 +243,7 @@ plot_nine_elec <- function(
             varforward <- c(e[i], paste0(e[i], "_CI"))
             plotlist[[i]] <- plot_grandavg_ci(cbind(data[, ..cols],
                     data[, ..varforward]), e[i], yunit = yunit,
-                    ylims = ylims, modus = modus,
+                    ylims = ylims, modus = modus, ci = ci,
                     leg_labs = leg_labs, leg_vals = leg_vals)
         }
     }
@@ -284,7 +286,8 @@ plot_full_elec <- function(
     yunit = paste0("Amplitude (", "\u03BC", "Volt\u29"),
     ylims = NULL,
     modus = "Condition",
-    tws = list(c(250, 400), c(600, 1000)),
+    tws = list(c(300, 500), c(600, 1000)),
+    ci = FALSE,
     leg_labs,
     leg_vals
 ) {
@@ -310,7 +313,7 @@ plot_full_elec <- function(
             varforward <- c(e[i], paste0(e[i], "_CI"))
             plotlist[[i]] <- plot_grandavg_ci(cbind(data[, ..cols],
                             data[, ..varforward]), e[i], yunit = yunit,
-                            ylims = ylims, modus = modus, ci = FALSE,
+                            ylims = ylims, modus = modus, ci = ci,
                             leg_labs = leg_labs, leg_vals = leg_vals)
         }
     } else if (modus %in% c("Tertile", "Quantile", "Condition")) {
@@ -318,7 +321,7 @@ plot_full_elec <- function(
             varforward <- c(e[i], paste0(e[i], "_CI"))
             plotlist[[i]] <- plot_grandavg_ci(cbind(data[, ..cols],
                             data[, ..varforward]), e[i], yunit = yunit,
-                            ylims = ylims, modus = modus, ci=FALSE,
+                            ylims = ylims, modus = modus, ci = ci,
                             leg_labs = leg_labs, leg_vals = leg_vals)
         }
     }
@@ -463,7 +466,7 @@ generate_topo <- function(
 
     # Create data frame to be used for interpolation
     # - the function needs columns labelled x, y, and z
-    interprep <- data.table(x = data_diff_locs$x,
+    inter3ep <- data.table(x = data_diff_locs$x,
                             y = data_diff_locs$y,
                             z = data_diff_locs$EEG)
 
@@ -493,8 +496,7 @@ generate_topo <- function(
 
     # Define color spectrum
     my_spectrum <- colorRampPalette(c("#00007F", "blue", "#0080ff", "white",
-                                    "white", "white", "#ff6969", "red", "#a90101"))
-
+                            "white", "white", "#ff6969", "red", "#a90101"))
 
     # Create head and nose shape
     head_shape <- circle_fun(c(0, 0), round(max(data_diff_locs$x) * 2.35, 4),
@@ -617,4 +619,57 @@ plot_density <- function(data, data_means, ylab, xlab, predictor,
     p <- p + labs(y = ylab)
     p <- p + theme(legend.position = "bottom")
     p
+}
+
+plot_rSPR <- function(
+    data,
+    file,
+    yunit,
+    title,
+    ylims = NULL,
+    modus = "Condition",
+    leg_labs,
+    leg_vals
+) {
+    if (modus == "t-value"){
+        data$sig <- data$sig_average < 0.05
+        df <- data[, c("Region", "Spec", "sig_average", "sig_proportion")]
+        df$posit <- rep(seq(ylims[1] - 0.9, ylims[1] - 0.5,
+            length = length(unique(data$Specs))),
+            length = length(unique(data$Region)))
+        df$sig <- factor(df$sig, levels=c("TRUE", "FALSE"),
+            labels=c("sign", "insign"))
+    } else if (modus == "coefficients") {
+    } else {
+        data$Spec <- data$Condition
+    }
+
+    p <- ggplot(data, aes(x=Region, y=logRT, color=Spec, group=Spec)) + geom_point(size=2.5, shape="cross") + geom_line(size=0.5)
+    p <- p + theme_minimal() 
+    p <- p + geom_errorbar(aes(ymin=logRT-logRT_CI, ymax=logRT+logRT_CI), width=.1, size=0.3)
+    if (modus == "coefficients") {
+        p <- p + scale_color_manual(name = "Coefficients",
+                    values = leg_vals, labels = leg_labs)
+    } else if (modus == "t-value") {
+        p <- p + geom_hline(yintercept=0, linetype="dashed")
+        p <- p + scale_color_manual(name="Z-value", values=c("#00FFFF", "#E349F6", "#efa213"), labels=c("Plausibility", "Cloze Distractor", "RT Pre-critical"))
+        p <- p + geom_point(data=df, aes(x=Region, y=posit, shape=sig), size=2.5) 
+        p <- p + scale_shape_manual(values=c(20, 32),name="P-values", labels=c("Significant", "Nonsignificant"))
+    } else { # RTs, Residuals
+        p <- p + scale_color_manual(name="Condition", labels=c("A: Exp. Plaus.", "B: Unexp. Less Plaus.", "C: Unexp. Implaus."), values=c("black", "red", "blue"))
+    }
+
+    #if ((is.vector(ylims) == TRUE) & (modus != "t-value")) { p <- p + ylim(ylims[1], ylims[2]) }
+    if (is.vector(ylims) == TRUE) { p <- p + ylim(ylims[1], ylims[2]) }
+    p <- p + theme(plot.title = element_text(size = 8),
+                    axis.text.x= element_text(size=7),
+                    legend.position="bottom", 
+                    legend.text=element_text(size=5), legend.title=element_text(size=4), 
+                    legend.box="vertical", legend.spacing.y=unit(-0.2, "cm"), 
+                    legend.margin=margin(0,0,0,0),
+                    legend.box.margin=margin(-10,-10,-10,-50))
+    p <- p + labs(x="Region", y=yunit, title=title)
+    p
+
+    ggsave(file, p, width = 3, height = 3)
 }

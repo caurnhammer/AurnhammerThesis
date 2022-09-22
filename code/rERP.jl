@@ -170,6 +170,81 @@ function invert(data, components, models, invert_preds)
     data
 end
 
+function process_spr_data(infile, outfile, models; invert_preds = false, conds = false, keep_conds = false, logRT = true) 
+    # Load data from disk
+    data = DataFrame(File(infile));
+
+    # Make ItemNum vs Item coherent across datasets
+    if "ItemNum" in names(data)
+        rename!(data, :ItemNum => :Item);
+    end
+    
+    # Log-transform RT
+    if logRT == true
+        data.logRT = log.(data.ReadingTime)
+    end
+
+    # Pretend that RT regions are ERP timestamps
+    rename!(data, :Region => :Timestamp)
+
+    # Take condition subsets at this point (i.e. before any z-scoring takes place)
+    if conds != false
+        data = data[subset_inds(data, conds),:]
+    end
+
+    # Select columns
+    data.Intercept = ones(nrow(data));
+    data = data[:,vcat(models.Descriptors, models.NonDescriptors, models.Predictors, models.Electrodes)];
+    
+    # Z-standardise predictors
+    data = standardise(data, false, models);
+    
+    # Invert predictors
+    if ((invert_preds != false))
+        data = invert(data, false, models, invert_preds)
+    end
+
+    # Turn condition labels to numbers. Set Verbose to show them.
+    if keep_conds == false
+        data = transform_conds(data, verbose=true);
+    end
+
+    # Write data to file or return as DataFrame
+    if typeof(outfile) == String
+        write(outfile, data)
+    else
+        data
+    end
+end
+
+function exclude_trial(df, lower, upper, lower_rc, upper_rc)
+    df_out = df
+    for s in unique(df[!,:Subject])
+        # subset for current subject
+        dts = df[(df.Subject .== s),:];
+        for i in unique(dts[!,:Item])
+            # subset current item
+            dti = dts[(dts.Item .== i),:];
+            
+            if sum(dti.ReactionTime .=== missing) > 1
+                exc = sum((dti.ReadingTime .> upper) .| (dti.ReadingTime .< lower)) > 0;
+                if exc == true
+                    #print(dti[:,[:ReadingTime]], "\n")
+                    df_out = df_out[.!((df_out.Subject .== s) .& (df_out.Item .== i)),:];
+                end
+            elseif sum(dti.ReactionTime .=== missing) == 0
+                exc = sum((dti.ReadingTime .> upper) .| (dti.ReadingTime .< lower) .| (dti.ReactionTime .> upper_rc) .| (dti.ReactionTime .< lower_rc)) > 0;
+                if exc == true
+                    #print(dti[:,[:ReactionTime, :ReadingTime]], "\n")
+                    df_out = df_out[.!((df_out.Subject .== s) .& (df_out.Item .== i)),:];
+                end
+            end
+        end
+    end
+
+    df_out
+end
+
 function read_data(infile, models)
     data = DataFrame(File(infile))
 
@@ -219,7 +294,7 @@ function fit_models(data, models, file)
     # Addition of intercept to coefs
     out_models = coef_addition(out_models, models, ind)
 
-    if typeof(file) .== String
+    if typeof(file) == String
         out_models = write_models(out_models, models, ind, file)
         out_data = write_data(out_data, models, ind, file)
     end
@@ -249,11 +324,11 @@ function fit_models_components(dt, models, file)
     write(string("../data/", file, "_models.csv"), out_models)    
 end
 
-function transform_conds(data ; verbose=false)
+function transform_conds(data ; verbose=false, column = :Condition)
     # Turn conditions into numbers
-    cond_labels = unique(data.Condition);
+    cond_labels = unique(data[:, column]);
     cond_dict = Dict(zip(cond_labels, [x for x in 1:length(cond_labels)]));
-    data[!,:Condition] = [cond_dict[x] for x in data[:,:Condition]];
+    data[!, column] = [cond_dict[x] for x in data[:, column]];
 
     if verbose
         println(cond_dict)
@@ -284,7 +359,7 @@ function allocate_data(data, models)
     rename!(out_data, out_data_names);
 
     # add original data
-    ind = (length(models.Descriptors)+2 + length(models.Predictors));
+    ind = (length(models.Descriptors)+length(models.NonDescriptors) + length(models.Predictors));
     out_data[1:nrow(data),vcat(out_data_names[1:ind], out_data_names[ind+3:end])] = @view data[!,vcat(out_data_names[1:ind], out_data_names[ind+3:end])];
 
     # add value 42 for original eeg data
@@ -467,4 +542,3 @@ function write_data(out_data, models, ind, file)
 
     out_data
 end
-
