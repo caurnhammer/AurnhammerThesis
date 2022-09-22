@@ -1,7 +1,7 @@
 mkdir final_pdf/
 
-convert -density 125 ../ERP/plots/Design2_Plaus_Clozedist/Waveforms/Observed.pdf \
-	final_pdf/ERP_Observed.pdf
+convert -density 250 ../ERP/plots/Design2_Plaus_Clozedist/Waveforms/Observed_Full.pdf \
+	final_pdf/ERP_Observed_Full.pdf
 
 convert -density 250 ../ERP/plots/Design2_Plaus_Clozedist/Waveforms/EstimatedPz_InterceptPlausCloze_distractor.pdf \
 	../ERP/plots/Design2_Plaus_Clozedist/Waveforms/ResidualPz_InterceptPlausCloze_distractor.pdf \
