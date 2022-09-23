@@ -17,11 +17,8 @@ make_plots <- function(
     # MODELS
     mod <- fread(paste0("../data/", file, "_models.csv"))
     mod$Spec <- factor(mod$Spec, levels = predictor)
-    # model_labs <- c("Intercept", "Plausibility", "Distractor Cloze", "CvsAB")
-    # model_vals <- c("black", "#E349F6", "#00FFFF", "#0E9853")
-    model_labs <- c("Intercept", "Distractor Cloze", "CvsAB")
-    model_vals <- c("black", "#00FFFF", "#0E9853")
-
+    model_labs <- c("Intercept", "Plausibility", "Distractor Cloze")
+    model_vals <- c("black", "#E349F6", "#00FFFF")
 
     # Models: coefficent
     coef <- mod[Type == "Coefficient", ]
@@ -40,7 +37,6 @@ make_plots <- function(
         leg_labs = model_labs, leg_vals = model_vals)
 
     # Models: t-value
-    #time_windows <- list(c(250, 400), c(600, 1000))
     time_windows <- list(c(300, 500), c(600, 1000))
     tval <- mod[Type == "t-value" & Spec != "Intercept", ]
     sig <- mod[Type == "p-value" & Spec != "Intercept", ]
@@ -163,25 +159,11 @@ elec_all <- c("Fp1", "Fp2", "F7", "F3", "Fz", "F4", "F8", "FC5",
                 "FC1", "FC2", "FC6", "C3", "Cz", "C4", "CP5", "CP1",
                 "CP2", "CP6", "P7", "P3", "Pz", "P4", "P8", "O1", "Oz", "O2")
 
-<<<<<<< HEAD
-# make_plots("Design2_Plaus_Clozedist", elec_all,
-#      predictor = c("Intercept", "Plaus", "Cloze_distractor"))
-
-# make_plots("Design2_Plaus_Clozedist_Interaction", elec_all,
-#     predictor = c("Intercept", "Plaus", "Cloze_distractor", "Interaction"))
-
-make_plots("Design2_Clozedist_CvsAB", elec_all,
-    predictor = c("Intercept", "Cloze_distractor", "CvsAB"))
-
-# make_plots("Design2_Plaus_Clozedist_across",
-#     predictor = c("Intercept", "Plaus", "Cloze_distractor"))
-=======
 make_plots("Design2_Plaus_Clozedist", elec_all,
+     predictor = c("Intercept", "Plaus", "Cloze_distractor"))
+
+make_plots("Design2_Plaus_Clozedist_across",
     predictor = c("Intercept", "Plaus", "Cloze_distractor"))
->>>>>>> 4e724cc82668772d94b449c6ce04398a19e4d086
 
-# make_plots("Design2_Plaus_Clozedist_Interaction_across",
-#     predictor = c("Intercept", "Plaus", "Cloze_distractor", "Interaction"))
-
-# make_plots("Design2_RT", elec_all,
-#    predictor = c("Intercept", "ReadingTime"))
+make_plots("Design2_RT", elec_all,
+   predictor = c("Intercept", "ReadingTime"))
