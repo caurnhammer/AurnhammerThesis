@@ -17,12 +17,19 @@ make_plots <- function(
     # MODELS
     mod <- fread(paste0("../data/", file, "_models.csv"))
     mod$Spec <- factor(mod$Spec, levels = predictor)
-    model_labs <- c("Intercept", "Plausibility", "Distractor Cloze")
-    model_vals <- c("black", "#E349F6", "#00FFFF")
+    # model_labs <- c("Intercept", "Plausibility", "Distractor Cloze", "CvsAB")
+    # model_vals <- c("black", "#E349F6", "#00FFFF", "#0E9853")
+    model_labs <- c("Intercept", "Distractor Cloze", "CvsAB")
+    model_vals <- c("black", "#00FFFF", "#0E9853")
+
 
     # Models: coefficent
     coef <- mod[Type == "Coefficient", ]
     coef$Condition <- coef$Spec
+    plot_nine_elec(coef, elec_nine,
+        file = paste0("../plots/", file, "/Waveforms/Coefficients.pdf"),
+        modus = "Coefficient", ylims = c(10, -5.5),
+        leg_labs = model_labs, leg_vals = model_vals)
     plot_single_elec(coef, "C3",
         file = paste0("../plots/", file, "/Waveforms/Coefficients_C3_noci.pdf"),
         modus = "Coefficient", ylims = c(10, -5.5),
@@ -156,10 +163,19 @@ elec_all <- c("Fp1", "Fp2", "F7", "F3", "Fz", "F4", "F8", "FC5",
                 "CP2", "CP6", "P7", "P3", "Pz", "P4", "P8", "O1", "Oz", "O2")
 
 # make_plots("Design2_Plaus_Clozedist", elec_all,
+#      predictor = c("Intercept", "Plaus", "Cloze_distractor"))
+
+# make_plots("Design2_Plaus_Clozedist_Interaction", elec_all,
+#     predictor = c("Intercept", "Plaus", "Cloze_distractor", "Interaction"))
+
+make_plots("Design2_Clozedist_CvsAB", elec_all,
+    predictor = c("Intercept", "Cloze_distractor", "CvsAB"))
+
+# make_plots("Design2_Plaus_Clozedist_across",
 #     predictor = c("Intercept", "Plaus", "Cloze_distractor"))
 
-make_plots("Design2_Plaus_Clozedist_across",
-     predictor = c("Intercept", "Plaus", "Cloze_distractor"))
+# make_plots("Design2_Plaus_Clozedist_Interaction_across",
+#     predictor = c("Intercept", "Plaus", "Cloze_distractor", "Interaction"))
 
 # make_plots("Design2_RT", elec_all,
 #    predictor = c("Intercept", "ReadingTime"))

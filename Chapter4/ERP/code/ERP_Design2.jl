@@ -10,14 +10,28 @@ models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Interc
 
 @time fit_models(dt, models, "Design2_Plaus_Clozedist");
 
+# Interaction
+dt.Interaction = zscore(dt.Plaus .* dt.Cloze_distractor) .* -1
+models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Intercept, :Plaus, :Cloze_distractor, :Interaction]);
+@time fit_models(dt, models, "Design2_Plaus_Clozedist_Interaction");
+
+# C vs AB
+dt.CvsAB = zscore(dt.Condition .== 3)
+models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Intercept, :Plaus, :Cloze_distractor, :CvsAB]);
+@time fit_models(dt, models, "Design2_Plaus_Clozedist_CvsAB");
+
 # Across-subjects regression, yielding a single-tvalue for each electrode and time-step
 dts = dt
 unique(dts.Subject)
 dts.Subject = ones(nrow(dts))
 
+models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Intercept, :Plaus, :Cloze_distractor]);
 @time fit_models(dts, models, "Design2_Plaus_Clozedist_across");
 
-# Predict EEG by ReadingTimes (separate Exp)
+models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Intercept, :Plaus, :Cloze_distractor, :Interaction]);
+@time fit_models(dts, models, "Design2_Plaus_Clozedist_Interaction_across");
+
+# Predict EEG by ReadingTimes (from separate Exp)
 models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Intercept, :ReadingTime]);
 @time process_data("../../../data/ERP_Design2.csv", "../data/Design2_rERP_RT.csv", models);
 @time dtrt = read_data("../data/Design2_rERP_RT.csv", models);
