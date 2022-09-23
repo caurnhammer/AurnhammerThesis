@@ -1,8 +1,5 @@
 j# Christoph Aurnhammer, 2022
-# This is the inital version of my rERP.jl primer.
 # rERPs have initially been described by Smith and Kutas (2015a, 2015b).
-# DO NOT DISTRIBUTED THIS CODE.
-# A final version will be made public as part of my Dissertation.
 
 # Load the functions in rERPs.jl
 # Packages are loaded from within rERPs.jl
@@ -77,12 +74,46 @@ models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Interc
 @time dt = read_data("../data/ERP_Design1_cloze_rcnoun_rERP.csv", models);
 @time fit_models(dt, models, "../data/ERP_Design1_cloze_rcnoun_rERP");
 
+# Fit models across subjects by setting all subjects to 1
+models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Intercept, :Cloze, :rcnoun]);
+@time process_data("../../data/ERP_Design1.csv", "../data/ERP_Design1_cloze_rcnoun_rERP.csv", models, invert_preds=[:Cloze, :rcnoun]);
+@time dt = read_data("../data/ERP_Design1_cloze_rcnoun_rERP.csv", models);
+dt.Subject = ones(nrow(dt));
+@time fit_models(dt, models, "../data/ERP_Design1_cloze_rcnoun_across_rERP");
 
 ################################
 # Modeling Scalp Distributions #
 ################################
+# Compute models for design 2
 models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Intercept, :Plaus, :Cloze_distractor]);
 @time process_data("../../data/ERP_Design2.csv", "../data/ERP_Design2_rERP.csv", models, invert_preds=[:Plaus]);
 @time dt = read_data("../data/ERP_Design2_rERP.csv", models);
 
-@time fit_models(dt, models, "ERP_Design2_Plaus_Clozedist");
+@time fit_models(dt, models, "ERP_Design2_Plaus_Clozedist_rERP");
+
+##############################################
+# linear mixed effects regression-based ERPs #
+##############################################
+
+
+
+###############################################
+# Beyond ERPs: Regression-based reading times #
+###############################################
+# Pretend RT regions levels are electrodes
+models = make_models([:Subject, :Timestamp], [:Item, :Condition, :ReadingTime, :ReactionTime], [:logRT], [:Intercept, :Cloze, :rcnoun])
+@time process_spr_data("../../data/SPR2_Design1.csv", "../data/SPR2_Design1_rRT.csv", models, invert_preds=[:Cloze, :rcnoun]);
+@time dt = read_data("../data/SPR2_Design1_rRT.csv", models);
+
+# exclude data
+before = nrow(combine(groupby(dt, [:Condition, :Item, :Subject]), [:ReadingTime => mean => :ReadingTime]));
+dt = exclude_trial(dt[((dt.Timestamp .!= "critical -2")),:], 50, 2500, 50, 6000);
+after = nrow(combine(groupby(dt, [:Condition, :Item, :Subject]), [:ReadingTime => mean => :ReadingTime]))
+round((before - after) / before * 100, digits=2)
+
+dt = transform_conds(dt, verbose = true, column = :Timestamp)
+select!(dt, Not([:ReadingTime, :ReactionTime]))
+
+models = make_models([:Subject, :Timestamp], [:Item, :Condition], [:logRT], [:Intercept, :Cloze, :rcnoun])
+include("../../code/rERP.jl");
+@time fit_models(dt, models, "SPR2_Design1_Cloze_rcnoun_rRT");

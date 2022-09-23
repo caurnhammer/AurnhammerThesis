@@ -54,6 +54,7 @@ make_plots <- function(
 
     plot_nine_elec(tval, elec_nine,
         file = paste0("../plots/", file, "/Waveforms/t-values.pdf"),
+        title = "Inferential statistics",
         modus = "t-value", ylims = c(7, -5), tws = time_windows,
         leg_labs = model_labs[2:length(model_vals)],
         leg_vals = model_vals[2:length(model_vals)])
@@ -74,11 +75,11 @@ make_plots <- function(
         leg_labs = data_labs, leg_vals = data_vals)
     plot_full_elec(data = obs, e = elec_all, 
         file = paste0("../plots/", file, "/Waveforms/Observed_Full.pdf"),
-        title = "Observed", modus = "Condition",
+        title = "Observed ERPs", modus = "Condition",
         ylims = c(9, -5), leg_labs = data_labs, leg_vals = data_vals)
     plot_single_elec(obs, "Pz",
             file = paste0("../plots/", file, "/Waveforms/Observed_Pz.pdf"),
-            modus = "Condition", ylims = c(10, -5.5),
+            modus = "Condition", ylims = c(10.5, -5.5),
             leg_labs = data_labs, leg_vals = data_vals)
 
     plot_topo(obs, file = paste0("../plots/", file, "/Topos/Observed"),
@@ -120,12 +121,12 @@ make_plots <- function(
             leg_labs = data_labs, leg_vals = data_vals)
         plot_single_elec(est_set, "Pz",
             file = paste0("../plots/", file, "/Waveforms/EstimatedPz_",
-            name, ".pdf"), modus = "Condition", ylims = c(10, -5.5),
+            name, ".pdf"), modus = "Condition", ylims = c(10.5, -5.5),
             leg_labs = data_labs, leg_vals = data_vals,
             title = paste("Isolated contribution of", predictor[i]))
         plot_single_elec(est_set, "Fp1",
             file = paste0("../plots/", file, "/Waveforms/EstimatedFp1_",
-            name, ".pdf"), modus = "Condition", ylims = c(10, -5.5),
+            name, ".pdf"), modus = "Condition", ylims = c(10.5, -5.5),
             leg_labs = data_labs, leg_vals = data_vals,
             title = paste("Isolated contribution of", predictor[i]))
         plot_topo(est_set, 
@@ -162,6 +163,7 @@ elec_all <- c("Fp1", "Fp2", "F7", "F3", "Fz", "F4", "F8", "FC5",
                 "FC1", "FC2", "FC6", "C3", "Cz", "C4", "CP5", "CP1",
                 "CP2", "CP6", "P7", "P3", "Pz", "P4", "P8", "O1", "Oz", "O2")
 
+<<<<<<< HEAD
 # make_plots("Design2_Plaus_Clozedist", elec_all,
 #      predictor = c("Intercept", "Plaus", "Cloze_distractor"))
 
@@ -173,6 +175,10 @@ make_plots("Design2_Clozedist_CvsAB", elec_all,
 
 # make_plots("Design2_Plaus_Clozedist_across",
 #     predictor = c("Intercept", "Plaus", "Cloze_distractor"))
+=======
+make_plots("Design2_Plaus_Clozedist", elec_all,
+    predictor = c("Intercept", "Plaus", "Cloze_distractor"))
+>>>>>>> 4e724cc82668772d94b449c6ce04398a19e4d086
 
 # make_plots("Design2_Plaus_Clozedist_Interaction_across",
 #     predictor = c("Intercept", "Plaus", "Cloze_distractor", "Interaction"))
