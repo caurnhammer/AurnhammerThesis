@@ -32,7 +32,7 @@ plot_lmerSPR <- function(
         
         plusminus$sig <- plusminus$pvalue < 0.05
         df <- plusminus[,c("Region", "group", "pvalue", "sig")]
-        df$posit <- rep(seq(ylims[1]-0.9, ylims[1]-0.5, length=length(unique(plusminus$group))), each=length(unique(plusminus$Region)))
+        df$posit <- rep(seq(ylims[1]+0.25, ylims[1]+0.5, length=length(unique(plusminus$group))), each=length(unique(plusminus$Region)))
         df$sig <- factor(df$sig, levels=c("TRUE", "FALSE"), labels=c("sign", "insign"))
         df$Region <- plusminus$Region
     } else {
@@ -42,7 +42,7 @@ plot_lmerSPR <- function(
     plusminus$Region <- plyr::mapvalues(plusminus$Region, c("critical -1", "critical", "postcritical", "postpostcritical"), c("Pre-Critical", "Critical", "Spillover", "Post-Spillover"))
     plusminus$Region <- factor(plusminus$Region, levels=c("Pre-Critical", "Critical", "Spillover", "Post-Spillover"))
     if (DV == "zvalue"){df$Region <- plusminus$Region}
- 
+    
     p <- ggplot(plusminus, aes(x=Region, y=DV, color=group, group=group)) + geom_point(size=2.5, shape="cross") + geom_line(size=0.5)
     p <- p + theme_minimal() 
     if (!(DV %in% c("zvalue", "coefficients"))){
@@ -50,8 +50,8 @@ plot_lmerSPR <- function(
     }
     if (DV == "coefficients") { 
         p <- p + geom_errorbar(aes(ymin=DV-SE, ymax=DV+SE), width=.1, size=0.3)
-        #p <- p + scale_color_manual(name="Coefficients", values=c("#000000", "#00FFFF", "#E349F6", "#FFA500"), labels=c("Intercept", "Noun Association", "log(Cloze)"))
-        p <- p + scale_color_manual(name="Coefficients", values=c("#000000", "#E349F6"), labels=c("Intercept", "log(Cloze)"))
+        p <- p + scale_color_manual(name="Coefficients", values=c("#000000", "#00FFFF", "#E349F6", "#FFA500"), labels=c("Intercept", "Noun Association", "log(Cloze)"))
+        # p <- p + scale_color_manual(name="Coefficients", values=c("#000000", "#E349F6"), labels=c("Intercept", "log(Cloze)"))
     } else if (DV == "zvalue") {
         p <- p + geom_hline(yintercept=0, linetype="dashed")
         p <- p + scale_color_manual(name="Z-value", values=c("#00FFFF", "#E349F6", "#FFA500"), labels=c("Noun Association", "log(Cloze)"))
@@ -78,6 +78,6 @@ plot_lmerSPR <- function(
     p <- p + labs(x="Region", y=yunit, title=title)
     p
 
-    file <- paste0("plots/", DV, ".pdf")
+    file <- paste0("../plots/", DV, ".pdf")
     ggsave(file, p, width=3, height=3)
 }
