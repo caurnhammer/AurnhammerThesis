@@ -77,7 +77,6 @@ function process_data(infile, outfile, models; baseline_corr = false, sampling_r
         # This has the advantage that the bins are the same across electrodes.
         # This means the N400 predictor is electrode specific, but the binning is not.
         data.AvgN400 = sum(eachcol(data[:,[Symbol(e, "N400") for e in models.Electrodes]]))
-        data.Quantile = levelcode.(cut(data.AvgN400, 4))
     end
     
     # Z-standardise predictors
@@ -307,6 +306,8 @@ function fit_models_components(dt, models, file)
     out_models = []
     for (i, e) in enumerate(models.Electrodes)
         println("Electrode $e ")
+        #models_e = make_models(models.Descriptors, models.NonDescriptors, [e], [:Intercept, Symbol(e, "N400")]);
+        #models_e = make_models(models.Descriptors, models.NonDescriptors, [e], [:Intercept, Symbol(e, "Segment")]);
         models_e = make_models(models.Descriptors, models.NonDescriptors, [e], [:Intercept, Symbol(e, "N400"), Symbol(e, "Segment")]);
         output = fit_models(dt, models_e, "none")
         if i .== 1
@@ -473,7 +474,6 @@ function pvalue(out_models, models, ind)
     out_models[m_start:m_end,[:Subject, :Timestamp, :N]] = @view out_models[(out_models.Type .== 2), [:Subject, :Timestamp, :N]];
     out_models[m_start:m_end,[:Type, :Spec]] = hcat(repeat([4], m_end-m_start+1), @view out_models[(out_models.Type .== 2),:Spec]);
 
-
     out_models
 end
 
@@ -521,6 +521,17 @@ function write_models(out_models, models, ind, file)
 end
 
 function write_data(out_data, models, ind, file)
+    # Specialsauce
+    specialsauce = true
+    if specialsauce
+        println(unique(out_data.Condition))
+        println(models.Sets)
+        est_n4 = out_data[((out_data.Type .== 2.0) .& (out_data.Spec .== 2.0)),:]
+        est_n4 = collect_component(est_n4, "N400_est", models; tws=600, twe=800);
+        est_n4.Quantile = levelcode.(cut(est_n4.CzN400_est, 4))
+        out_data.Condition = repeat(est_n4.Quantile, (2 * length(unique(models.Sets)) + 1))
+    end
+
     out_data_cp = out_data[:,:]
     out_data = combine(groupby(out_data_cp, [:Timestamp, :Type, :Spec, :Condition]), [x => mean => x for x in models.Electrodes])
     
