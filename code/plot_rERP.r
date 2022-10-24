@@ -48,6 +48,8 @@ plot_grandavg_ci <- function(
     ###### DATA PROC
     if (modus %in% c("Quantile", "Condition")) {
         colnames(df)[c(4, 5)] <- c("V", "V_CI")
+    } else if (modus == "ConditionQuantile") {
+        colnames(df)[c(5, 6)] <- c("V", "V_CI")
     } else if (modus == "Coefficient") {
         colnames(df)[c(3, 4)] <- c("V", "V_CI")
     } else if (modus == "t-value") {
@@ -68,6 +70,9 @@ plot_grandavg_ci <- function(
     else if (modus %in% c("Condition", "Quantile")) {
         p <- ggplot(df, aes_string(x = "Timestamp", y = "V",
             color = modus, fill = modus)) + geom_line()
+    } else if (modus == "ConditionQuantile") {
+        p <- ggplot(df, aes_string(x = "Timestamp", y = "V",
+            color = "Condition", linetype = "Spec")) + geom_line()
     }
 
     # For all plots
@@ -105,6 +110,15 @@ plot_grandavg_ci <- function(
                 labels = leg_labs, values = leg_vals)
         p <- p + scale_fill_manual(name = "Condition",
                 labels = leg_labs, values = leg_vals)
+    } else if (modus == "ConditionQuantile") {
+        p <- p + labs(y = yunit, x = "Time (ms)", title = ttl)
+        p <- p + scale_linetype_manual(name = "",
+                labels = leg_labs, values = leg_vals)
+        p <- p + scale_color_manual(name = "Condition",
+                #labels = c("A: E+A+", "B: E+A-", "C: E-A+", "D: E-A-"),
+                #values = c("#000000", "#BB5566", "#004488", "#DDAA33"))
+                labels = c("A", "B", "C"),
+                values = c("#000000", "red", "blue"))
     } else if (modus == "Coefficient") {
         p <- p + labs(y = "Intercept + Coefficient", x = "Time (ms)",
                     title = ttl)
@@ -144,10 +158,13 @@ plot_single_elec <- function(
     ci = TRUE,
     leg_labs,
     leg_vals
-) {
+) { 
     if (modus %in% c("Tertile", "Quantile", "Condition")) {
         cols <- c("Spec", "Timestamp", modus)
-    } else if (modus %in% c("Coefficient", "t-value")) {
+    } else if (modus == "ConditionQuantile") {
+        cols <- c("Spec", "Timestamp", modus, "Condition")
+    }
+    else if (modus %in% c("Coefficient", "t-value")) {
         data[,"Spec"] <- as.factor(data$Spec)
         cols <- c("Spec", "Timestamp")
     }
@@ -170,7 +187,7 @@ plot_single_elec <- function(
                     ylims = ylims, modus = modus, ci = ci,
                     leg_labs = leg_labs, leg_vals = leg_vals)
         }
-    } else if (modus %in% c("Tertile", "Quantile", "Condition")) {
+    } else if (modus %in% c("Tertile", "Quantile", "Condition", "ConditionQuantile")) {
         for (i in 1:length(e)) {
             varforward <- c(e[i], paste0(e[i], "_CI"))
             plotlist[[i]] <- plot_grandavg_ci(cbind(data[, ..cols],

@@ -15,12 +15,15 @@ make_plots <- function(
     mod <- fread(paste0("../data/", file, "_models.csv"))
     mod$Spec <- factor(mod$Spec, levels = predictor)
 
-    model_labs <- c("Intercept", "N400", "Segment")
-    model_vals <- c("black", "#E349F6", "#00FFFF")
+    # model_labs <- c("Intercept", "N400", "Segment")
+    # model_vals <- c("black", "#E349F6", "#00FFFF")
+    model_labs <- c("N400", "Segment")
+    model_vals <- c("#E349F6", "#00FFFF")
 
     # Models: coefficent
-    coef <- mod[Type == "Coefficient", ]
+    coef <- mod[(Type == "Coefficient") & (Spec != "Intercept"), ]
     coef$Condition <- coef$Spec
+    print(unique(coef$Condition))
     plot_single_elec(coef, "Cz",
         file = paste0("../plots/", file, "/Waveforms/Coefficients_Cz.pdf"),
         modus = "Coefficient", ylims = c(20, -30),
@@ -48,7 +51,8 @@ make_plots <- function(
     eeg <- fread(paste0("../data/", file, "_data.csv"))
     eeg$Quantile <- factor(eeg$Condition)
     data_labs <- c(1, 2, 3, 4)
-    data_vals <- c("blue", "red", "orange", "black")
+    # data_vals <- c("blue", "red", "orange", "black")
+    data_vals <- c("blue", "black", "orange")
 
     # Estimates
     obs <- eeg[Type == "EEG", ]
@@ -57,25 +61,6 @@ make_plots <- function(
         file = paste0("../plots/", file,  "/Waveforms/Observed.pdf"),
         modus = "Quantile", ylims = c(30, -30),
         leg_labs = data_labs, leg_vals = data_vals)
-
-    # plot_full_elec(data = obs, e = elec_all, 
-    #     file = paste0("../plots/", file, "/Waveforms/Observed_Full.pdf"),
-    #     title = "Observed", modus = "Condition",
-    #     ylims = c(9, -5), leg_labs = data_labs, leg_vals = data_vals)
-
-    # plot_topo(obs, file = paste0("../plots/", file, "/Topos/Observed"),
-    #             tw = c(250, 400), cond_man = "B", cond_base = "A",
-    #             add_title = "\nObserved", omit_legend = TRUE,
-    #             save_legend = TRUE)
-    # plot_topo(obs, file = paste0("../plots/", file, "/Topos/Observed"),
-    #             tw = c(600, 1000), cond_man = "B", cond_base = "A",
-    #             add_title = "\nObserved", omit_legend = TRUE)
-    # plot_topo(obs, file = paste0("../plots/", file, "/Topos/Observed"),
-    #             tw = c(250, 400), cond_man = "C", cond_base = "A",
-    #             add_title = "\nObserved", omit_legend = TRUE)
-    # plot_topo(obs, file = paste0("../plots/", file, "/Topos/Observed"),
-    #             tw = c(600, 1000), cond_man = "C", cond_base = "A",
-    #             add_title = "\nObserved", omit_legend = TRUE)
 
     # Estimated
     est <- eeg[Type == "est",]

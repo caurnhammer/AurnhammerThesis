@@ -18,11 +18,12 @@ struct Models
     Electrodes::Array
     Predictors::Array
     Sets::Array
+    Quantiles::Bool
 end
 
-function make_models(desc, nondesc, elec, pred)
-    models = Models(desc, nondesc, elec, pred, []);
-    Models(models.Descriptors, models.NonDescriptors, models.Electrodes, models.Predictors, pred_sets(models));
+function make_models(desc, nondesc, elec, pred; quant = false)
+    models = Models(desc, nondesc, elec, pred, [], quant);
+    Models(models.Descriptors, models.NonDescriptors, models.Electrodes, models.Predictors, pred_sets(models), models.Quantiles);
 end
 
 struct Ind
@@ -70,7 +71,7 @@ function process_data(infile, outfile, models; baseline_corr = false, sampling_r
     # Collect component predictor
     if components != false
         # Add an electrode specific component predictors
-        data = collect_component(data, "N400", models; tws=300, twe=500);
+        data = collect_component(data, "N400", models; tws=600, twe=800);
         data = collect_component(data, "Segment", models ; tws=0, twe=1200);
 
         # Add Quartiles, based on the N400 size averaged across electrodes
@@ -291,7 +292,7 @@ function fit_models(data, models, file)
     out_models = pvalue(out_models, models, ind);
 
     # Addition of intercept to coefs
-    out_models = coef_addition(out_models, models, ind)
+    # out_models = coef_addition(out_models, models, ind)
 
     if typeof(file) == String
         out_models = write_models(out_models, models, ind, file)
@@ -306,9 +307,9 @@ function fit_models_components(dt, models, file)
     out_models = []
     for (i, e) in enumerate(models.Electrodes)
         println("Electrode $e ")
-        #models_e = make_models(models.Descriptors, models.NonDescriptors, [e], [:Intercept, Symbol(e, "N400")]);
-        #models_e = make_models(models.Descriptors, models.NonDescriptors, [e], [:Intercept, Symbol(e, "Segment")]);
-        models_e = make_models(models.Descriptors, models.NonDescriptors, [e], [:Intercept, Symbol(e, "N400"), Symbol(e, "Segment")]);
+        #models_e = make_models(models.Descriptors, models.NonDescriptors, [e], [:Intercept, Symbol(e, "N400")]; quant = models.Quantiles);
+        #models_e = make_models(models.Descriptors, models.NonDescriptors, [e], [:Intercept, Symbol(e, "Segment")]; quant = models.Quantiles);
+        models_e = make_models(models.Descriptors, models.NonDescriptors, [e], [:Intercept, Symbol(e, "N400"), Symbol(e, "Segment")]; quant = models.Quantiles);
         output = fit_models(dt, models_e, "none")
         if i .== 1
             out_data = output[1]
@@ -520,16 +521,18 @@ function write_models(out_models, models, ind, file)
     out_models
 end
 
+function assign_estimate_quantiles(data, models)
+    est_n4 = data[((data.Type .== 2.0) .& (data.Spec .== 2.0)),:]
+    est_n4 = collect_component(est_n4, "N400_est", models; tws=300, twe=500);
+    est_n4.Quantile = levelcode.(cut(est_n4.CzN400_est, 3))
+    data.Condition = repeat(est_n4.Quantile, (2 * length(unique(models.Sets)) + 1))
+
+    data
+end
+
 function write_data(out_data, models, ind, file)
-    # Specialsauce
-    specialsauce = true
-    if specialsauce
-        println(unique(out_data.Condition))
-        println(models.Sets)
-        est_n4 = out_data[((out_data.Type .== 2.0) .& (out_data.Spec .== 2.0)),:]
-        est_n4 = collect_component(est_n4, "N400_est", models; tws=600, twe=800);
-        est_n4.Quantile = levelcode.(cut(est_n4.CzN400_est, 4))
-        out_data.Condition = repeat(est_n4.Quantile, (2 * length(unique(models.Sets)) + 1))
+    if models.Quantiles
+        out_data = assign_estimate_quantiles(out_data, models)
     end
 
     out_data_cp = out_data[:,:]
