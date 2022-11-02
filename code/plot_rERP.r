@@ -112,13 +112,14 @@ plot_grandavg_ci <- function(
                 labels = leg_labs, values = leg_vals)
     } else if (modus == "ConditionQuantile") {
         p <- p + labs(y = yunit, x = "Time (ms)", title = ttl)
-        p <- p + scale_linetype_manual(name = "",
+        p <- p + scale_linetype_manual(name = "Quantile",
                 labels = leg_labs, values = leg_vals)
         p <- p + scale_color_manual(name = "Condition",
-                #labels = c("A: E+A+", "B: E+A-", "C: E-A+", "D: E-A-"),
-                #values = c("#000000", "#BB5566", "#004488", "#DDAA33"))
-                labels = c("A", "B", "C"),
-                values = c("#000000", "red", "blue"))
+                #labels = "D: E-A-", values = "#DDAA33")
+                labels = c("A: E+A+", "B: E+A-", "C: E-A+", "D: E-A-"),
+                values = c("#000000", "#BB5566", "#004488", "#DDAA33"))
+                #labels = c("A", "B", "C"),
+                #values = c("#000000", "red", "blue"))
     } else if (modus == "Coefficient") {
         p <- p + labs(y = "Intercept + Coefficient", x = "Time (ms)",
                     title = ttl)
@@ -207,7 +208,7 @@ plot_single_elec <- function(
     legend <- get_legend(gg)
     nl <- theme(legend.position = "none")
     gg <- arrangeGrob(gg + nl + ggtitle(paste0(e, ": ", title)),
-            legend, heights = c(10, 1))
+            legend, heights = c(10, 2))
 
     if (file != FALSE) {
        ggsave(file, gg, device = cairo_pdf, width = 3, height = 3)

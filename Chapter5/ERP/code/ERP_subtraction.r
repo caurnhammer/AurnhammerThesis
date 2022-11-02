@@ -35,6 +35,10 @@ avg_quart_dt <- function(df, elec, add_grandavg = FALSE) {
     df_avg
 }
 
+ci <- function(vec) {
+    1.96 * se(vec)
+}
+
 # Load data of Design 1, baseline condition
 dt <- fread("../../../data/ERP_Design1.csv")
 elec <- "Pz"
@@ -80,9 +84,6 @@ ggsave("../plots/Subtraction/ERP_Design1_randtrials_Cz.pdf", gg,
 ##########################
 # Plot Design 1 Cond A/C #
 ##########################
-ci <- function(vec) {
-    1.96 * se(vec)
-}
 dt_c_s <- dt[Condition %in% c("A", "C"), lapply(.SD, mean),
     by = list(Subject, Condition, Timestamp), .SDcols = elec]
 dt_c <- dt[Condition %in% c("A", "C"), lapply(.SD, mean),
@@ -160,6 +161,8 @@ plot_single_elec(dt_all, elec,
 quart_labels <- c("Avg.", "Low Quant", "High Quant")
 quart_values <- c("solid", "dotted", "dashed")
 cond_colos <- c("#000000", "#BB5566", "#004488", "#DDAA33")
+
+source("../../../code/plot_rERP.r")
 
 for (cond in c("A", "B", "C", "D")) {
     dt_cond <- dt[Condition == cond, ]
