@@ -37,3 +37,17 @@ convert -density 125 ../plots/ERP_Design2_Plaus_Clozedist/Topos/Estimated_Interc
 	../plots/ERP_Design2_Plaus_Clozedist/Topos/Observed_topolegend.pdf \
 	+append -page 350:80 \
 	final_pdf/ERP_Estimated_Topos_B.pdf
+
+cp ../plots/SPR2_Design1_Cloze_rcnoun_rRT/Observed.pdf final_pdf/SPR_Observed.pdf
+
+montage -mode concatenate -density 125 \
+	../plots/SPR2_Design1_Cloze_rcnoun_rRT/Estimated_Intercept.pdf 			  ../plots/SPR2_Design1_Cloze_rcnoun_rRT/Residual_Intercept.pdf \
+	../plots/SPR2_Design1_Cloze_rcnoun_rRT/Estimated_Interceptrcnoun.pdf 	  ../plots/SPR2_Design1_Cloze_rcnoun_rRT/Residual_Interceptrcnoun.pdf \
+	../plots/SPR2_Design1_Cloze_rcnoun_rRT/Estimated_InterceptCloze.pdf 	  ../plots/SPR2_Design1_Cloze_rcnoun_rRT/Residual_InterceptCloze.pdf \
+    ../plots/SPR2_Design1_Cloze_rcnoun_rRT/Estimated_InterceptClozercnoun.pdf ../plots/SPR2_Design1_Cloze_rcnoun_rRT/Residual_InterceptClozercnoun.pdf \
+	-tile 2x4 \
+	final_pdf/SPR_Est_Res_Full.pdf
+
+convert -density 250 ../plots/SPR2_Design1_Cloze_rcnoun_across_rRT/Coefficients.pdf ../plots/SPR2_Design1_Cloze_rcnoun_across_rRT/t-values.pdf \
+	+append -page 500:250 \
+	final_pdf/SPR_tval_across.pdf

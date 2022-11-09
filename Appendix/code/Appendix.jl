@@ -1,4 +1,4 @@
-j# Christoph Aurnhammer, 2022
+# Christoph Aurnhammer, 2022
 # rERPs have initially been described by Smith and Kutas (2015a, 2015b).
 
 # Load the functions in rERPs.jl
@@ -115,5 +115,9 @@ dt = transform_conds(dt, verbose = true, column = :Timestamp)
 select!(dt, Not([:ReadingTime, :ReactionTime]))
 
 models = make_models([:Subject, :Timestamp], [:Item, :Condition], [:logRT], [:Intercept, :Cloze, :rcnoun])
-include("../../code/rERP.jl");
 @time fit_models(dt, models, "SPR2_Design1_Cloze_rcnoun_rRT");
+
+# rRTs across subjects
+dt.Subject = ones(nrow(dt));
+models = make_models([:Subject, :Timestamp], [:Item, :Condition], [:logRT], [:Intercept, :Cloze, :rcnoun])
+@time fit_models(dt, models, "SPR2_Design1_Cloze_rcnoun_across_rRT");

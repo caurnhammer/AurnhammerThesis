@@ -53,7 +53,7 @@ plot_grandavg_ci <- function(
     } else if (modus == "t-value") {
         colnames(df)[c(3, 4, 5)] <- c("V", "V_CI", "V_sig")
         sig_dt <- df[, c("Spec", "Timestamp", "V_sig")]
-        sig_dt$posit <- rep(seq(ylims[1], ylims[1]-2,
+        sig_dt$posit <- rep(seq(ylims[1], ylims[1] - 2,
             length = length(unique(sig_dt$Spec))),
             length = nrow(sig_dt))
         sig_dt$sig <- factor(sig_dt$V_sig, levels = c("0", "1"),
@@ -632,44 +632,59 @@ plot_rSPR <- function(
     leg_vals
 ) {
     if (modus == "t-value"){
-        data$sig <- data$sig_average < 0.05
-        df <- data[, c("Region", "Spec", "sig_average", "sig_proportion")]
-        df$posit <- rep(seq(ylims[1] - 0.9, ylims[1] - 0.5,
-            length = length(unique(data$Specs))),
-            length = length(unique(data$Region)))
-        df$sig <- factor(df$sig, levels=c("TRUE", "FALSE"),
-            labels=c("sign", "insign"))
-    } else if (modus == "coefficients") {
+        #data$sig <- data$sig_average < 0.05
+        sig_dt <- data[, c("Region", "Spec", "sig")]
+        sig_dt$posit <- rep(seq(ylims[1] + 2, ylims[1] + 4,
+                length = length(unique(data$Spec))),
+                length = nrow(sig_dt))
+        sig_dt$sig <- factor(sig_dt$sig, levels = c(1, 0),
+            labels = c("sign", "insign"))
+    } else if (modus == "coefficients") { # pass
     } else {
         data$Spec <- data$Condition
     }
 
-    p <- ggplot(data, aes(x=Region, y=logRT, color=Spec, group=Spec)) + geom_point(size=2.5, shape="cross") + geom_line(size=0.5)
-    p <- p + theme_minimal() 
-    p <- p + geom_errorbar(aes(ymin=logRT-logRT_CI, ymax=logRT+logRT_CI), width=.1, size=0.3)
-    if (modus == "coefficients") {
+    # For all plots
+    p <- ggplot(data, aes(x = Region, y = logRT, color = Spec, group = Spec)) +
+            geom_point(size = 2.5, shape = "cross") + geom_line(size = 0.5)
+    p <- p + theme_minimal()
+    p <- p + geom_errorbar(aes(ymin = logRT - logRT_CI,
+                ymax = logRT + logRT_CI), width = .1, size = 0.3)
+    # Conditional modifications 
+    if (modus == "coefficients") { # coefficients
         p <- p + scale_color_manual(name = "Coefficients",
-                    values = leg_vals, labels = leg_labs)
-    } else if (modus == "t-value") {
-        p <- p + geom_hline(yintercept=0, linetype="dashed")
-        p <- p + scale_color_manual(name="Z-value", values=c("#00FFFF", "#E349F6", "#efa213"), labels=c("Plausibility", "Cloze Distractor", "RT Pre-critical"))
-        p <- p + geom_point(data=df, aes(x=Region, y=posit, shape=sig), size=2.5) 
-        p <- p + scale_shape_manual(values=c(20, 32),name="P-values", labels=c("Significant", "Nonsignificant"))
+                    labels = leg_labs, values = leg_vals)
+    } else if (modus == "t-value") { # t-values
+        p <- p + geom_hline(yintercept = 0, linetype = "dashed")
+        p <- p + scale_color_manual(name = "Z-value",
+            labels = leg_labs, values = leg_vals)
+        p <- p + geom_point(data = sig_dt,
+                aes(x = Region, y = posit, shape = sig), size = 2.5)
+        p <- p + scale_shape_manual(values = c(20, 32), name = "P-values",
+            labels = c("Significant", "Nonsignificant"))
     } else { # RTs, Residuals
-        p <- p + scale_color_manual(name="Condition", labels=c("A: Exp. Plaus.", "B: Unexp. Less Plaus.", "C: Unexp. Implaus."), values=c("black", "red", "blue"))
+        p <- p + scale_color_manual(name = "Condition",
+                    labels = leg_labs, values = leg_vals)
     }
-
-    #if ((is.vector(ylims) == TRUE) & (modus != "t-value")) { p <- p + ylim(ylims[1], ylims[2]) }
-    if (is.vector(ylims) == TRUE) { p <- p + ylim(ylims[1], ylims[2]) }
+    # limit y-axis
+    if (is.vector(ylims) == TRUE) {
+        p <- p + ylim(ylims[1], ylims[2])
+    }
+    # Apply theme
     p <- p + theme(plot.title = element_text(size = 8),
-                    axis.text.x= element_text(size=7),
-                    legend.position="bottom", 
-                    legend.text=element_text(size=5), legend.title=element_text(size=4), 
-                    legend.box="vertical", legend.spacing.y=unit(-0.2, "cm"), 
-                    legend.margin=margin(0,0,0,0),
-                    legend.box.margin=margin(-10,-10,-10,-50))
-    p <- p + labs(x="Region", y=yunit, title=title)
-    p
+                    axis.text.x = element_text(size = 7),
+                    legend.position = "bottom",
+                    legend.text = element_text(size = 5),
+                    legend.title = element_text(size = 4),
+                    legend.box = "vertical",
+                    legend.spacing.y = unit(-0.2, "cm"),
+                    legend.margin = margin(0, 0, 0, 0),
+                    legend.box.margin = margin(-10, -10, -10, -50))
+    p <- p + labs(x = "Region", y = yunit, title = title)
 
-    ggsave(file, p, width = 3, height = 3)
+    if (file != FALSE) {
+       ggsave(file, p, device = cairo_pdf, width = 3, height = 3)
+    } else {
+       p
+    }
 }

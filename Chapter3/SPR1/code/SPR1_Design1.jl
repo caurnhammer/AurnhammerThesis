@@ -1,20 +1,21 @@
 ## SESSION PREPARATION
 pwd()
 
-using CSV, DataFrames, DataFramesMeta, MixedModels, PooledArrays
+#using CSV, DataFrames, DataFramesMeta, MixedModels, PooledArrays
+using CSV, DataFrames, MixedModels
 using StatsBase: mean, std, zscore
 
-include("spr_fns.jl")
+#include("spr_fns.jl")
+include("../../../code/rERP.jl")
 
 ## DATA PREPARATION
 # Load data and scale continuous covariates
-dt = read_spr_data("data/CAPSPR_1.csv");
-
-dt.srp = dt.srp .* -1;
-dt.rcnoun = dt.rcnoun .* -1;
+models = make_models([:Subject, :Timestamp], [:Item, :Condition, :ReadingTime, :ReactionTime, :Duplicated], [:logRT], [:Intercept, :Cloze, :rcnoun])
+@time process_spr_data("../../../data/SPR1_Design1.csv", "../data/SPR1_Design1_rRT.csv", models, invert_preds=[:Cloze, :rcnoun]);
+dt = read_data("../data/SPR1_Design1_rRT.csv", models);
 
 # exclude data
-dt = exclude_trial(dt[((dt.Region .!== "critical -2") .& (dt.Duplicated .!== "multi")),:], 50, 2500, 50, 6000)
+dt = exclude_trial(dt[((dt.Timestamp .!== "critical -2") .& (dt.Duplicated .!== "multi")),:], 50, 2500, 50, 6000)
 
 #### TODO: zscore rcnoun / rcverb. Update formula. Run models anew.
 
