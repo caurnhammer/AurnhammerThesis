@@ -20,21 +20,21 @@ dt = exclude_trial(dt[((dt.Timestamp .!== "critical -2") .& (dt.Duplicated .!== 
 #### TODO: zscore rcnoun / rcverb. Update formula. Run models anew.
 
 ## MODEL PREPARATION
-contr = Dict(:Subject => Grouping(), :Item => Grouping())
+contr = Dict(:Subject => Grouping(), :Item => Grouping());
 
-f0 = @formula(logRT ~ 1 + srp + rcnoun + (1 + srp + rcnoun| Item) + (1 + srp + rcnoun | Subject))
+f0 = @formula(logRT ~ 1 + rcnoun + srp + (1 + rcnoun + srp | Item) + (1 + rcnoun + srp | Subject))
 f1 = @formula(logRT ~ 1 + srp + (1 + srp | Item) + (1 + srp | Subject))
 f = f0
 
 lmerSPR = fit_models(dt, f, contr);
 
-numpred = length(f.rhs) - 2
+numpred = length(f.rhs) - 2;
 coefs = [Symbol(x) for x in string.(f.rhs[1:numpred])];
 
-lmerSPR = combine_datasets(dt, lmerSPR, coefs[2:length(coefs)])
+lmerSPR = combine_datasets(dt, lmerSPR, coefs[2:length(coefs)]);
 lmerSPR = compute_RTs(lmerSPR, coefs);
-estimates = names(lmerSPR)[occursin.("est_", names(lmerSPR))]
-lmerSPR = compute_residuals(lmerSPR, estimates); 
+estimates = names(lmerSPR)[occursin.("est_", names(lmerSPR))];
+lmerSPR = compute_residuals(lmerSPR, estimates);
 lmerSPR = compute_coefs(lmerSPR, coefs); 
 
-CSV.write("data/lmerSPR1_srprcnoun.csv", lmerSPR);
+CSV.write("../data/lmerSPR1_srprcnoun.csv", lmerSPR);

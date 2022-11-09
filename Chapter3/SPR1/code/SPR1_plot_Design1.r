@@ -1,6 +1,6 @@
 library(data.table)
 library(plyr)
-source("/Users/chr/Prog/Disscode/Exp123/lmerSPR1/plot_lmerSPR.R", encoding = "UTF-8")
+source("../../../code/plot_lmerSPR.r", encoding = "UTF-8")
 
 produce_spr_plots <- function(
     path
@@ -43,18 +43,18 @@ produce_spr_plots <- function(
     plot_lmerSPR(data1, "zvalue", yunit="Z-values", title="SPR Effect Size", ylims=c(-3, 3), grouping="Zvalue") 
 
     # Condition A predictions
-    dt <- fread("data/lmerSPR1_Asrp.csv")
-    srp_range <- range(dt$z_srp)
-    dt <- dt[, lapply(.SD, mean), by=list(Region, Subject), .SDcols=c("1", "srp", "i_1", "i_srp", "s_1", "s_srp")]
+    # dt <- fread("data/lmerSPR1_Asrp.csv")
+    # srp_range <- range(dt$z_srp)
+    # dt <- dt[, lapply(.SD, mean), by=list(Region, Subject), .SDcols=c("1", "srp", "i_1", "i_srp", "s_1", "s_srp")]
     
-    # To Do : column mult to get subject variation in there (random effects)
-    dt$est_max <- (dt$"1" + dt$i_1 + dt$s_1) + (dt$srp + dt$s_srp + dt$i_srp) * srp_range[[1]]
-    dt$est_avg <- (dt$"1" + dt$i_1 + dt$s_1) + (dt$srp + dt$s_srp + dt$i_srp) * 0
-    dt$est_1SD <- (dt$"1" + dt$i_1 + dt$s_1) + (dt$srp + dt$s_srp + dt$i_srp)  * 1
-    dt$est_min <- (dt$"1" + dt$i_1 + dt$s_1) + (dt$srp + dt$s_srp + dt$i_srp)  * srp_range[[2]]
+    # # To Do : column mult to get subject variation in there (random effects)
+    # dt$est_max <- (dt$"1" + dt$i_1 + dt$s_1) + (dt$srp + dt$s_srp + dt$i_srp) * srp_range[[1]]
+    # dt$est_avg <- (dt$"1" + dt$i_1 + dt$s_1) + (dt$srp + dt$s_srp + dt$i_srp) * 0
+    # dt$est_1SD <- (dt$"1" + dt$i_1 + dt$s_1) + (dt$srp + dt$s_srp + dt$i_srp)  * 1
+    # dt$est_min <- (dt$"1" + dt$i_1 + dt$s_1) + (dt$srp + dt$s_srp + dt$i_srp)  * srp_range[[2]]
 
-    est_cols <- colnames(dt)[grep("est_", colnames(dt))]
-    dt_m <- melt(dt, id.vars=c("Region", "Subject"), measure.vars=est_cols, variable.name="estimate", value.name="logRT")
-    dt_c <- dcast(dt_m, formula = Region + logCloze ~ Electrode, value.var="estimates")
-    plot_lmerSPR(dt_m, "logRT", yunit="logRT", title="Estimated RTs", grouping="estimate", ylims=c(5.7,5.9)) #, ylims=c(-0.5, 4)) 
+    # est_cols <- colnames(dt)[grep("est_", colnames(dt))]
+    # dt_m <- melt(dt, id.vars=c("Region", "Subject"), measure.vars=est_cols, variable.name="estimate", value.name="logRT")
+    # dt_c <- dcast(dt_m, formula = Region + logCloze ~ Electrode, value.var="estimates")
+    # plot_lmerSPR(dt_m, "logRT", yunit="logRT", title="Estimated RTs", grouping="estimate", ylims=c(5.7,5.9)) #, ylims=c(-0.5, 4)) 
 }

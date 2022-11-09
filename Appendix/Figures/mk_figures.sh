@@ -18,8 +18,8 @@ convert -density 250 ../plots/ERP_Design1_cloze_rcnoun_rERP/Waveforms/Observed.p
 
 montage -mode concatenate -density 125 \
 	../plots/ERP_Design1_cloze_rcnoun_rERP/Waveforms/Estimated_Intercept.pdf ../plots/ERP_Design1_cloze_rcnoun_rERP/Waveforms/Residual_Intercept.pdf \
-	../plots/ERP_Design1_cloze_rcnoun_rERP/Waveforms/Estimated_Interceptrcnoun.pdf ../plots/ERP_Design1_cloze_rcnoun_rERP/Waveforms/Residual_Interceptrcnoun.pdf \
 	../plots/ERP_Design1_cloze_rcnoun_rERP/Waveforms/Estimated_InterceptCloze.pdf ../plots/ERP_Design1_cloze_rcnoun_rERP/Waveforms/Residual_InterceptCloze.pdf \
+	../plots/ERP_Design1_cloze_rcnoun_rERP/Waveforms/Estimated_Interceptrcnoun.pdf ../plots/ERP_Design1_cloze_rcnoun_rERP/Waveforms/Residual_Interceptrcnoun.pdf \
     ../plots/ERP_Design1_cloze_rcnoun_rERP/Waveforms/Estimated_InterceptClozercnoun.pdf ../plots/ERP_Design1_cloze_rcnoun_rERP/Waveforms/Residual_InterceptClozercnoun.pdf \
 	-tile 2x4 \
 	final_pdf/ERP_Est_Res_Full.pdf

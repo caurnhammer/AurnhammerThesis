@@ -15,10 +15,10 @@ end
 
 function exclude_trial(df, lower, upper, lower_rc, upper_rc)
     df_out = df
-    for s in unique(df[:Subject])
+    for s in unique(df[!,:Subject])
         # subset for current subject
         dts = df[(df.Subject .== s),:];
-        for i in unique(dts[:Item])
+        for i in unique(dts[!,:Item])
             # subset current item
             dti = dts[(dts.Item .== i),:];
             
@@ -47,7 +47,7 @@ function read_spr_data(path)
     :Subject => PooledArray => :Subject,
     :Item => PooledArray => :Item);
 
-    dt = dt[(dt.Condition .== "A"),:]
+    # dt = dt[(dt.Condition .== "A"),:]
 
     dt.srp = log.(dt.Cloze .+ 0.01)
     dt.inter = zscore(dt.srp .* dt.rcnoun)
@@ -77,13 +77,13 @@ function fit_models(data, form, f_contr)
     num_groupings = length(f_contr);             # number of grouping factors (in ranefs)
     numpred = length(form.rhs) - num_groupings;  # number of predictors (including zval_intercept)
     pred_names = string.(form.rhs[1:numpred]);   # get predictor names
-    tl = length(unique(data[:Region]));          # num of unique Regions
-    su = length(unique(data[:Subject]));         # num of unique subjects
-    it = length(unique(data[:Item]));            # num of unique items
+    tl = length(unique(data[!,:Region]));          # num of unique Regions
+    su = length(unique(data[!,:Subject]));         # num of unique subjects
+    it = length(unique(data[!,:Item]));            # num of unique items
     n = tl * su * it;                            # nrows of final data frame
     r = su * it;                                 # nrows that are written
-    subj = unique(data[:Subject]);               # array of unique subjects
-    items = unique(data[:Item]);                 # array of unique items
+    subj = unique(data[!,:Subject]);               # array of unique subjects
+    items = unique(data[!,:Item]);                 # array of unique items
 
     # Allocate output
     output_names = vcat([:Region, :Subject, :Item], [Symbol.(string("zval_",string(x))) for x in Symbol.(pred_names)],
@@ -92,13 +92,13 @@ function fit_models(data, form, f_contr)
                          [x for x in Symbol.(pred_names)],
                         [Symbol.(string("s_",string(x))) for x in Symbol.(pred_names)], [Symbol.(string("i_",string(x))) for x in Symbol.(pred_names)], :AIC, :BIC);
     ncols = (3 + numpred * 4 + numpred * num_groupings + 2);
-    output = DataFrame(zeros(n, ncols));
-    names!(output, output_names);
-    output[:Region] = string.(output[:Region]);
+    output = DataFrame(zeros(n, ncols), :auto);
+    rename!(output, output_names);
+    output[!,:Region] = string.(output[!,:Region]);
     
     counter = 0;
     startind = 1;
-    for (i, t) in enumerate(unique(data[:Region]))          
+    for (i, t) in enumerate(unique(data[!,:Region]))          
         counter = counter + 1
         # subset data for Region
         te_dt = data[(data.Region .== t),:];
@@ -110,11 +110,13 @@ function fit_models(data, form, f_contr)
         bic = m.objective + dof(m) * log(nobs(m))
         
         # TO DO : use ranef names. Currently only supports fixef = ranef models.
-        output[startind:(startind+r-1),:] = DataFrame(vcat([fill(t,r), repeat(subj,inner=it), repeat(items,outer=su)], [fill(y,r) for y in zvals], [fill(y,r) for y in m.pvalues], [fill(y,r) for y in m.stderror],
-                                            [fill(y,r) for y in m.beta], [subj_coef(m.b[2],x,su,it,numpred) for x in 1:numpred], [item_coef(m.b[1],x,su,it,numpred) for x in 1:numpred], [fill(aic,r), fill(bic, r)]))
-        
+        tempdt = DataFrame(vcat([fill(t,r), repeat(subj,inner=it), repeat(items,outer=su)], [fill(y,r) for y in zvals], [fill(y,r) for y in m.pvalues], [fill(y,r) for y in m.stderror],
+                                            [fill(y,r) for y in m.beta], [subj_coef(m.b[2],x,su,it,numpred) for x in 1:numpred], [item_coef(m.b[1],x,su,it,numpred) for x in 1:numpred], [fill(aic,r), fill(bic, r)]), :auto)
+        rename!(tempdt, output_names)
+        output[startind:(startind+r-1),:] = tempdt
+    
         startind = startind + r
-
+        
         print("> ", round((counter*100) / tl, digits=2), "% done. Model = ", counter, " / ", tl, "; Region = ", t, ".\r")
     end
 
@@ -163,19 +165,19 @@ function compute_RTs(lmer_data, preds)
 
     for x in combi
         if x[1] == Symbol("1") # intercept
-            lmer_data[:est_1] = lmer_data[Symbol("1")] .+ lmer_data[:s_1]  .+ lmer_data[:i_1]
+            lmer_data[!,:est_1] = lmer_data[!,Symbol("1")] .+ lmer_data[!,:s_1]  .+ lmer_data[!,:i_1]
         elseif typeof(x[1]) == Symbol # intercept + single pred
-            lmer_data[Symbol(string("est_"), x[1])] = lmer_data[:est_1] + (lmer_data[x[1]] .+ lmer_data[Symbol("s_", x[1])] .+ lmer_data[Symbol("i_", x[1])]) .* lmer_data[Symbol("z_", x[1])];
+            lmer_data[!,Symbol(string("est_"), x[1])] = lmer_data[!,:est_1] + (lmer_data[!,x[1]] .+ lmer_data[!,Symbol("s_", x[1])] .+ lmer_data[!,Symbol("i_", x[1])]) .* lmer_data[!,Symbol("z_", x[1])];
         elseif typeof(x[1]) == Array{Symbol,1} # intercept + combination of preds
             # start with intercept
-            temp_data = lmer_data[:est_1]
+            temp_data = lmer_data[!,:est_1]
             colname = "est_"
             # for each element within combination
             for y in x
                 colname = string(colname, y[1])
-                temp_data = temp_data .+ (lmer_data[Symbol(y[1])] .+ lmer_data[Symbol("s_", y[1])] .+ lmer_data[Symbol("i_", y[1])]) .* lmer_data[Symbol("z_", y[1])]
+                temp_data = temp_data .+ (lmer_data[!,Symbol(y[1])] .+ lmer_data[!,Symbol("s_", y[1])] .+ lmer_data[!,Symbol("i_", y[1])]) .* lmer_data[!,Symbol("z_", y[1])]
             end
-            lmer_data[Symbol(colname)] = temp_data
+            lmer_data[!,Symbol(colname)] = temp_data
         end
     end
 
@@ -185,7 +187,7 @@ end
 function compute_residuals(lmer_data, preds)
     # Residuals: observed - estimated
     for x in preds
-        lmer_data[Symbol(string("res_", string(x[5:lastindex(x)])))] = lmer_data[:logRT] .- lmer_data[Symbol(x)]
+        lmer_data[!,Symbol(string("res_", string(x[5:lastindex(x)])))] = lmer_data[!,:logRT] .- lmer_data[!,Symbol(x)]
     end
 
     lmer_data
@@ -195,9 +197,9 @@ function compute_coefs(lmer_data, preds)
     # Compute sum of intercept and coefs (fixef + subject ranef + item ranef)
     for x in preds
         if x == Symbol("1")
-            lmer_data[:coef_1] = lmer_data[Symbol("1")] .+ lmer_data[:s_1] .+ lmer_data[:i_1]
+            lmer_data[!,:coef_1] = lmer_data[!,Symbol("1")] .+ lmer_data[!,:s_1] .+ lmer_data[!,:i_1]
         else
-            lmer_data[Symbol(string("coef_intercept_", string(x)))] = lmer_data[:coef_1] .+ lmer_data[x] .+ lmer_data[Symbol(string("s_", string(x)))] .+ lmer_data[Symbol(string("i_", string(x)))]
+            lmer_data[!,Symbol(string("coef_intercept_", string(x)))] = lmer_data[!,:coef_1] .+ lmer_data[!,x] .+ lmer_data[!,Symbol(string("s_", string(x)))] .+ lmer_data[!,Symbol(string("i_", string(x)))]
         end
     end
     
