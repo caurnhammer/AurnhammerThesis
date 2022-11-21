@@ -1,7 +1,7 @@
 include("../../../code/rERP.jl");
 
 # Aurnhammer et al. (2021), Condition C
-elec = [:Cz];        
+elec = [:Pz];        
 models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Intercept], quant = true);
 
 # Design 1
@@ -27,6 +27,19 @@ include("../../../code/rERP.jl"); @time fit_models_components(dt, models, "ERP_D
 @time process_data("../../../data/ERP_Design1.csv", "../data/ERP_Design1_rERP.csv", models, conds=["D"], components=[:N400, :Segment]);
 @time dt = read_data("../data/ERP_Design1_rERP.csv", models);
 include("../../../code/rERP.jl"); @time fit_models_components(dt, models, "ERP_Design1_N400Segment_D");
+
+# dbc 19
+@time process_data("../../../data/dbc_data.csv", "../data/ERP_dbc19_rERP.csv", models, conds=["control"], components=[:N400, :Segment]);
+@time dt = read_data("../data/ERP_dbc19_rERP.csv", models);
+include("../../../code/rERP.jl"); @time fit_models_components(dt, models, "ERP_dbc19_N400Segment_A");
+
+@time process_data("../../../data/dbc_data.csv", "../data/ERP_dbc19_rERP.csv", models, conds=["script-related"], components=[:N400, :Segment]);
+@time dt = read_data("../data/ERP_dbc19_rERP.csv", models);
+include("../../../code/rERP.jl"); @time fit_models_components(dt, models, "ERP_dbc19_N400Segment_B");
+
+@time process_data("../../../data/dbc_data.csv", "../data/ERP_dbc19_rERP.csv", models, conds=["script-unrelated"], components=[:N400, :Segment]);
+@time dt = read_data("../data/ERP_dbc19_rERP.csv", models);
+include("../../../code/rERP.jl"); @time fit_models_components(dt, models, "ERP_dbc19_N400Segment_C");
 
 # Design 2
 # SWITCH ON AND OFF IN fit_models_components

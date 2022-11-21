@@ -71,7 +71,7 @@ function process_data(infile, outfile, models; baseline_corr = false, sampling_r
     # Collect component predictor
     if components != false
         # Add an electrode specific component predictors
-        data = collect_component(data, "N400", models; tws=600, twe=800);
+        data = collect_component(data, "N400", models; tws=300, twe=500);
         data = collect_component(data, "Segment", models ; tws=0, twe=1200);
 
         # Add Quartiles, based on the N400 size averaged across electrodes
@@ -292,7 +292,7 @@ function fit_models(data, models, file)
     out_models = pvalue(out_models, models, ind);
 
     # Addition of intercept to coefs
-    # out_models = coef_addition(out_models, models, ind)
+    out_models = coef_addition(out_models, models, ind)
 
     if typeof(file) == String
         out_models = write_models(out_models, models, ind, file)
@@ -524,7 +524,7 @@ end
 function assign_estimate_quantiles(data, models)
     est_n4 = data[((data.Type .== 2.0) .& (data.Spec .== 2.0)),:]
     est_n4 = collect_component(est_n4, "N400_est", models; tws=300, twe=500);
-    est_n4.Quantile = levelcode.(cut(est_n4.CzN400_est, 3))
+    est_n4.Quantile = levelcode.(cut(est_n4.PzN400_est, 3))
     data.Condition = repeat(est_n4.Quantile, (2 * length(unique(models.Sets)) + 1))
 
     data
