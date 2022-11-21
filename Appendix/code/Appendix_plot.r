@@ -145,6 +145,28 @@ make_plots <- function(
     }
 }
 
+plot_zscores <- function(file, pred) {
+    dt <- fread(file)
+    dt <- dt[Condition %in% c("A", "C"), ]
+
+    p <- ggplot(dt, aes(y = Cloze, x = scale(Cloze), color = Condition))
+    p <- p + geom_point()
+    p <- p + scale_color_manual(labels = c("A", "C"),
+                values = c("black", "#004488"))
+    p <- p + theme_minimal()
+    p <- p + theme(legend.position = "bottom")
+    p <- p + geom_vline(xintercept = mean(scale(dt$Cloze)), linetype = "dashed")
+    p <- p + geom_hline(yintercept = mean(dt$Cloze), linetype = "dashed")
+    p <- p + labs(x = "z-standardized Cloze", title = "Z-standardization")
+
+    ggsave(p, filename = "../Figures/final_pdf/Stimuli_zscore.pdf",
+            device = cairo_pdf, width = 3, height = 3)
+    p
+}
+
+plot_zscores("../../data/Stimuli_Design1.csv", "Cloze")
+
+
 elec_all <- c("Fp1", "Fp2", "F7", "F3", "Fz", "F4", "F8", "FC5",
                 "FC1", "FC2", "FC6", "C3", "Cz", "C4", "CP5", "CP1",
                 "CP2", "CP6", "P7", "P3", "Pz", "P4", "P8", "O1", "Oz", "O2")
