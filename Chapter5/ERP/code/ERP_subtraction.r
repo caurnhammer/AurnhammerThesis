@@ -12,7 +12,7 @@ avg_quart_dt <- function(df, elec, add_grandavg = FALSE) {
         .SDcols = elec]
     df_avg <- df_s_avg[, lapply(.SD, mean), by = list(Quantile, Timestamp),
         .SDcols = elec]
-    df_avg[, paste0(elec, "_CI")] <- df_s_avg[, lapply(.SD, se),
+    df_avg[, paste0(elec, "_CI")] <- df_s_avg[, lapply(.SD, ci),
         by = list(Quantile, Timestamp), .SDcols = elec][,..elec]
     df_avg$Quantile <- as.factor(df_avg$Quantile)
     df_avg$Spec <- df_avg$Quantile
@@ -25,7 +25,7 @@ avg_quart_dt <- function(df, elec, add_grandavg = FALSE) {
         df_gavg <- df_s_gavg[, lapply(.SD, mean), by = list(Timestamp),
             .SDcols = elec]
 
-        df_gavg[, paste0(elec, "_CI")] <- df_s_gavg[, lapply(.SD, se),
+        df_gavg[, paste0(elec, "_CI")] <- df_s_gavg[, lapply(.SD, ci),
             by = list(Timestamp), .SDcols = elec][,..elec]
         df_gavg$Quantile <- 42
         df_gavg$Spec <- df_gavg$Quantile
@@ -62,7 +62,6 @@ p_list <- vector(mode = "list", length = length(n))
 lims <- c(max(dt_rtrials$Pz), min(dt_rtrials$Pz))
 for (i in 1:n) {
     single_trial <- dt_rtrials[TrialNum == unique(dt_rtrials$TrialNum)[i], ]
-    #m_coef <- coef(lm(Pz ~ Timestamp, single_trial))
     p_list[[i]] <- ggplot(single_trial, aes(x = Timestamp, y = Pz,
             color = TrialNum, group = TrialNum)) + geom_line() +
             theme_minimal() + scale_y_reverse(limits = c(lims[1], lims[2])) +
@@ -70,7 +69,6 @@ for (i in 1:n) {
             scale_color_manual(values = "black") +
             geom_hline(yintercept = 0, linetype = "dashed") +
             geom_vline(xintercept = 0, linetype = "dashed") +
-            #geom_abline(intercept = m_coef[[1]], slope = m_coef[[2]]) +
             stat_smooth(method = "lm", se = FALSE, size = 0.5) +
             labs(y = paste0("Amplitude (", "\u03BC", "Volt\u29"), title = "Pz")
 }
@@ -96,7 +94,7 @@ dt_c$Pz_CI <- dt_c_s[Condition %in% c("A", "C"), lapply(.SD, ci),
 dt_c$Spec <- dt_c$Condition
 plot_single_elec(dt_c, elec,
     file = paste0("../plots/Subtraction/ERP_Design1_AC_Pz.pdf"),
-    modus = "Condition", ylims = c(9, -5.5),
+    modus = "Condition", ylims = c(9, -5),
     leg_labs = cond_labels, leg_vals = cond_values)
 
 #####################################
@@ -113,7 +111,7 @@ dt_cond <- merge(dt_cond, n400[, c("Trial", "Quantile")], on = "Trial")
 dt_avg <- avg_quart_dt(dt_cond, elec)
 plot_single_elec(dt_avg, elec,
     file = paste0("../plots/Subtraction/Subtraction_Design1_RawN400_Tertiles.pdf"),
-    modus = "Quantile", ylims = c(17, -13),
+    modus = "Quantile", ylims = c(18, -14),
     leg_labs = quart_labels, leg_vals = quart_values)
 
 #####################################
@@ -136,7 +134,7 @@ dt_cond <- merge(dt_cond, n4seg[, c("Trial", "Quantile")], by = "Trial")
 dt_avg <- avg_quart_dt(dt_cond, elec)
 plot_single_elec(dt_avg, elec,
     file = paste0("../plots/Subtraction/Subtraction_Design1_N400minusSegment_Tertiles_", cond, ".pdf"),
-    modus = "Quantile", ylims = c(17, -13),
+    modus = "Quantile", ylims = c(18, -14),
     leg_labs = quart_labels, leg_vals = quart_values)
 
 ######################
@@ -158,7 +156,7 @@ dt_cond <- merge(dt_cond, n4seg[, c("Trial", "Quantile")], by = "Trial")
 dt_avg <- avg_quart_dt(dt_cond, elec)
 plot_single_elec(dt_avg, elec,
     file = paste0("../plots/Subtraction/Subtraction_Design1_N400minusSegment_Quartiles_A.pdf"),
-    modus = "Quantile", ylims = c(17, -13),
+    modus = "Quantile", ylims = c(18, -14),
     leg_labs = quart_labels, leg_vals = quart_values)
 
 
@@ -182,7 +180,7 @@ dt_avg$Pz_CI <- dt_s[, lapply(.SD, ci),
 dt_avg$Spec <- dt_avg$Condition
 plot_single_elec(dt_avg, elec,
     file = paste0("../plots/Subtraction/ERP_dbc19_Pz.pdf"),
-    modus = "Condition", ylims = c(9, -5.5),
+    modus = "Condition", ylims = c(9, -5),
     leg_labs = cond_labels, leg_vals = cond_values)
 
 # Binning per condition
@@ -207,131 +205,134 @@ for (i in c(1, 2, 3)) {
     plot_single_elec(dt_avg, elec,
         file = paste0("../plots/Subtraction/Subtraction_dbc19_N400minusSegment_Quantiles_", cond_alts[i], ".pdf"),
         title = cond_alts[i],
-        modus = "Quantile", ylims = c(12, -10),
+        modus = "Quantile", ylims = c(18, -14),
         leg_labs = quart_labels, leg_vals = quart_values)
 }
+
+
+# ---------------------> attic
 
 #######################################
 # Within-condition N400-P600 dynamics #
 # shown for all conditions            #
 #######################################
 # original condition complex
-dt <- fread("../../../data/ERP_Design1.csv")
-elec <- "Pz"
-cond_labels <- c("A: E+A+", "B: E+A-", "C: E-A+", "D: E-A-")
-cond_values <- c("#000000", "#BB5566", "#004488", "#DDAA33")
-dt_s <- dt[, lapply(.SD, mean),
-    by = list(Subject, Condition, Timestamp), .SDcols = elec]
-dt_all <- dt[, lapply(.SD, mean),
-    by = list(Condition, Timestamp), .SDcols = elec]
-dt_all$Pz_CI <- dt[, lapply(.SD, ci),
-    by = list(Condition, Timestamp), .SDcols = elec][,..elec]
-dt_all$Spec <- dt_all$Condition
-plot_single_elec(dt_all, elec,
-    file = paste0("../plots/Subtraction/ERP_Design1_ABCD_Pz.pdf"),
-    modus = "Condition", ylims = c(9, -5.5),
-    leg_labs = cond_labels, leg_vals = cond_values)
+# dt <- fread("../../../data/ERP_Design1.csv")
+# elec <- "Pz"
+# cond_labels <- c("A: E+A+", "B: E+A-", "C: E-A+", "D: E-A-")
+# cond_values <- c("#000000", "#BB5566", "#004488", "#DDAA33")
+# dt_s <- dt[, lapply(.SD, mean),
+#     by = list(Subject, Condition, Timestamp), .SDcols = elec]
+# dt_all <- dt[, lapply(.SD, mean),
+#     by = list(Condition, Timestamp), .SDcols = elec]
+# dt_all$Pz_CI <- dt[, lapply(.SD, ci),
+#     by = list(Condition, Timestamp), .SDcols = elec][,..elec]
+# dt_all$Spec <- dt_all$Condition
+# plot_single_elec(dt_all, elec,
+#     file = paste0("../plots/Subtraction/ERP_Design1_ABCD_Pz.pdf"),
+#     modus = "Condition", ylims = c(9, -5),
+#     leg_labs = cond_labels, leg_vals = cond_values)
 
-# Show condition average + two subtraction-based quantiles within condition
-quart_labels <- c("Avg.", "Low Quant", "High Quant")
-quart_values <- c("solid", "dotted", "dashed")
-cond_colos <- c("#000000", "#BB5566", "#004488", "#DDAA33")
+# # Show condition average + two subtraction-based quantiles within condition
+# quart_labels <- c("Avg.", "Low Quant", "High Quant")
+# quart_values <- c("solid", "dotted", "dashed")
+# cond_colos <- c("#000000", "#BB5566", "#004488", "#DDAA33")
 
-source("../../../code/plot_rERP.r")
+# source("../../../code/plot_rERP.r")
 
-for (cond in c("A", "B", "C", "D")) {
-    dt_cond <- dt[Condition == cond, ]
-    dt_cond$Trial <- paste(dt_cond$ItemNum, dt_cond$Subject)
+# for (cond in c("A", "B", "C", "D")) {
+#     dt_cond <- dt[Condition == cond, ]
+#     dt_cond$Trial <- paste(dt_cond$ItemNum, dt_cond$Subject)
 
-    n400 <- dt_cond[(Timestamp > 300 & Timestamp < 500), lapply(.SD, mean),
-        by = list(Trial), .SDcols = elec]
-    segment <- dt_cond[(Timestamp > 0), lapply(.SD, mean),
-        by = list(Trial), .SDcols = elec]
-    n4seg <- merge(n400, segment, by = "Trial")
-    colnames(n4seg)[2:3] <- c("N400", "Segment")
-    n4seg$N4minSeg <- n4seg$N400 - n4seg$Segment
-    n4seg$Quantile <- ntile(n4seg$N4minSeg, 2)
-    dt_cond <- merge(dt_cond, n4seg[, c("Trial", "Quantile")], by = "Trial")
+#     n400 <- dt_cond[(Timestamp > 300 & Timestamp < 500), lapply(.SD, mean),
+#         by = list(Trial), .SDcols = elec]
+#     segment <- dt_cond[(Timestamp > 0), lapply(.SD, mean),
+#         by = list(Trial), .SDcols = elec]
+#     n4seg <- merge(n400, segment, by = "Trial")
+#     colnames(n4seg)[2:3] <- c("N400", "Segment")
+#     n4seg$N4minSeg <- n4seg$N400 - n4seg$Segment
+#     n4seg$Quantile <- ntile(n4seg$N4minSeg, 2)
+#     dt_cond <- merge(dt_cond, n4seg[, c("Trial", "Quantile")], by = "Trial")
 
-    dt_avg <- avg_quart_dt(dt_cond, elec, add_grandavg = TRUE)
-    dt_avg$Spec <- ifelse(dt_avg$Spec == 42, "Average", ifelse(dt_avg$Spec == 1, "Low Quant", "High Quant"))
-    dt_avg$ConditionQuantile <- dt_avg$Quantile
-    dt_avg$Condition <- cond
+#     dt_avg <- avg_quart_dt(dt_cond, elec, add_grandavg = TRUE)
+#     dt_avg$Spec <- ifelse(dt_avg$Spec == 42, "Average", ifelse(dt_avg$Spec == 1, "Low Quant", "High Quant"))
+#     dt_avg$ConditionQuantile <- dt_avg$Quantile
+#     dt_avg$Condition <- cond
 
-    source("../../../code/plot_rERP.r")
-    plot_single_elec(dt_avg, elec,
-        file = paste0("../plots/Subtraction/Subtraction_Design1_N400minusSegment_Quantiles_", cond, ".pdf"),
-        modus = "ConditionQuantile", ylims = c(12, -7),
-        leg_labs = quart_labels, leg_vals = quart_values, ci = FALSE)
+#     source("../../../code/plot_rERP.r")
+#     plot_single_elec(dt_avg, elec,
+#         file = paste0("../plots/Subtraction/Subtraction_Design1_N400minusSegment_Quantiles_", cond, ".pdf"),
+#         modus = "ConditionQuantile", ylims = c(13, -7),
+#         leg_labs = quart_labels, leg_vals = quart_values, ci = FALSE)
 
-    if (cond == "A") {
-        dt_out <- dt_avg
-    } else {
-        dt_out <- rbind(dt_out, dt_avg)
-    }
-}
+#     if (cond == "A") {
+#         dt_out <- dt_avg
+#     } else {
+#         dt_out <- rbind(dt_out, dt_avg)
+#     }
+# }
 
-source("../../../code/plot_rERP.r")
-plot_single_elec(dt_out, elec,
-    file = paste0("../plots/Subtraction/Subtraction_Design1_N400minusSegment_Quantiles_Conds.pdf"),
-    modus = "ConditionQuantile", ylims = c(12, -7),
-    leg_labs = quart_labels, leg_vals = quart_values, ci = FALSE)
+# source("../../../code/plot_rERP.r")
+# plot_single_elec(dt_out, elec,
+#     file = paste0("../plots/Subtraction/Subtraction_Design1_N400minusSegment_Quantiles_Conds.pdf"),
+#     modus = "ConditionQuantile", ylims = c(13, -7),
+#     leg_labs = quart_labels, leg_vals = quart_values, ci = FALSE)
 
-# DESIGN 2
-dt <- fread("../../../data/ERP_Design2.csv")
-elec <- "Pz"
-cond_labels <- c("A", "B", "C")
-cond_values <- c("#000000", "red", "blue")
-dt_s <- dt[, lapply(.SD, mean),
-    by = list(Subject, Condition, Timestamp), .SDcols = elec]
-dt_all <- dt[, lapply(.SD, mean),
-    by = list(Condition, Timestamp), .SDcols = elec]
-dt_all$Pz_CI <- dt[, lapply(.SD, ci),
-    by = list(Condition, Timestamp), .SDcols = elec][,..elec]
-dt_all$Spec <- dt_all$Condition
-plot_single_elec(dt_all, elec,
-    file = paste0("../plots/Subtraction/ERP_Design2_ABC_Pz.pdf"),
-    modus = "Condition", ylims = c(9, -5.5),
-    leg_labs = cond_labels, leg_vals = cond_values)
+# # DESIGN 2
+# dt <- fread("../../../data/ERP_Design2.csv")
+# elec <- "Pz"
+# cond_labels <- c("A", "B", "C")
+# cond_values <- c("#000000", "red", "blue")
+# dt_s <- dt[, lapply(.SD, mean),
+#     by = list(Subject, Condition, Timestamp), .SDcols = elec]
+# dt_all <- dt[, lapply(.SD, mean),
+#     by = list(Condition, Timestamp), .SDcols = elec]
+# dt_all$Pz_CI <- dt[, lapply(.SD, ci),
+#     by = list(Condition, Timestamp), .SDcols = elec][,..elec]
+# dt_all$Spec <- dt_all$Condition
+# plot_single_elec(dt_all, elec,
+#     file = paste0("../plots/Subtraction/ERP_Design2_ABC_Pz.pdf"),
+#     modus = "Condition", ylims = c(9, -5),
+#     leg_labs = cond_labels, leg_vals = cond_values)
 
-# Show condition average + two subtraction-based quantiles within condition
-quart_labels <- c("Avg.", "Low Quant", "High Quant")
-quart_values <- c("solid", "dotted", "dashed")
+# # Show condition average + two subtraction-based quantiles within condition
+# quart_labels <- c("Avg.", "Low Quant", "High Quant")
+# quart_values <- c("solid", "dotted", "dashed")
 
-for (cond in c("A", "B", "C")) {
-    dt_cond <- dt[Condition == cond, ]
-    dt_cond$Trial <- paste(dt_cond$ItemNum, dt_cond$Subject)
+# for (cond in c("A", "B", "C")) {
+#     dt_cond <- dt[Condition == cond, ]
+#     dt_cond$Trial <- paste(dt_cond$ItemNum, dt_cond$Subject)
 
-    n400 <- dt_cond[(Timestamp > 300 & Timestamp < 500), lapply(.SD, mean),
-        by = list(Trial), .SDcols = elec]
-    segment <- dt_cond[(Timestamp > 0), lapply(.SD, mean),
-        by = list(Trial), .SDcols = elec]
-    n4seg <- merge(n400, segment, by = "Trial")
-    colnames(n4seg)[2:3] <- c("N400", "Segment")
-    n4seg$N4minSeg <- n4seg$N400 - n4seg$Segment
-    n4seg$Quantile <- ntile(n4seg$N4minSeg, 2)
-    dt_cond <- merge(dt_cond, n4seg[, c("Trial", "Quantile")], by = "Trial")
+#     n400 <- dt_cond[(Timestamp > 300 & Timestamp < 500), lapply(.SD, mean),
+#         by = list(Trial), .SDcols = elec]
+#     segment <- dt_cond[(Timestamp > 0), lapply(.SD, mean),
+#         by = list(Trial), .SDcols = elec]
+#     n4seg <- merge(n400, segment, by = "Trial")
+#     colnames(n4seg)[2:3] <- c("N400", "Segment")
+#     n4seg$N4minSeg <- n4seg$N400 - n4seg$Segment
+#     n4seg$Quantile <- ntile(n4seg$N4minSeg, 2)
+#     dt_cond <- merge(dt_cond, n4seg[, c("Trial", "Quantile")], by = "Trial")
 
-    dt_avg <- avg_quart_dt(dt_cond, elec, add_grandavg = TRUE)
-    dt_avg$Spec <- ifelse(dt_avg$Spec == 42, "Average", ifelse(dt_avg$Spec == 1, "Low Quant", "High Quant"))
-    dt_avg$ConditionQuantile <- dt_avg$Quantile
-    dt_avg$Condition <- cond
+#     dt_avg <- avg_quart_dt(dt_cond, elec, add_grandavg = TRUE)
+#     dt_avg$Spec <- ifelse(dt_avg$Spec == 42, "Average", ifelse(dt_avg$Spec == 1, "Low Quant", "High Quant"))
+#     dt_avg$ConditionQuantile <- dt_avg$Quantile
+#     dt_avg$Condition <- cond
 
-    source("../../../code/plot_rERP.r")
-    plot_single_elec(dt_avg, elec,
-        file = paste0("../plots/Subtraction/Subtraction_Design2_N400minusSegment_Quantiles_", cond, ".pdf"),
-        modus = "ConditionQuantile", ylims = c(12, -7),
-        leg_labs = quart_labels, leg_vals = quart_values, ci = FALSE)
+#     source("../../../code/plot_rERP.r")
+#     plot_single_elec(dt_avg, elec,
+#         file = paste0("../plots/Subtraction/Subtraction_Design2_N400minusSegment_Quantiles_", cond, ".pdf"),
+#         modus = "ConditionQuantile", ylims = c(13, -7),
+#         leg_labs = quart_labels, leg_vals = quart_values, ci = FALSE)
 
-    if (cond == "A") {
-        dt_out <- dt_avg
-    } else {
-        dt_out <- rbind(dt_out, dt_avg)
-    }
-}
+#     if (cond == "A") {
+#         dt_out <- dt_avg
+#     } else {
+#         dt_out <- rbind(dt_out, dt_avg)
+#     }
+# }
 
-source("../../../code/plot_rERP.r")
-plot_single_elec(dt_out, elec,
-    file = paste0("../plots/Subtraction/Subtraction_Design2_N400minusSegment_Quantiles_Conds.pdf"),
-    modus = "ConditionQuantile", ylims = c(12, -7),
-    leg_labs = quart_labels, leg_vals = quart_values, ci = FALSE)
+# source("../../../code/plot_rERP.r")
+# plot_single_elec(dt_out, elec,
+#     file = paste0("../plots/Subtraction/Subtraction_Design2_N400minusSegment_Quantiles_Conds.pdf"),
+#     modus = "ConditionQuantile", ylims = c(13, -7),
+#     leg_labs = quart_labels, leg_vals = quart_values, ci = FALSE)

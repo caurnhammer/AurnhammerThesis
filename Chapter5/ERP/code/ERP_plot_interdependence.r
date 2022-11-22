@@ -27,7 +27,7 @@ make_plots <- function(
     plot_single_elec(coef, "Pz",
         file = paste0("../plots/", file, "/Waveforms/Coefficients_Pz.pdf"),
         title = "rERP coefficients",
-        modus = "Coefficient", ylims = c(15, -22),
+        modus = "Coefficient", ylims = c(15, -23.5),
         leg_labs = model_labs, leg_vals = model_vals)
 
     # Models: t-value
@@ -99,11 +99,11 @@ make_plots <- function(
 # make_plots("ERP_Design1_Segment_C", c("Pz"),
 #     predictor = c("Intercept", "PzSegment"))
 
-# make_plots("ERP_Design1_N400Segment_C", c("Pz"),
-#     predictor = c("Intercept", "PzN400", "PzSegment"))
+make_plots("ERP_Design1_N400Segment_C", c("Pz"),
+    predictor = c("Intercept", "PzN400", "PzSegment"))
 
-# make_plots("ERP_Design1_N400Segment_A", c("Pz"),
-#    predictor = c("Intercept", "PzN400", "PzSegment"))
+make_plots("ERP_Design1_N400Segment_A", c("Pz"),
+   predictor = c("Intercept", "PzN400", "PzSegment"))
 
 make_plots("ERP_dbc19_N400Segment_A", c("Pz"),
    predictor = c("Intercept", "PzN400", "PzSegment"))
