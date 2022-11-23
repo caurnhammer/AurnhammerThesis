@@ -114,6 +114,8 @@ plot_single_elec(dt_avg, elec,
     modus = "Quantile", ylims = c(18, -14),
     leg_labs = quart_labels, leg_vals = quart_values)
 
+
+
 #####################################
 # Plot Quantile bins computed from  #
 # N400 - Segment per-trial averages #
@@ -208,6 +210,194 @@ for (i in c(1, 2, 3)) {
         modus = "Quantile", ylims = c(18, -14),
         leg_labs = quart_labels, leg_vals = quart_values)
 }
+
+##############
+# VALIDATION #
+##############
+
+# RELATION OF THE BINS TO CLOZE PROBABILITY
+# RAW
+dt_cond <- dt[Condition == "A",]
+#dt_cond <- dt
+dt_cond$Trial <- paste(dt_cond$ItemNum, dt_cond$Subject)
+n400 <- dt_cond[(Timestamp > 300 & Timestamp < 500), lapply(.SD, mean),
+    by = list(Trial, Subject, ItemNum, Condition, NumInSess), .SDcols = c(elec, "Cloze")]
+n400$Quantile <- ntile(n400[,..elec], 3)
+dt_cond <- merge(dt_cond, n400[, c("Trial", "Quantile", "Cloze")], on = "Trial")
+dt_trial <- dt_cond[, lapply(.SD, mean), by = list(Trial), .SDcols=c("Cloze", "Quantile")]
+cor(dt_trial$Cloze, dt_trial$Quantile)
+
+summary(lm(Cloze ~ scale(Quantile), n400))
+
+# SUBTRACTION
+dt_cond <- dt[Condition == "A"]
+#dt_cond <- dt
+dt_cond$Trial <- paste(dt_cond$ItemNum, dt_cond$Subject)
+n400 <- dt_cond[(Timestamp > 300 & Timestamp < 500), lapply(.SD, mean),
+    by = list(Trial), .SDcols = elec]
+segment <- dt_cond[(Timestamp > 0), lapply(.SD, mean),
+    by = list(Trial), .SDcols = c(elec, "Cloze")]
+n4seg <- merge(n400, segment, by = "Trial")
+colnames(n4seg)[2:3] <- c("N400", "Segment")
+n4seg$N4minSeg <- n4seg$N400 - n4seg$Segment
+n4seg$Quantile <- ntile(n4seg$N4minSeg, 3)
+dt_cond <- merge(dt_cond, n4seg[, c("Trial", "Quantile")], by = "Trial")
+dt_trial <- dt_cond[, lapply(.SD, mean), by = list(Trial, Condition), .SDcols=c("Cloze", "Quantile", "Pz")]
+cor(dt_trial$Cloze, dt_trial$Quantile)
+
+summary(lm(Cloze ~ scale(Quantile), n4seg))
+summary(lm(Cloze ~ scale(N400), n4seg))
+summary(lm(Cloze ~ scale(N4minSeg), n4seg))
+
+
+summary(lm(N400 ~ scale(Cloze), n4seg))
+summary(lm(N4minSeg ~ scale(Cloze), n4seg))
+
+########
+# Correlation of N400 to Segment and N4minSeg to Segment
+dt_cond <- dt[Condition == "A", ]
+dt_cond$Trial <- paste(dt_cond$ItemNum, dt_cond$Subject)
+
+n400 <- dt_cond[(Timestamp > 300 & Timestamp < 500), lapply(.SD, mean),
+    by = list(Trial), .SDcols = elec]
+segment <- dt_cond[(Timestamp > 0), lapply(.SD, mean),
+    by = list(Trial), .SDcols = c(elec, "Cloze")]
+n4seg <- merge(n400, segment, by = "Trial")
+colnames(n4seg)[2:3] <- c("N400", "Segment")
+n4seg$N4minSeg <- n4seg$N400 - n4seg$Segment
+n4seg$Quantile <- ntile(n4seg$N4minSeg, 3)
+dt_cond <- merge(dt_cond, n4seg[, c("Trial", "Quantile")], by = "Trial")
+
+dt_trial <- dt_cond[, lapply(.SD, mean), by = list(Trial, Condition), .SDcols=c("Cloze", "Quantile", "Pz")]
+
+cor(n4seg$N400, n4seg$Segment)
+cor(n4seg$N4minSeg, n4seg$Segment)
+
+sl <- 57
+ggsave(ggplot(n4seg, aes(x=N400, y=Segment)) + geom_point(size=0.5) + theme_minimal() + lims(x=c(-sl, sl), y=c(-sl, sl)), file="/Users/chr/Desktop/N4_Segment.pdf", device=cairo_pdf, width=5, height=5)
+ggsave(ggplot(n4seg, aes(x=N4minSeg, y=Segment)) + geom_point(size=0.5) + theme_minimal() + lims(x=c(-sl, sl), y=c(-sl, sl)), file="/Users/chr/Desktop/N4minSeg_Segment.pdf", device=cairo_pdf, width=5, height=5)
+
+ggsave(ggplot(n4seg, aes(x=N400, y=Cloze)) + geom_point() + theme_minimal(), file="/Users/chr/Desktop/N4_Cloze.pdf", device=cairo_pdf, width=5, height=5)
+ggsave(ggplot(n4seg, aes(x=N4minSeg, y=Cloze)) + geom_point() + theme_minimal(), file="/Users/chr/Desktop/N4minSeg_Cloze.pdf", device=cairo_pdf, width=5, height=5)
+
+# raw P6
+dt_cond <- dt[Condition == "A",]
+#dt_cond <- dt
+dt_cond$Trial <- paste(dt_cond$ItemNum, dt_cond$Subject)
+p600 <- dt_cond[(Timestamp > 600 & Timestamp < 800), lapply(.SD, mean),
+    by = list(Trial, Subject, ItemNum, Condition, NumInSess), .SDcols = c(elec, "Cloze")]
+p600$Quantile <- ntile(p600[,..elec], 3)
+dt_cond <- merge(dt_cond, p600[, c("Trial", "Quantile", "Cloze")], on = "Trial")
+dt_trial <- dt_cond[, lapply(.SD, mean), by = list(Trial), .SDcols=c("Cloze", "Quantile")]
+cor(dt_trial$Cloze, dt_trial$Quantile)
+
+summary(lm(Cloze ~ scale(Quantile), p600))
+
+dt_avg <- avg_quart_dt(dt_cond, elec)
+plot_single_elec(dt_avg, elec,
+    file = paste0("../plots/Subtraction/Subtraction_Design1_RawP600_Tertiles_A.pdf"),
+    modus = "Quantile", ylims = c(18, -14),
+    leg_labs = quart_labels, leg_vals = quart_values)
+
+
+# P6-Segment
+dt_cond <- dt[Condition == "A", ]
+dt_cond$Trial <- paste(dt_cond$ItemNum, dt_cond$Subject)
+
+p600 <- dt_cond[(Timestamp > 800 & Timestamp < 1000), lapply(.SD, mean),
+    by = list(Trial), .SDcols = elec]
+segment <- dt_cond[(Timestamp > 0 & Timestamp < 1200), lapply(.SD, mean),
+    by = list(Trial), .SDcols = c(elec, "Cloze")]
+p6seg <- merge(p600, segment, by = "Trial")
+colnames(p6seg)[2:3] <- c("P600", "Segment")
+p6seg$P6minSeg <- p6seg$P600 - p6seg$Segment
+p6seg$Quantile <- ntile(p6seg$P6minSeg, 3)
+dt_cond <- merge(dt_cond, p6seg[, c("Trial", "Quantile")], by = "Trial")
+
+dt_trial <- dt_cond[, lapply(.SD, mean), by = list(Trial, Condition), .SDcols=c("Cloze", "Quantile", "Pz")]
+
+cor(p6seg$P600, p6seg$Segment)
+cor(p6seg$P6minSeg, p6seg$Segment)
+
+summary(lm(Cloze ~ scale(Quantile), p6seg))
+
+summary(lm(Cloze ~ scale(P6minSeg), p6seg))
+summary(lm(P600 ~ scale(Cloze), p6seg))
+summary(lm(P6minSeg ~ scale(Cloze), p6seg))
+
+summary(lm(Cloze ~ scale(Segment), p6seg))
+summary(lm(Cloze ~ scale(P600), p6seg))
+summary(lm(Cloze ~ scale(P6minSeg), p6seg))
+
+dt_avg <- avg_quart_dt(dt_cond, elec)
+plot_single_elec(dt_avg, elec,
+    file = paste0("../plots/Subtraction/Subtraction_Design1_P600minusSegment_Tertiles_A.pdf"),
+    modus = "Quantile", ylims = c(18, -14),
+    leg_labs = quart_labels, leg_vals = quart_values)
+
+sl <- 57
+ggsave(ggplot(p6seg, aes(x=P600, y=Segment)) + geom_point(size=0.5) + theme_minimal() + lims(x=c(-sl, sl), y=c(-sl, sl)), file="/Users/chr/Desktop/P6_Segment.pdf", device=cairo_pdf, width=5, height=5)
+ggsave(ggplot(p6seg, aes(x=P6minSeg, y=Segment)) + geom_point(size=0.5) + theme_minimal() +  lims(x=c(-sl, sl), y=c(-sl, sl)), file="/Users/chr/Desktop/P6minSeg_Segment.pdf", device=cairo_pdf, width=5, height=5)
+
+
+
+
+
+# Simu stuff
+reso <- 700
+simu <- data.table(Trial = rep(0, reso * 1000), Time = rep(seq(-200, 1198, length=reso), 1000), Data = rep(0, reso * 1000))
+j <- 1
+for (i in seq(1, 1000)) {
+    simu[j:(j+reso-1), "Trial"] <- i
+    simu[j:(j+reso-1), "Data"] <- seq(0, sample(seq(-10, 10), 1), length = reso)
+    j <- j + reso
+}
+simu
+
+
+# raw n4
+sim <- simu
+simn4seg <- sim[(Time > 300 & Time < 500), lapply(.SD, mean),
+    by = list(Trial), .SDcols = "Data"]
+simn4seg$Quantile <- ntile(simn4seg[,"Data"], 3)
+sim <- merge(sim, simn4seg[, c("Trial", "Quantile")], on = "Trial")
+sim_avg <- sim[, lapply(.SD, mean), by=list(Time, Quantile), .SDcols = "Data"]
+sim_avg$Quantile <- as.factor(sim_avg$Quantile)
+p <- ggplot(sim_avg, aes(x=Time, y=Data, color=Quantile)) + geom_line() + scale_y_reverse() + theme_minimal()
+ggsave(p, file="/Users/chr/Desktop/sim_rawbins.pdf", device=cairo_pdf, width=5, height=5)
+
+# subtraction
+sim <- simu
+n400 <- sim[(Time > 300 & Time < 500), lapply(.SD, mean),
+    by = list(Trial), .SDcols = "Data"]
+segment <- sim[Time > 0, lapply(.SD, mean),
+    by = list(Trial), .SDcols = "Data"]
+simn4seg <- merge(n400, segment, by = "Trial")
+colnames(simn4seg)[2:3] <- c("N400", "Segment")
+simn4seg$N4minSeg <- simn4seg$N400 - simn4seg$Segment
+simn4seg$Quantile <- ntile(simn4seg$N4minSeg, 3)
+sim <- merge(sim, simn4seg[, c("Trial", "Quantile")], by = "Trial")
+sim_avg <- sim[, lapply(.SD, mean), by=list(Time, Quantile), .SDcols = "Data"]
+sim_avg$Quantile <- as.factor(sim_avg$Quantile)
+p <- ggplot(sim_avg, aes(x=Time, y=Data, color=Quantile)) + geom_line() + scale_y_reverse() + theme_minimal()
+ggsave(p, file="/Users/chr/Desktop/sim_subtractionbins.pdf", device=cairo_pdf, width=5, height=5)
+
+
+myvec <- seq(100, 1100, length.out = 11)
+myvec <- c(0, (myvec))
+t <- 2
+print(simu[Trial==t, "Data"])
+for (i in myvec) {
+    roi <- mean(simu[Trial == t & Time > i & Time < (i + 100),]$Data) 
+    seg <- mean(simu[Trial == t & Time > 0,]$Data)
+    sub <- roi - seg
+    print(c(roi, seg, sub))
+}
+# -> for a positive drifting trial, the subtraction biases the bin to be too negative for early time-windows 
+# and too positive for later time-windows (vice versa for a negative drifting trial).
+# This only affects bin assignment and does not alter the data being shown.
+
+
 
 
 # ---------------------> attic
