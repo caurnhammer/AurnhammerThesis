@@ -1,3 +1,5 @@
+# If components are provided, they are automatically inverted. I.e. no need to provide them to invert_preds argument
+
 include("../../../code/rERP.jl");
 
 # Aurnhammer et al. (2021), Condition C
@@ -58,7 +60,7 @@ include("../../../code/rERP.jl"); @time fit_models_components(dt, models, "ERP_D
 # DEV
 include("../../../code/rERP.jl");
 models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Intercept], quant = true);
-@time process_data("../../../data/ERP_Design1.csv", "../data/ERP_Design1_rERP.csv", models, conds=["A"], components=[:N400, :P600, :Segment], invert_preds=[:Cloze]);
+@time process_data("../../../data/ERP_Design1.csv", "../data/ERP_Design1_rERP.csv", models, conds=["A"], components=[:N400, :P600, :Segment]);
 @time dt = read_data("../data/ERP_Design1_rERP.csv", models);
 
 models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Intercept, :PzSegment], quant = false);
@@ -67,3 +69,27 @@ include("../../../code/rERP.jl"); @time fit_models(dt, models, "ERP_Design1_Segm
 
 models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Intercept], quant = true);
 include("../../../code/rERP.jl"); @time fit_models_components(dt, models, "ERP_Design1_N400Segment_A");
+
+include("../../../code/rERP.jl");
+models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Intercept], quant = true);
+@time process_data("../../../data/ERP_Design1.csv", "../data/ERP_Design1_rERP.csv", models, conds=["A"], components=[:N400minP600, :Segment]);
+@time dt = read_data("../data/ERP_Design1_rERP.csv", models);
+include("../../../code/rERP.jl"); @time fit_models_components(dt, models, "ERP_Design1_N600minP1000Segment_A");
+
+include("../../../code/rERP.jl");
+models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Intercept], quant = true);
+@time process_data("../../../data/ERP_Design1.csv", "../data/ERP_Design1_rERP.csv", models, conds=["A"], components=[:N400, :Segment]);
+@time dt = read_data("../data/ERP_Design1_rERP.csv", models);
+include("../../../code/rERP.jl"); @time fit_models_components(dt, models, "ERP_Design1_N000Segment_A");
+
+
+# Through time
+include("../../../code/rERP.jl");
+models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Intercept], quant = false);
+tw_length = 200
+tws = collect(range(0, 1000, 11))
+for t in tws
+    @time dt = process_data("../../../data/ERP_Design1.csv", false, models, components=[:TimeWindow, :Segment], time_windows=[t, t+tw_length]);
+    # @time dt = process_data("../../../data/ERP_Design1.csv", false, models, components=[:Segment], time_windows=[t, t+tw_length]);
+    @time fit_models_components(dt, models, string("ERP_Design1_TimeWindowSegment_", Int(t), "-", Int(t+tw_length)));
+end

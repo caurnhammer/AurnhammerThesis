@@ -40,7 +40,7 @@ function make_Ind(data, models, m_indices, s_ind, e_ind, m_ind)
     Ind(length(models.Predictors),  Dict([x => i-1 for (i, x) in enumerate(models.Predictors)]), nrow(data), length(m_indices), s_ind, e_ind, m_ind)
 end
 
-function process_data(infile, outfile, models; baseline_corr = false, sampling_rate = false, invert_preds = false, conds = false, components = false, keep_conds = false)
+function process_data(infile, outfile, models; baseline_corr = false, sampling_rate = false, invert_preds = false, conds = false, components = false, keep_conds = false, time_windows = false)
     # Load Data from disk
     data = DataFrame(File(infile))
     
@@ -71,14 +71,16 @@ function process_data(infile, outfile, models; baseline_corr = false, sampling_r
     # Collect component predictor
     if components != false
         # Add an electrode specific component predictors
-        data = collect_component(data, "N400", models; tws=300, twe=500);
-        data = collect_component(data, "P600", models ; tws=600, twe=800);
+        data = collect_component(data, "TimeWindow", models; tws=time_windows[1], twe=time_windows[2]);
+        #data = collect_component(data, "P600", models ; tws=1000, twe=1200);
         data = collect_component(data, "Segment", models ; tws=0, twe=1200);
+
+        #data.PzN400minP600 = data.PzN400 .- data.PzP600
 
         # Add Quartiles, based on the N400 size averaged across electrodes
         # This has the advantage that the bins are the same across electrodes.
         # This means the N400 predictor is electrode specific, but the binning is not.
-        data.AvgN400 = sum(eachcol(data[:,[Symbol(e, "N400") for e in models.Electrodes]]))
+        # data.AvgN400 = sum(eachcol(data[:,[Symbol(e, "N400") for e in models.Electrodes]]))
     end
     
     # Z-standardise predictors
@@ -98,7 +100,7 @@ function process_data(infile, outfile, models; baseline_corr = false, sampling_r
     if typeof(outfile) == String
         write(outfile, data)
     else
-        data
+        sort!(data, [x for x in reverse(models.Descriptors)])
     end
 end
 
@@ -209,12 +211,11 @@ function process_spr_data(infile, outfile, models; invert_preds = false, conds =
     if keep_conds == false
         data = transform_conds(data, verbose=true);
     end
-
     # Write data to file or return as DataFrame
     if typeof(outfile) == String
         write(outfile, data)
     else
-        data
+        sort!(data, [x for x in reverse(models.Descriptors)])
     end
 end
 
@@ -308,10 +309,13 @@ function fit_models_components(dt, models, file)
     out_models = []
     for (i, e) in enumerate(models.Electrodes)
         println("Electrode $e ")
-        #models_e = make_models(models.Descriptors, models.NonDescriptors, [e], [:Intercept, Symbol(e, "N400")]; quant = models.Quantiles);
-        #models_e = make_models(models.Descriptors, models.NonDescriptors, [e], [:Intercept, Symbol(e, "Segment")]; quant = models.Quantiles);
-        models_e = make_models(models.Descriptors, models.NonDescriptors, [e], [:Intercept, Symbol(e, "N400"), Symbol(e, "Segment")]; quant = models.Quantiles);
-        #models_e = make_models(models.Descriptors, models.NonDescriptors, [e], [:Intercept, Symbol(e, "N400"), Symbol(e, "P600"), Symbol(e, "Segment")]; quant = models.Quantiles);
+        # models_e = make_models(models.Descriptors, models.NonDescriptors, [e], [:Intercept, Symbol(e, "Segment")]; quant = models.Quantiles);
+        # models_e = make_models(models.Descriptors, models.NonDescriptors, [e], [:Intercept, Symbol(e, "Segment")]; quant = models.Quantiles);
+        # models_e = make_models(models.Descriptors, models.NonDescriptors, [e], [:Intercept, Symbol(e, "N400"), Symbol(e, "Segment")]; quant = models.Quantiles);
+        # models_e = make_models(models.Descriptors, models.NonDescriptors, [e], [:Intercept, Symbol(e, "N400"), Symbol(e, "P600"), Symbol(e, "Segment")]; quant = models.Quantiles);
+        models_e = make_models(models.Descriptors, models.NonDescriptors, [e], [:Intercept, Symbol(e, "TimeWindow"), Symbol(e, "Segment")]; quant = false);
+        # models_e = make_models(models.Descriptors, models.NonDescriptors, [e], [:Intercept, Symbol(e, "Segment")]; quant = false);
+        # print(dt[1:10,:])
         output = fit_models(dt, models_e, "none")
         if i .== 1
             out_data = output[1]

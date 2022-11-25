@@ -15,13 +15,12 @@ make_plots <- function(
     mod <- fread(paste0("../data/", file, "_models.csv"))
     mod$Spec <- factor(mod$Spec, levels = predictor)
 
-    model_labs <- c("Intercept", "N400", "Segment")
+    model_labs <- c("Intercept", "TimeWindow", "Segment")
     model_vals <- c("black", "#E349F6", "#00FFFF")
-
-    # model_labs <- c("Intercept", "N400", "P600", "Segment")
-    # model_vals <- c("black", "#E349F6", "blue", "#00FFFF")
-    # #model_labs <- c("N400", "Segment")
-    #model_vals <- c("#E349F6", "#00FFFF")
+    # model_labs <- c("Intercept", "Segment")
+    # model_vals <- c("black", "#00FFFF")
+    # model_labs <- c("Intercept", "N400", "Segment")
+    # model_vals <- c("black", "#E349F6", "#00FFFF")
 
     # Models: coefficent
     coef <- mod[(Type == "Coefficient"), ]
@@ -53,17 +52,21 @@ make_plots <- function(
 
     ## DATA
     eeg <- fread(paste0("../data/", file, "_data.csv"))
-    eeg$Quantile <- factor(eeg$Condition)
-    data_labs <- c(1, 2, 3, 4)
-    data_vals <- c("blue", "red", "orange", "black")
+    # eeg$Quantile <- factor(eeg$Condition)
+    # data_labs <- c(1, 2, 3, 4)
+    # data_vals <- c("blue", "red", "orange", "black")
     # data_vals <- c("blue", "black", "orange")
+    eeg$Condition <- factor(plyr::mapvalues(eeg$Condition, c(2, 1, 3, 4),
+        c("B", "A", "C", "D")), levels = c("A", "B", "C", "D"))
+    data_labs <- c("A", "B", "C", "D")
+    data_vals <- c("#000000", "#BB5566", "#004488", "#DDAA33")
 
     # Estimates
     obs <- eeg[Type == "EEG", ]
 
     plot_single_elec(obs, elec,
         file = paste0("../plots/", file,  "/Waveforms/Observed.pdf"),
-        modus = "Quantile", ylims = c(30, -30),
+        modus = "Condition", ylims = c(10, -5),
         leg_labs = data_labs, leg_vals = data_vals)
 
     # Estimated
@@ -76,7 +79,7 @@ make_plots <- function(
         name <- gsub("\\[|\\]|:|,| ", "", spec)
         plot_single_elec(est_set, elec,
                   file = paste0("../plots/", file, "/Waveforms/Estimated_",
-                  name, ".pdf"), modus = "Quantile", ylims = c(30, -30),
+                  name, ".pdf"), modus = "Condition", ylims = c(10, -5),
                   leg_labs = data_labs, leg_vals = data_vals)
     }
 
@@ -91,7 +94,7 @@ make_plots <- function(
         plot_single_elec(res_set, elec,
                   file = paste0("../plots/", file, "/Waveforms/Residual_",
                   name, ".pdf"), title = paste0("Residual Pz: ", pred[i]),
-                modus = "Quantile", ylims = c(25, -30),
+                modus = "Condition", ylims = c(4, -4),
                   leg_labs = data_labs, leg_vals = data_vals)
     }
 }
@@ -138,3 +141,22 @@ make_plots <- function(
 
 # make_plots("ERP_Design2_N400Segment_C", c("Pz"),
 #     predictor = c("Intercept", "PzN400", "PzSegment"))
+
+# make_plots("ERP_Design1_N400minP600Segment_A", c("Pz"),
+#     predictor = c("Intercept", "PzN400minP600", "PzSegment"))
+ 
+
+# make_plots("ERP_Design1_N000minP200Segment_A", c("Pz"),
+#     predictor = c("Intercept", "PzN400minP600", "PzSegment"))
+
+# make_plots("ERP_Design1_N600minP1000Segment_A", c("Pz"),
+#     predictor = c("Intercept", "PzN400minP600", "PzSegment"))
+
+tw_length = 200
+tws = seq(0, 1000, 100)
+for (t in tws) {
+    make_plots(paste0("ERP_Design1_TimewindowSegment_", t, "-", t+tw_length), c("Pz"),
+        predictor = c("Intercept", "PzTimeWindow", "PzSegment"))
+    # make_plots(paste0("ERP_Design1_Segment_", t, "-", t+tw_length), c("Pz"),
+    #     predictor = c("Intercept", "PzSegment"))
+}
