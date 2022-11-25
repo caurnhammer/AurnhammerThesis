@@ -215,6 +215,61 @@ for (i in c(1, 2, 3)) {
 # VALIDATION #
 ##############
 
+# Show single trials in extreme bins
+dt_cond <- dt[Condition == "A", ]
+dt_cond$Trial <- paste(dt_cond$ItemNum, dt_cond$Subject)
+
+n400 <- dt_cond[(Timestamp > 300 & Timestamp < 500), lapply(.SD, mean),
+    by = list(Trial), .SDcols = elec]
+segment <- dt_cond[(Timestamp > 0), lapply(.SD, mean),
+    by = list(Trial), .SDcols = elec]
+n4seg <- merge(n400, segment, by = "Trial")
+colnames(n4seg)[2:3] <- c("N400", "Segment")
+n4seg$N4minSeg <- n4seg$N400 - n4seg$Segment
+n4seg$Quantile <- ntile(n4seg$N4minSeg, 5)
+dt_cond <- merge(dt_cond, n4seg[, c("Trial", "Quantile")], by = "Trial")
+
+dt_ex <- dt_cond[Quantile == 5,]
+dt_tex <- dt_ex[sample(unique(dt_ex$Trial),1),]
+ggplot(dt_tex, aes(x=Timestamp, y=Pz)) + geom_line() + scale_y_reverse() + theme_minimal()
+
+dt_ex <- dt_cond[Quantile == 1,]
+dt_tex <- dt_ex[sample(unique(dt_ex$Trial),1),]
+ggplot(dt_tex, aes(x=Timestamp, y=Pz)) + geom_line() + scale_y_reverse() + theme_minimal()
+
+# Move through time
+tws <- c(0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000)
+for (tw in tws){
+    #dt_cond <- dt[Condition == "A"]
+    dt_cond <- dt
+    dt_cond$Trial <- paste(dt_cond$ItemNum, dt_cond$Subject)
+    n400 <- dt_cond[(Timestamp > tw & Timestamp < (tw+200)), lapply(.SD, mean),
+        by = list(Trial, Condition), .SDcols = c(elec, "Cloze")]
+    segment <- dt_cond[(Timestamp > 0), lapply(.SD, mean),
+        by = list(Trial), .SDcols = elec]
+    n4seg <- merge(n400, segment, by = "Trial")
+    colnames(n4seg)[c(3,5)] <- c("N400", "Segment")
+    n4seg$N4minSeg <- n4seg$N400 - n4seg$Segment
+    n4seg$Quantile <- ntile(n4seg$N4minSeg, 4)
+    dt_cond <- merge(dt_cond, n4seg[, c("Trial", "Quantile")], by = "Trial")
+
+    print(c(tw, tw+200))
+    print(table(n4seg$Quantile, n4seg$Condition))
+    #print(cor(n4seg$Cloze, n4seg$Quantile))
+
+    # pdf(paste0("../plots/Subtraction/Heatmap_QuantilesCond_", tw, ".pdf"))
+    # n4seg$Condition <- factor(n4seg$Condition, levels=c("A", "B", "C", "D"))
+    # heatmap(table(n4seg$Quantile, n4seg$Condition), Rowv = NA, Colv = NA)
+    # dev.off()
+
+    # dt_avg <- avg_quart_dt(dt_cond, elec)
+    # plot_single_elec(dt_avg, elec,
+    #     file = paste0("../plots/Subtraction/Subtraction_Design1_N400minusSegment_Quartiles_A_", tw, ".pdf"),
+    #     modus = "Quantile", ylims = c(18, -14),
+    #     leg_labs = quart_labels, leg_vals = quart_values)
+}
+
+
 # RELATION OF THE BINS TO CLOZE PROBABILITY
 # RAW
 dt_cond <- dt[Condition == "A",]
@@ -397,8 +452,27 @@ for (i in myvec) {
 # and too positive for later time-windows (vice versa for a negative drifting trial).
 # This only affects bin assignment and does not alter the data being shown.
 
+dt_cond <- dt
+dt_cond$Trial <- paste(dt_cond$ItemNum, dt_cond$Subject)
+n400 <- dt_cond[(Timestamp > 300 & Timestamp < 500), lapply(.SD, mean),
+    by = list(Trial, Condition), .SDcols = elec]
+segment <- dt_cond[(Timestamp > 0), lapply(.SD, mean),
+    by = list(Trial), .SDcols = c(elec, "Cloze")]
+n4seg <- merge(n400, segment, by = "Trial")
+colnames(n4seg)[3:4] <- c("N400", "Segment")
+n4seg$N4minSeg <- n4seg$N400 - n4seg$Segment
+n4seg$Quantile <- ntile(n4seg$N4minSeg, 3)
 
+p600 <- dt_cond[(Timestamp > 600 & Timestamp < 800), lapply(.SD, mean),
+    by = list(Trial), .SDcols = elec]
+segment <- dt_cond[(Timestamp > 0 & Timestamp < 1200), lapply(.SD, mean),
+    by = list(Trial), .SDcols = c(elec, "Cloze")]
+p6seg <- merge(p600, segment, by = "Trial")
+colnames(p6seg)[2:3] <- c("P600", "Segment")
+p6seg$P6minSeg <- p6seg$P600 - p6seg$Segment
 
+n4p6seg <- merge(n4seg, p6seg[, c("Trial", "P600", "P6minSeg")], on="Trial")
+fwrite(n4p6seg, "/Users/chr/Desktop/n4p6seg.csv")
 
 # ---------------------> attic
 

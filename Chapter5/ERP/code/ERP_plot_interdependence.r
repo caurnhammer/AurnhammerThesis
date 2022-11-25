@@ -17,7 +17,10 @@ make_plots <- function(
 
     model_labs <- c("Intercept", "N400", "Segment")
     model_vals <- c("black", "#E349F6", "#00FFFF")
-    #model_labs <- c("N400", "Segment")
+
+    # model_labs <- c("Intercept", "N400", "P600", "Segment")
+    # model_vals <- c("black", "#E349F6", "blue", "#00FFFF")
+    # #model_labs <- c("N400", "Segment")
     #model_vals <- c("#E349F6", "#00FFFF")
 
     # Models: coefficent
@@ -99,23 +102,35 @@ make_plots <- function(
 # make_plots("ERP_Design1_Segment_C", c("Pz"),
 #     predictor = c("Intercept", "PzSegment"))
 
-make_plots("ERP_Design1_N400Segment_C", c("Pz"),
-    predictor = c("Intercept", "PzN400", "PzSegment"))
+# make_plots("ERP_Design1_N400Segment_C", c("Pz"),
+#     predictor = c("Intercept", "PzN400", "PzSegment"))
 
-make_plots("ERP_Design1_N400Segment_A", c("Pz"),
-   predictor = c("Intercept", "PzN400", "PzSegment"))
+# make_plots("ERP_Design1_N400Segment_A", c("Pz"),
+#    predictor = c("Intercept", "PzN400", "PzSegment"))
 
-make_plots("ERP_dbc19_N400Segment_A", c("Pz"),
-   predictor = c("Intercept", "PzN400", "PzSegment"))
+# make_plots("ERP_dbc19_N400Segment_A", c("Pz"),
+#    predictor = c("Intercept", "PzN400", "PzSegment"))
 
-make_plots("ERP_dbc19_N400Segment_B", c("Pz"),
-   predictor = c("Intercept", "PzN400", "PzSegment"))
+# make_plots("ERP_dbc19_N400Segment_B", c("Pz"),
+#    predictor = c("Intercept", "PzN400", "PzSegment"))
 
-make_plots("ERP_dbc19_N400Segment_C", c("Pz"),
-   predictor = c("Intercept", "PzN400", "PzSegment"))
+# make_plots("ERP_dbc19_N400Segment_C", c("Pz"),
+#    predictor = c("Intercept", "PzN400", "PzSegment"))
+
+# make_plots("ERP_Design1_N400P600Segment_C", c("Pz"),
+#    predictor = c("Intercept", "PzN400", "PzP600", "PzSegment"))
+
+# make_plots("ERP_Design1_SegmentCloze_A", c("Pz"),
+#    predictor = c("Intercept", "PzSegment", "Cloze"))
+
+# make_plots("ERP_Design1_Segment2_A", c("Pz"),
+#    predictor = c("Intercept", "PzSegment"))
+
+# make_plots("ERP_Design1_Segment2_A", c("Pz"),
+#    predictor = c("Intercept", "PzN400", "PzSegment"))
 
 
-# make_plots("ERP_Design2_N400Segment_A", c("Pz"),
+# make_plots("ERP_Design1_N400Segment_A", c("Pz"),
 #     predictor = c("Intercept", "PzN400", "PzSegment"))
 
 # make_plots("ERP_Design2_N400Segment_B", c("Pz"),

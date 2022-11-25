@@ -72,6 +72,7 @@ function process_data(infile, outfile, models; baseline_corr = false, sampling_r
     if components != false
         # Add an electrode specific component predictors
         data = collect_component(data, "N400", models; tws=300, twe=500);
+        data = collect_component(data, "P600", models ; tws=600, twe=800);
         data = collect_component(data, "Segment", models ; tws=0, twe=1200);
 
         # Add Quartiles, based on the N400 size averaged across electrodes
@@ -310,6 +311,7 @@ function fit_models_components(dt, models, file)
         #models_e = make_models(models.Descriptors, models.NonDescriptors, [e], [:Intercept, Symbol(e, "N400")]; quant = models.Quantiles);
         #models_e = make_models(models.Descriptors, models.NonDescriptors, [e], [:Intercept, Symbol(e, "Segment")]; quant = models.Quantiles);
         models_e = make_models(models.Descriptors, models.NonDescriptors, [e], [:Intercept, Symbol(e, "N400"), Symbol(e, "Segment")]; quant = models.Quantiles);
+        #models_e = make_models(models.Descriptors, models.NonDescriptors, [e], [:Intercept, Symbol(e, "N400"), Symbol(e, "P600"), Symbol(e, "Segment")]; quant = models.Quantiles);
         output = fit_models(dt, models_e, "none")
         if i .== 1
             out_data = output[1]
