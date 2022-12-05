@@ -219,6 +219,77 @@ for (i in c(1, 2, 3)) {
 # VALIDATION #
 ##############
 
+# Move through time
+dt_cond <- dt
+dt_cond$Trial <- paste(dt_cond$ItemNum, dt_cond$Subject)
+n400 <- dt_cond[(Timestamp > 300 & Timestamp < 500), lapply(.SD, mean),
+    by = list(Trial, Condition), .SDcols = c(elec, "Cloze")]
+p600 <- dt_cond[(Timestamp > 600 & Timestamp < 800), lapply(.SD, mean),
+    by = list(Trial, Condition), .SDcols = c(elec, "Cloze")]
+segment <- dt_cond[(Timestamp > 0), lapply(.SD, mean),
+    by = list(Trial), .SDcols = elec]
+n4seg <- merge(n400, segment, by = "Trial")
+n4seg <- merge(n4seg, p600, by = "Trial")
+colnames(n4seg)[c(3,5,7)] <- c("N400", "Segment", "P600")
+n4seg$N4minSeg <- n4seg$N400 - n4seg$Segment
+n4seg$P6minSeg <- n4seg$P600 - n4seg$Segment
+# n4seg$Quantile <- ntile(n4seg$N4minSeg, 3)
+
+n4seg$N4Quantile <- ntile(n4seg$N400, 2)
+n4seg$P6Quantile <- ntile(n4seg$Segment, 2)
+table(n4seg$N4Quantile, n4seg$P6Quantile)
+
+n4seg$N4Quantile <- ntile(n4seg$N400, 2)
+n4seg$P6Quantile <- ntile(n4seg$P600, 2)
+table(n4seg$N4Quantile, n4seg$P6Quantile)
+
+n4seg$N4Quantile <- ntile(n4seg$N4minSeg, 2)
+n4seg$P6Quantile <- ntile(n4seg$P600, 2)
+table(n4seg$N4Quantile, n4seg$P6Quantile)
+
+n4seg$N4Quantile <- ntile(n4seg$N4minSeg, 2)
+n4seg$P6Quantile <- ntile(n4seg$P6minSeg, 2)
+table(n4seg$N4Quantile, n4seg$P6Quantile)
+
+
+# dt_cond <- merge(dt_cond, n4seg[, c("Trial", "Quantile")], by = "Trial")
+
+# delogu within-condition plaus relation
+conds <- c("control", "script-related", "script-unrelated")
+cond_alts <- c("Baseline", "Event-related", "Event-unrelated")
+# tws <- seq(-100, 1000, 200)
+tws <- c(300, 800)
+for (tw in tws) {
+    # dt_cond <- dt[Condition == cond, ]
+    # dt_cond <- dt[Condition == "script-related", ]
+    #dt_cond <- dt[Condition == "script-unrelated", ]
+    dt_cond <- dt
+    dt_cond$Trial <- paste(dt_cond$ItemNum, dt_cond$Subject)
+    n400 <- dt_cond[(Timestamp > tw & Timestamp < (tw+200)), lapply(.SD, mean),
+        by = list(Trial, Condition), .SDcols = c(elec, "Plaus")]
+    segment <- dt_cond[(Timestamp > 0), lapply(.SD, mean),
+        by = list(Trial), .SDcols = elec]
+    n4seg <- merge(n400, segment, by = "Trial")
+    colnames(n4seg)[c(3,5)] <- c("N400", "Segment")
+    n4seg$N4minSeg <- n4seg$N400 - n4seg$Segment
+    n4seg$Quantile <- ntile(n4seg$N4minSeg, 3)
+    dt_cond <- merge(dt_cond, n4seg[, c("Trial", "Quantile")], by = "Trial")
+
+    print(c(tw, tw+200))
+    print(cor(n4seg$Plaus, n4seg$N4minSeg))
+    print(cor(n4seg$Plaus, n4seg$N400))
+    print(summary(lm(Plaus ~ N4minSeg, n4seg)))
+    
+    dt_avg <- avg_quart_dt(dt_cond, elec)
+    source("../../../code/plot_rERP.r")
+    plot_single_elec(dt_avg, elec,
+        file = paste0("../plots/Subtraction/Subtraction_dbc19_N400minusSegment_Quantiles_", tw, "_", tw+200, ".pdf"),
+        title = cond_alts[i],
+        modus = "Quantile", ylims = c(18, -14),
+        leg_labs = quart_labels, leg_vals = quart_values)
+}
+
+
 # Show single trials in extreme bins
 dt_cond <- dt[Condition == "A", ]
 dt_cond$Trial <- paste(dt_cond$ItemNum, dt_cond$Subject)
@@ -242,24 +313,29 @@ dt_tex <- dt_ex[sample(unique(dt_ex$Trial),1),]
 ggplot(dt_tex, aes(x=Timestamp, y=Pz)) + geom_line() + scale_y_reverse() + theme_minimal()
 
 # Move through time
-tws <- seq(0, 950, 50)
+tws <- seq(-100, 1000, 200)
 for (tw in tws){
     #dt_cond <- dt[Condition == "A"]
     dt_cond <- dt
     dt_cond$Trial <- paste(dt_cond$ItemNum, dt_cond$Subject)
-    n400 <- dt_cond[(Timestamp > tw & Timestamp < (tw+50)), lapply(.SD, mean),
+    n400 <- dt_cond[(Timestamp > 300 & Timestamp < 500), lapply(.SD, mean),
+        by = list(Trial, Condition), .SDcols = c(elec, "Cloze")]
+    p600 <- dt_cond[(Timestamp > 600 & Timestamp < 800), lapply(.SD, mean),
         by = list(Trial, Condition), .SDcols = c(elec, "Cloze")]
     segment <- dt_cond[(Timestamp > 0), lapply(.SD, mean),
         by = list(Trial), .SDcols = elec]
     n4seg <- merge(n400, segment, by = "Trial")
-    colnames(n4seg)[c(3,5)] <- c("N400", "Segment")
+    n4seg <- merge(n4seg, p600, by = "Trial")
+    colnames(n4seg)[c(3,5,7)] <- c("N400", "Segment", "P600")
     n4seg$N4minSeg <- n4seg$N400 - n4seg$Segment
     n4seg$Quantile <- ntile(n4seg$N4minSeg, 3)
     dt_cond <- merge(dt_cond, n4seg[, c("Trial", "Quantile")], by = "Trial")
 
-    # print(c(tw, tw+200))
+    print(c(tw, tw+200))
     # print(table(n4seg$Quantile, n4seg$Condition))
     #print(cor(n4seg$Cloze, n4seg$Quantile))
+    #print(cor(n4seg$Cloze, n4seg$N4minSeg))
+    print(summary(lm(Cloze ~ N4minSeg, n4seg)))
 
     # pdf(paste0("../plots/Subtraction/Heatmap_QuantilesCond_", tw, ".pdf"))
     # n4seg$Condition <- factor(n4seg$Condition, levels=c("A", "B", "C", "D"))
@@ -268,11 +344,10 @@ for (tw in tws){
 
     dt_avg <- avg_quart_dt(dt_cond, elec)
     plot_single_elec(dt_avg, elec,
-        file = paste0("../plots/Subtraction/Subtraction_Design1_N400minusSegment_Quartiles_A_", tw, ".pdf"),
+        file = paste0("../plots/Subtraction/Subtraction_Design1_N400minusSegment_Quartiles_", tw, ".pdf"),
         modus = "Quantile", ylims = c(18, -14),
         leg_labs = quart_labels, leg_vals = quart_values)
 }
-
 
 # RELATION OF THE BINS TO CLOZE PROBABILITY
 # RAW

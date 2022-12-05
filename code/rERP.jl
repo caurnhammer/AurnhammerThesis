@@ -71,8 +71,11 @@ function process_data(infile, outfile, models; baseline_corr = false, sampling_r
     # Collect component predictor
     if components != false
         # Add an electrode specific component predictors
-        data = collect_component(data, "TimeWindow", models; tws=time_windows[1], twe=time_windows[2]);
-        #data = collect_component(data, "P600", models ; tws=1000, twe=1200);
+        # data = collect_component(data, "TimeWindow", models; tws=time_windows[1], twe=time_windows[2]);
+        data = collect_component(data, "N400", models ; tws=300, twe=500);
+        # data = collect_component(data, "P600", models ; tws=600, twe=800);
+        # data.PzTimeWindow = data.PzTimeWindow .- data.PzP600
+
         data = collect_component(data, "Segment", models ; tws=0, twe=1200);
 
         #data.PzN400minP600 = data.PzN400 .- data.PzP600
@@ -311,11 +314,12 @@ function fit_models_components(dt, models, file)
         println("Electrode $e ")
         # models_e = make_models(models.Descriptors, models.NonDescriptors, [e], [:Intercept, Symbol(e, "Segment")]; quant = models.Quantiles);
         # models_e = make_models(models.Descriptors, models.NonDescriptors, [e], [:Intercept, Symbol(e, "Segment")]; quant = models.Quantiles);
-        # models_e = make_models(models.Descriptors, models.NonDescriptors, [e], [:Intercept, Symbol(e, "N400"), Symbol(e, "Segment")]; quant = models.Quantiles);
+        models_e = make_models(models.Descriptors, models.NonDescriptors, [e], [:Intercept, Symbol(e, "N400"), Symbol(e, "Segment")]; quant = models.Quantiles);
         # models_e = make_models(models.Descriptors, models.NonDescriptors, [e], [:Intercept, Symbol(e, "N400"), Symbol(e, "P600"), Symbol(e, "Segment")]; quant = models.Quantiles);
-        models_e = make_models(models.Descriptors, models.NonDescriptors, [e], [:Intercept, Symbol(e, "TimeWindow"), Symbol(e, "Segment")]; quant = false);
+        # models_e = make_models(models.Descriptors, models.NonDescriptors, [e], [:Intercept, Symbol(e, "TimeWindow")]; quant = false);
         # models_e = make_models(models.Descriptors, models.NonDescriptors, [e], [:Intercept, Symbol(e, "Segment")]; quant = false);
-        # print(dt[1:10,:])
+        # models_e = make_models(models.Descriptors, models.NonDescriptors, [e], [:Intercept, Symbol(e, "TimeWindow"), Symbol(e, "Segment")]; quant = false);
+        # models_e = make_models(models.Descriptors, models.NonDescriptors, [e], [:Intercept, Symbol(e, "N400"), Symbol(e, "P600")]; quant = false);
         output = fit_models(dt, models_e, "none")
         if i .== 1
             out_data = output[1]
@@ -430,7 +434,7 @@ function residual(out_data, models, ind)
         d_end_res = d_end_est + ind.n * length(models.Sets);
         out_data[d_start_res:d_end_res,models.Electrodes] = out_data[ind.s:ind.e,models.Electrodes] .- out_data[d_start_est:d_end_est,models.Electrodes]
         out_data[d_start_res:d_end_res,[:Type, :Spec]] = hcat(repeat([3], length(ind.s:ind.e)), repeat([s_num], length(ind.s:ind.e)))
-        out_data[d_start_res:d_end_res, flatten_ar([models.Descriptors, models.NonDescriptors, models.Predictors])] = out_data[ind.s:ind.e,flatten_ar([models.Descriptors, models.NonDescriptors, models.Predictors])]    
+        out_data[d_start_res:d_end_res, flatten_ar([models.Descriptors, models.NonDescriptors, models.Predictors])] = out_data[ind.s:ind.e,flatten_ar([models.Descriptors, models.NonDescriptors, models.Predictors])]
     end
 
     out_data

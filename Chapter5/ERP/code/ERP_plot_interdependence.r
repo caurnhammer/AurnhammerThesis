@@ -15,12 +15,18 @@ make_plots <- function(
     mod <- fread(paste0("../data/", file, "_models.csv"))
     mod$Spec <- factor(mod$Spec, levels = predictor)
 
-    model_labs <- c("Intercept", "TimeWindow", "Segment")
-    model_vals <- c("black", "#E349F6", "#00FFFF")
+    # model_labs <- c("Intercept", "TimeWindow", "Segment")
+    # model_vals <- c("black", "#E349F6", "#00FFFF")
+    # model_labs <- c("Intercept", "N4minP6")
+    # model_vals <- c("black", "#E349F6")
+    # model_labs <- c("Intercept", "N400", "P600")
+    # model_vals <- c("black", "#E349F6", "#00FFFF")
     # model_labs <- c("Intercept", "Segment")
     # model_vals <- c("black", "#00FFFF")
-    # model_labs <- c("Intercept", "N400", "Segment")
-    # model_vals <- c("black", "#E349F6", "#00FFFF")
+    # model_labs <- c("Intercept", "N400A", "N400B", "N400C", "Segment")
+    # model_vals <- c("black", "pink", "#E349F6", "purple", "#00FFFF")
+    model_labs <- c("Intercept", "N400", "Segment")
+    model_vals <- c("black", "#E349F6", "#00FFFF")
 
     # Models: coefficent
     coef <- mod[(Type == "Coefficient"), ]
@@ -56,10 +62,22 @@ make_plots <- function(
     # data_labs <- c(1, 2, 3, 4)
     # data_vals <- c("blue", "red", "orange", "black")
     # data_vals <- c("blue", "black", "orange")
-    eeg$Condition <- factor(plyr::mapvalues(eeg$Condition, c(2, 1, 3, 4),
-        c("B", "A", "C", "D")), levels = c("A", "B", "C", "D"))
-    data_labs <- c("A", "B", "C", "D")
-    data_vals <- c("#000000", "#BB5566", "#004488", "#DDAA33")
+    # eeg$Condition <- factor(plyr::mapvalues(eeg$Condition, c(2, 1, 3, 4),
+    #     c("B", "A", "C", "D")), levels = c("A", "B", "C", "D"))
+    # data_labs <- c("A", "B", "C", "D")
+    # data_vals <- c("#000000", "#BB5566", "#004488", "#DDAA33")
+
+    # eeg$Condition <- factor(plyr::mapvalues(eeg$Condition, c(1, 2, 3),
+    #     c("baseline", "event-related", "event-unrelated")),
+    #     levels = c("baseline", "event-related", "event-unrelated"))
+    # data_labs <- c("baseline", "event-related", "event-unrelated")
+    # data_vals <- c("#000000", "red", "blue")
+
+    eeg$Condition <- factor(plyr::mapvalues(eeg$Condition, c(1, 2),
+        c("event-related", "event-unrelated")),
+        levels = c("event-related", "event-unrelated"))
+    data_labs <- c("event-related", "event-unrelated")
+    data_vals <- c("red", "blue")
 
     # Estimates
     obs <- eeg[Type == "EEG", ]
@@ -71,7 +89,8 @@ make_plots <- function(
 
     # Estimated
     est <- eeg[Type == "est",]
-    pred <- c("1", "1 + N400", "1 + Segment", "1 + N400 + Segment")
+    # pred <- c("1", "1 + N400", "1 + Segment", "1 + N400 + Segment")
+    pred <- c("1", "1 + Time Window", "1 + Segment", "1 + Time Window + Segment")
     for (i in seq(1, length(unique(est$Spec)))) {
         spec <- unique(est$Spec)[i]
         est_set <- est[Spec == spec, ]
@@ -80,12 +99,13 @@ make_plots <- function(
         plot_single_elec(est_set, elec,
                   file = paste0("../plots/", file, "/Waveforms/Estimated_",
                   name, ".pdf"), modus = "Condition", ylims = c(10, -5),
-                  leg_labs = data_labs, leg_vals = data_vals)
+                  leg_labs = data_labs, leg_vals = data_vals, ci = FALSE)
     }
 
     # Residual
     res <- eeg[Type == "res", ]
-    pred <- c("1", "1 + N400", "1 + Segment", "1 + N400 + Segment")
+    # pred <- c("1", "1 + N400", "1 + Segment", "1 + N400 + Segment")
+    pred <- c("1", "1 + Time Window", "1 + Segment", "1 + Time Window + Segment")
     for (i in seq(1, length(unique(res$Spec)))) {
         spec <- unique(res$Spec)[i]
         res_set <- res[Spec == spec, ]
@@ -95,7 +115,7 @@ make_plots <- function(
                   file = paste0("../plots/", file, "/Waveforms/Residual_",
                   name, ".pdf"), title = paste0("Residual Pz: ", pred[i]),
                 modus = "Condition", ylims = c(4, -4),
-                  leg_labs = data_labs, leg_vals = data_vals)
+                  leg_labs = data_labs, leg_vals = data_vals, ci = FALSE)
     }
 }
 
@@ -152,11 +172,43 @@ make_plots <- function(
 # make_plots("ERP_Design1_N600minP1000Segment_A", c("Pz"),
 #     predictor = c("Intercept", "PzN400minP600", "PzSegment"))
 
-tw_length = 200
-tws = seq(0, 1000, 100)
-for (t in tws) {
-    make_plots(paste0("ERP_Design1_TimewindowSegment_", t, "-", t+tw_length), c("Pz"),
-        predictor = c("Intercept", "PzTimeWindow", "PzSegment"))
-    # make_plots(paste0("ERP_Design1_Segment_", t, "-", t+tw_length), c("Pz"),
-    #     predictor = c("Intercept", "PzSegment"))
-}
+# tw_length = 200
+# tws = seq(-100, 1000, 100)
+# for (t in tws) {
+#     # make_plots(paste0("ERP_Design1_TimewindowSegment_", t, "-", t+tw_length), c("Pz"),
+#     #     predictor = c("Intercept", "PzTimeWindow", "PzSegment"))
+#     make_plots(paste0("ERP_Design1_TimewindowSmallSegment_", t, "-", t+tw_length), c("Pz"),
+#         predictor = c("Intercept", "PzTimeWindow", "PzSegment"))
+#     # make_plots(paste0("ERP_Design1_Segment_", t, "-", t+tw_length), c("Pz"),
+#     #     predictor = c("Intercept", "PzSegment"))
+#     # make_plots(paste0("ERP_Design1_TimeWindow_", t, "-", t+tw_length), c("Pz"),
+#     #     predictor = c("Intercept", "PzTimeWindow"))
+# }
+
+# for (t in tws) {
+#     make_plots(paste0("ERP_dbc19_TimeWindowSegment_", t, "-", t+tw_length), c("Pz"),
+#         predictor = c("Intercept", "PzTimeWindow", "PzSegment"))
+# }
+
+
+# make_plots(paste0("ERP_Design1_N4minP6Segment"), c("Pz"),
+#     predictor = c("Intercept", "PzTimeWindow", "PzSegment"))
+
+# make_plots(paste0("ERP_Design1_N4minP6"), c("Pz"),
+#     predictor = c("Intercept", "PzTimeWindow"))
+
+# make_plots(paste0("ERP_Design1_N400P600"), c("Pz"),
+#     predictor = c("Intercept", "PzN400", "PzP600"))
+
+# make_plots(paste0("ERP_dbc19_N4minP6"), c("Pz"),
+#     predictor = c("Intercept", "PzTimeWindow"))
+
+# make_plots(paste0("ERP_dbc19_condN400Segment"), c("Pz"),
+#     predictor = c("Intercept", "PzN400A", "PzN400B", "PzN400C", "PzSegment"))
+
+# make_plots(paste0("ERP_dbc19_condN400"), c("Pz"),
+#     predictor = c("Intercept", "PzN400A", "PzN400B", "PzN400C"))
+
+
+make_plots(paste0("ERP_dbc19_N400Segment_BC"), c("Pz"),
+    predictor = c("Intercept", "PzN400", "PzSegment"))

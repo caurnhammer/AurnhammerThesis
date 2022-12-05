@@ -31,16 +31,13 @@ include("../../../code/rERP.jl"); @time fit_models_components(dt, models, "ERP_D
 include("../../../code/rERP.jl"); @time fit_models_components(dt, models, "ERP_Design1_N400Segment_D");
 
 # dbc 19
-@time process_data("../../../data/dbc_data.csv", "../data/ERP_dbc19_rERP.csv", models, conds=["control"], components=[:N400, :Segment]);
-@time dt = read_data("../data/ERP_dbc19_rERP.csv", models);
+include("../../../code/rERP.jl"); @time dt = process_data("../../../data/dbc_data.csv", false, models, conds=["control"], components=[:N400, :Segment]);
 include("../../../code/rERP.jl"); @time fit_models_components(dt, models, "ERP_dbc19_N400Segment_A");
 
-@time process_data("../../../data/dbc_data.csv", "../data/ERP_dbc19_rERP.csv", models, conds=["script-related"], components=[:N400, :Segment]);
-@time dt = read_data("../data/ERP_dbc19_rERP.csv", models);
+include("../../../code/rERP.jl"); @time dt = process_data("../../../data/dbc_data.csv", false, models, conds=["script-related"], components=[:N400, :Segment]);
 include("../../../code/rERP.jl"); @time fit_models_components(dt, models, "ERP_dbc19_N400Segment_B");
 
-@time process_data("../../../data/dbc_data.csv", "../data/ERP_dbc19_rERP.csv", models, conds=["script-unrelated"], components=[:N400, :Segment]);
-@time dt = read_data("../data/ERP_dbc19_rERP.csv", models);
+include("../../../code/rERP.jl"); @time dt = process_data("../../../data/dbc_data.csv", false, models, conds=["script-unrelated"], components=[:N400, :Segment]);
 include("../../../code/rERP.jl"); @time fit_models_components(dt, models, "ERP_dbc19_N400Segment_C");
 
 # Design 2
@@ -83,13 +80,70 @@ models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Interc
 include("../../../code/rERP.jl"); @time fit_models_components(dt, models, "ERP_Design1_N000Segment_A");
 
 
-# Through time
+## Through time
+# Aurnhammer et al., 2021
 include("../../../code/rERP.jl");
 models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Intercept], quant = false);
 tw_length = 200
-tws = collect(range(0, 1000, 11))
+tws = collect(range(-100, 1000, 12));
 for t in tws
     @time dt = process_data("../../../data/ERP_Design1.csv", false, models, components=[:TimeWindow, :Segment], time_windows=[t, t+tw_length]);
-    # @time dt = process_data("../../../data/ERP_Design1.csv", false, models, components=[:Segment], time_windows=[t, t+tw_length]);
     @time fit_models_components(dt, models, string("ERP_Design1_TimeWindowSegment_", Int(t), "-", Int(t+tw_length)));
 end
+
+# Delogu et al., 2019
+include("../../../code/rERP.jl");
+models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Intercept], quant = false);
+tw_length = 200
+tws = collect(range(-100, 1000, 12));
+for t in tws
+    @time dt = process_data("../../../data/dbc_data.csv", false, models, components=[:TimeWindow, :Segment], time_windows=[t, t+tw_length]);
+    @time fit_models_components(dt, models, string("ERP_dbc19_TimeWindowSegment_", Int(t), "-", Int(t+tw_length)));
+end
+
+# different combis for across condition data
+include("../../../code/rERP.jl");
+elec = [:Pz];   
+models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Intercept], quant = false);
+@time dt = process_data("../../../data/ERP_Design1.csv", false, models, components=[:TimeWindow, :Segment], time_windows=[300, 500]);
+@time fit_models_components(dt, models, string("ERP_Design1_N4minP6Segment"));
+
+include("../../../code/rERP.jl");
+elec = [:Pz];   
+models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Intercept], quant = false);
+@time dt = process_data("../../../data/ERP_Design1.csv", false, models, components=[:TimeWindow], time_windows=[300, 500]);
+@time fit_models_components(dt, models, string("ERP_Design1_N4minP6"));
+
+include("../../../code/rERP.jl");
+elec = [:Pz];   
+models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Intercept], quant = false);
+@time dt = process_data("../../../data/ERP_Design1.csv", false, models, components=[:N400, :P600], time_windows=[300, 500]);
+@time fit_models_components(dt, models, string("ERP_Design1_N400P600"));
+
+include("../../../code/rERP.jl");
+elec = [:Pz];   
+models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Intercept], quant = false);
+@time dt = process_data("../../../data/dbc_data.csv", false, models, conds=["script-related", "script-unrelated"], components=[:N400, :Segment], time_windows=[300, 500]);
+models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Intercept, :PzN400, :PzSegment], quant = false);
+@time fit_models(dt, models, "ERP_dbc19_N400Segment_BC");
+
+
+models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Intercept], quant = true);
+include("../../../code/rERP.jl"); @time dt = process_data("../../../data/dbc_data.csv", false, models, components=[:N400, :Segment]);
+
+dt.PzN400A = zeros(nrow(dt));
+dt[(dt.Condition .== 1),:PzN400A] = zscore(copy(dt[(dt.Condition .== 1),:PzN400]));
+
+dt.PzN400B = zeros(nrow(dt));
+dt[(dt.Condition .== 2),:PzN400B] = zscore(copy(dt[(dt.Condition .== 2),:PzN400]));
+
+dt.PzN400C = zeros(nrow(dt));
+dt[(dt.Condition .== 3),:PzN400C] = zscore(copy(dt[(dt.Condition .== 3),:PzN400]));
+
+models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Intercept, :PzN400A, :PzN400B, :PzN400C, :PzSegment], quant = false);
+fit_models(dt, models, "ERP_dbc19_condN400Segment");
+
+models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Intercept, :PzN400A, :PzN400B, :PzN400C], quant = false);
+fit_models(dt, models, "ERP_dbc19_condN400");
+
+#   !!!!!!!!!!!!!!!!!! TURN ON STANDARDISATION IN process_data AGAIN !!!!!!!!!!!!!!!!!!!
