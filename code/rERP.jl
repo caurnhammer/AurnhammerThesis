@@ -78,8 +78,6 @@ function process_data(infile, outfile, models; baseline_corr = false, sampling_r
 
         data = collect_component(data, "Segment", models ; tws=0, twe=1200);
 
-        #data.PzN400minP600 = data.PzN400 .- data.PzP600
-
         # Add Quartiles, based on the N400 size averaged across electrodes
         # This has the advantage that the bins are the same across electrodes.
         # This means the N400 predictor is electrode specific, but the binning is not.
