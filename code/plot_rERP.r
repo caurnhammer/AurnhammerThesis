@@ -484,7 +484,7 @@ generate_topo <- function(
 
     # Create data frame to be used for interpolation
     # - the function needs columns labelled x, y, and z
-    inter3ep <- data.table(x = data_diff_locs$x,
+    interprep <- data.table(x = data_diff_locs$x,
                             y = data_diff_locs$y,
                             z = data_diff_locs$EEG)
 
@@ -524,7 +524,7 @@ generate_topo <- function(
     # create a circle round the outside of the plotting area
     # to mask the jagged edges of the interpolation
     mask_ring <- circle_fun(diameter = 1.42)
-
+    
     ###### Plot
     p <- ggplot(interpol_m, aes(x = x, y = y, fill = EEG))
     p <- p + geom_raster() + stat_contour(aes(z = EEG), binwidth = 0.5)

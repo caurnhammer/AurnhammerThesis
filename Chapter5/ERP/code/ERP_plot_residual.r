@@ -1,100 +1,88 @@
+library(data.table)
+library(ggplot2)
+
+data_file <- "ERP_Design1_A_logCloze_fulldata.csv"
+data_file <- "ERP_Design1_B_logCloze_fulldata.csv"
+data_file <- "ERP_Design1_C_logCloze_fulldata.csv"
+data_file <- "ERP_Design1_D_logCloze_fulldata.csv"
+
+data_file <- "ERP_Design1_AC_logCloze_fulldata.csv"
+data_file <- "ERP_Design1_BD_logCloze_fulldata.csv"
+data_file <- "ERP_Design1_AC_logCloze_reducedC_fulldata.csv"
+
+data_file <- "ERP_Design1_AB_rcnoun_fulldata.csv"
+data_file <- "ERP_Design1_CD_rcnoun_fulldata.csv"
+
+data_file <- "ERP_Design1_AC_Cloze_fulldata.csv"
+data_file <- "ERP_Design1_A_Cloze_fulldata.csv"
+data_file <- "ERP_Design1_C_Cloze_fulldata.csv"
+
+data_file <- "ERP_Design1_AC_CondCode_fulldata.csv"
+
+data_file <- "ERP_Design1_ABCD_CondCode_fulldata.csv"
+
+data_file <- "ERP_Design1_A_randpred_fulldata.csv"
+data_file <- "ERP_Design1_AC_randpred_fulldata.csv"
+
+data_file <- "ERP_Design2_ABC_Plaus_fulldata.csv"
+data_file <- "ERP_Design2_A_Plaus_fulldata.csv"
+data_file <- "ERP_Design2_B_Plaus_fulldata.csv"
+data_file <- "ERP_Design2_C_Plaus_fulldata.csv"
+
+dt <- fread(data_file)
+x <- "logCloze"
+x <- "Cloze"
+x <- "CondCodeExp"
+x <- "CondCodeAssoc"
+x <- "CondCodeExp, :CondCodeAssoc"
+x <- "rcnoun"
+x <- "randpred"
+
+resred <- dt[Type == "res" & Spec == "[:Intercept]", c(1:6)]
+resred$Int <- dt[Type == "res" & Spec == "[:Intercept]", "Pz"]
+resred$pred <- dt[Type == "res" & Spec == paste0("[:Intercept, :", x, "]"), "Pz"]
+resred$red <- abs(resred$pred) - abs(resred$Int)
+n4p6 <- data.table(n4=resred[Timestamp >= 300 & Timestamp <= 500, lapply(.SD, mean), by=list(Subject, Item), .SDcols = "red"]$red, p6=resred[Timestamp >= 600 & Timestamp <= 800, lapply(.SD, mean), by=list(Subject, Item), .SDcols="red"]$red)
+ggplot(n4p6, aes(n4, p6)) + geom_point() + geom_smooth(method = "lm")
+
+set.seed(98)
+n4p6$p6permute <- n4p6[sample(seq(1:854))]$p6
+ggplot(n4p6, aes(n4, p6permute)) + geom_point() + geom_smooth(method = "lm")
+
 source("../../../code/plot_rERP.r")
-source("../../../code/benjamini-hochberg.r")
+mod <- fread("ERP_Design1_A_randpred_models.csv")
+coef <- mod[Type == "Coefficient"]
+# coef$Spec <- factor(plyr::mapvalues(coef$Spec, c("Intercept", "CondCodeExp", "CondCodeAssoc"),
+    # c("Intercept", "CondCodeExp", "CondCodeAssoc")), levels = c("Intercept", "CondCodeExp", "CondCodeAssoc"))
+model_labs <- c("Intercept", "randpred", "CondCodeAssoc")
+model_vals <- c("black", "#E349F6", "cyan")
+plot_single_elec(coef, "Pz", file = FALSE,
+    title = "rERP coefficients",
+    modus = "Coefficient", ylims = c(9, -5),
+    leg_labs = model_labs, leg_vals = model_vals)
 
-make_plots <- function(
-    file,
-    elec = c("F3", "Fz", "F4", "C3", "Pz", "C4", "P3", "Pz", "P4"),
-    predictor = "Intercept"
-) {
-    # make dirs
-    system(paste0("mkdir ../plots/", file))
-    system(paste0("mkdir ../plots/", file, "/Waveforms"))
-    # system(paste0("mkdir ../plots/", file, "/Topos"))
+#######################################################
 
-    # MODELS
-    mod <- fread(paste0("../data/", file, "_models.csv"))
-    mod$Spec <- factor(mod$Spec, levels = predictor)
+table(n4p6$n4 < 0, n4p6$p6 < 0) / nrow(n4p6)
+cor(n4p6$n4, n4p6$p6)
 
-    model_labs <- c("Intercept", "Cloze")
-    model_vals <- c("black", "#E349F6")
+plot(n4p6$n4[order(n4p6$n4)])
+plot(n4p6$p6[order(n4p6$p6)])
 
-    # Models: coefficent
-    coef <- mod[(Type == "Coefficient"), ]
-    coef$Condition <- coef$Spec
-    print(unique(coef$Condition))
-    plot_single_elec(coef, "Pz",
-        file = paste0("../plots/", file, "/Waveforms/Coefficients_Pz.pdf"),
-        title = "rERP coefficients",
-        modus = "Coefficient", ylims = c(15, -23.5),
-        leg_labs = model_labs, leg_vals = model_vals)
+# corr plot plus lm
+# ggplot(n4p6, aes(n4, p6)) + geom_point() + geom_smooth(method = "lm") + lims(x=c(-22, 22),y=c(-22, 22))
+ggplot(n4p6, aes(n4, p6)) + geom_point() + geom_smooth(method = "lm")
 
-    # Models: t-value
-    # time_windows <- list(c(250, 400), c(600, 1000))
-    # tval <- mod[Type == "t-value" & Spec != "Intercept", ]
-    # sig <- mod[Type == "p-value" & Spec != "Intercept", ]
-    # colnames(sig) <- gsub("_CI", "_sig", colnames(sig))
+summary(lm(n4 ~ p6, n4p6))
+summary(lm(p6 ~ n4, n4p6))
 
-    # sig_corr <- bh_apply_wide(sig, elec, alpha=0.05, tws=time_windows)
-    # sigcols <- grepl("_sig", colnames(sig_corr))
-    # tval <- cbind(tval, sig_corr[,..sigcols])
-    # mod$Spec <- factor(mod$Spec, levels = predictor)
-    # tval$Condition <- tval$Spec
+# Residual improvement over time
+resred_ot <- resred[, lapply(.SD, mean), by = list(Timestamp), .SDcols = "red"]
+ggplot(resred_ot, aes(Timestamp, red)) + geom_line()
 
-    # plot_nine_elec(tval, elec,
-    #     file = paste0("../plots/", file, "/Waveforms/t-values.pdf"),
-    #     modus = "t-value", ylims = c(7, -5), tws = time_windows,
-    #     leg_labs = model_labs[2:length(model_vals)],
-    #     leg_vals = model_vals[2:length(model_vals)])
+meanabs_ot <- resred[, lapply(.SD, abs), by = list(Timestamp), .SDcols = "Int"][, lapply(.SD, mean), by=Timestamp, .SDcols="Int"]
+ggplot(meanabs_ot, aes(Timestamp, Int)) + geom_line()
 
-    ## DATA
-    eeg <- fread(paste0("../data/", file, "_data.csv"))
-    eeg$Condition <- factor(plyr::mapvalues(eeg$Condition, c(1, 2),
-        c("A", "C")), levels = c("A", "C"))
-    data_labs <- c("A", "C")
-    data_vals <- c("#000000", "#004488")
-
-    # eeg$Condition <- factor(plyr::mapvalues(eeg$Condition, c(2, 1, 3, 4),
-    #     c("B", "A", "C", "D")), levels = c("A", "B", "C", "D"))
-    # data_labs <- c("A", "B", "C", "D")
-    # data_vals <- c("#000000", "#BB5566", "#004488", "#DDAA33")
-
-    # Estimates
-    obs <- eeg[Type == "EEG", ]
-
-    plot_single_elec(obs, elec,
-        file = paste0("../plots/", file,  "/Waveforms/Observed.pdf"),
-        modus = "Condition", ylims = c(10, -5),
-        leg_labs = data_labs, leg_vals = data_vals)
-
-    # Estimated
-    est <- eeg[Type == "est",]
-    pred <- c("1", "1 + log(Cloze)")
-    for (i in seq(1, length(unique(est$Spec)))) {
-        spec <- unique(est$Spec)[i]
-        est_set <- est[Spec == spec, ]
-        spec <- unique(est_set$Spec)
-        name <- gsub("\\[|\\]|:|,| ", "", spec)
-        plot_single_elec(est_set, elec,
-                  file = paste0("../plots/", file, "/Waveforms/Estimated_",
-                  name, ".pdf"), modus = "Condition", ylims = c(10, -5),
-                  leg_labs = data_labs, leg_vals = data_vals)
-    }
-
-    # Residual
-    res <- eeg[Type == "res", ]
-    pred <- c("1", "1 + log(Cloze)")
-    for (i in seq(1, length(unique(res$Spec)))) {
-        spec <- unique(res$Spec)[i]
-        res_set <- res[Spec == spec, ]
-        spec <- unique(res_set$Spec)
-        name <- gsub("\\[|\\]|:|,| ", "", spec)
-        plot_single_elec(res_set, elec,
-                  file = paste0("../plots/", file, "/Waveforms/Residual_",
-                  name, ".pdf"), title = paste0("Residual Pz: ", pred[i]),
-                modus = "Condition", ylims = c(4, -4),
-                  leg_labs = data_labs, leg_vals = data_vals)
-    }
-}
-
-make_plots(paste0("ERP_Design1_AC_logCloze"), c("Pz"),
-    predictor = c("Intercept", "logCloze"))
+resred$abs <- abs(resred$pred)
+meanabs_ot <- resred[, lapply(.SD, mean), by = list(Timestamp), .SDcols = "abs"]
+ggplot(meanabs_ot, aes(Timestamp, abs)) + geom_line()

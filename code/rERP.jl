@@ -73,15 +73,8 @@ function process_data(infile, outfile, models; baseline_corr = false, sampling_r
         # Add an electrode specific component predictors
         # data = collect_component(data, "TimeWindow", models; tws=time_windows[1], twe=time_windows[2]);
         data = collect_component(data, "N400", models ; tws=300, twe=500);
-        # data = collect_component(data, "P600", models ; tws=600, twe=800);
-        # data.PzTimeWindow = data.PzTimeWindow .- data.PzP600
-
+        # data = collect_component(data, "P600", models ; tws=600, twe=800);        
         data = collect_component(data, "Segment", models ; tws=0, twe=1200);
-
-        # Add Quartiles, based on the N400 size averaged across electrodes
-        # This has the advantage that the bins are the same across electrodes.
-        # This means the N400 predictor is electrode specific, but the binning is not.
-        # data.AvgN400 = sum(eachcol(data[:,[Symbol(e, "N400") for e in models.Electrodes]]))
     end
     
     # Z-standardise predictors
@@ -298,8 +291,8 @@ function fit_models(data, models, file)
     out_models = coef_addition(out_models, models, ind)
 
     if typeof(file) == String
-        out_models = write_models(out_models, models, ind, file)
-        out_data = write_data(out_data, models, ind, file)
+        out_models = write_models(out_models, models, file)
+        out_data = write_data(out_data, models, file)
     end
 
     [out_data, out_models]
@@ -503,7 +496,7 @@ function ci(x)
     1.96 * se(x)
 end
 
-function write_models(out_models, models, ind, file)
+function write_models(out_models, models, file)
     out_models_cp = out_models[:,:]
     out_models = combine(groupby(out_models_cp, [:Timestamp, :Type, :Spec]), [x => mean => x for x in models.Electrodes]);
 
@@ -538,7 +531,18 @@ function assign_estimate_quantiles(data, models)
     data
 end
 
-function write_data(out_data, models, ind, file)
+function write_data(out_data, models, file)
+    write_full_data = true
+    if write_full_data
+        fdata = out_data[:,:]
+        dtype_dict = Dict(1 => "EEG", 2 => "est", 3 => "res");
+        dspec_dict = Dict([i => x for (i, x) in enumerate(models.Sets)]);
+        dspec_dict[42] = [:EEG];
+        fdata[!,:Type] = [dtype_dict[x] for x in fdata[:,:Type]];
+        fdata[!,:Spec] = [dspec_dict[x] for x in fdata[:,:Spec]];    
+        write(string("../data/", file, "_fulldata.csv"), fdata)
+    end
+
     if models.Quantiles
         out_data = assign_estimate_quantiles(out_data, models)
     end

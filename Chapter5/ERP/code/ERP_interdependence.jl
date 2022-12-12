@@ -30,6 +30,13 @@ include("../../../code/rERP.jl"); @time fit_models_components(dt, models, "ERP_D
 @time dt = read_data("../data/ERP_Design1_rERP.csv", models);
 include("../../../code/rERP.jl"); @time fit_models_components(dt, models, "ERP_Design1_N400Segment_D");
 
+
+models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Intercept]);
+@time dt = process_data("../../../data/ERP_Design1.csv", false, models, conds=["A", "C"], components=[:N400, :Segment]);
+models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Intercept, :PzN400, :PzSegment]);
+include("../../../code/rERP.jl"); @time fit_models(dt, models, "ERP_Design1_N400Segment");
+
+
 # dbc 19
 include("../../../code/rERP.jl"); @time dt = process_data("../../../data/dbc_data.csv", false, models, conds=["control"], components=[:N400, :Segment]);
 include("../../../code/rERP.jl"); @time fit_models_components(dt, models, "ERP_dbc19_N400Segment_A");
@@ -53,6 +60,11 @@ include("../../../code/rERP.jl"); @time fit_models_components(dt, models, "ERP_D
 @time process_data("../../../data/ERP_Design2.csv", "../data/ERP_Design2_rERP.csv", models, conds=["C"], components=[:N400, :Segment]);
 @time dt = read_data("../data/ERP_Design2_rERP.csv", models);
 include("../../../code/rERP.jl"); @time fit_models_components(dt, models, "ERP_Design2_N400Segment_C");
+
+models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Intercept]);
+@time dt = process_data("../../../data/ERP_Design2.csv", false, models, components=[:N400, :Segment]);
+models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Intercept, :PzN400, :PzSegment]);
+include("../../../code/rERP.jl"); @time fit_models(dt, models, "ERP_Design2_N400Segment");
 
 # DEV
 include("../../../code/rERP.jl");
@@ -126,7 +138,6 @@ models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Interc
 @time dt = process_data("../../../data/dbc_data.csv", false, models, conds=["script-related", "script-unrelated"], components=[:N400, :Segment], time_windows=[300, 500]);
 models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Intercept, :PzN400, :PzSegment], quant = false);
 @time fit_models(dt, models, "ERP_dbc19_N400Segment_BC");
-
 
 models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Intercept], quant = true);
 include("../../../code/rERP.jl"); @time dt = process_data("../../../data/dbc_data.csv", false, models, components=[:N400, :Segment]);
