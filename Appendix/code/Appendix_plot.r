@@ -30,7 +30,7 @@ make_plots <- function(
     plot_single_elec(data = coef, e = c("Pz"), 
         file = paste0("../plots/", file, "/Waveforms/Coefficients.pdf"),
         title = "Coefficients", modus = "Coefficient",
-        ylims = c(9, -5.5), leg_labs = model_labs, leg_vals = model_vals)
+        ylims = c(10, -5), leg_labs = model_labs, leg_vals = model_vals)
 
     source("../../code/plot_rERP.r")
     plot_full_elec(data = coef, e = elec, file = paste0("../plots/", file,
@@ -63,7 +63,7 @@ make_plots <- function(
     ########
     eeg <- fread(paste0("../data/", file, "_data.csv"))
 
-    if (design == "Design1_AC") {
+    if (design %in% c("Design1_AC", "Design1_AC_log")) {
         eeg$Condition <- factor(plyr::mapvalues(eeg$Condition, c(1, 2),
                         c("A", "C")), levels = c("A", "C"))
         data_labs <- c("A", "C")
@@ -93,15 +93,25 @@ make_plots <- function(
         title = "Observed", modus = "Condition",
         ylims = c(9, -5.5), leg_labs = data_labs, leg_vals = data_vals)
 
-    if (design == "Design1") {
+    if (design == "Design1_AC") {
         plot_topo(obs, file = paste0("../plots/", file, "/Topos/Observed"),
                 tw = c(300, 500), cond_man = "C", cond_base = "A",
+                omit_legend = TRUE, save_legend = TRUE)
+    } else if (design == "Design2") {
+        plot_topo(obs, file = paste0("../plots/", file, "/Topos/Observed"),
+                tw = c(600, 1000), cond_man = "B", cond_base = "A",
                 omit_legend = TRUE, save_legend = TRUE)
     }
 
     # Data: Estimated
-    combo <- c("Intercept", "Intercept + Cloze", "Intercept + Noun Association",
-                "Intercept + Cloze + Noun Association")
+    if (design == "Design1_AC_log") {
+        combo <- c("Intercept", "Intercept + logCloze", "Intercept + Noun Association",
+                "Intercept + logCloze + Noun Association")
+    } else {
+        combo <- c("Intercept", "Intercept + Cloze", "Intercept + Noun Association",
+            "Intercept + Cloze + Noun Association")
+    }
+    
     pred <- c("Intercept", "Tar. Plaus.", "Dist. Cloze",
               "Dist. Cloze + Tar. Plaus.")
     est <- eeg[Type == "est", ]
@@ -171,26 +181,30 @@ elec_all <- c("Fp1", "Fp2", "F7", "F3", "Fz", "F4", "F8", "FC5",
                 "FC1", "FC2", "FC6", "C3", "Cz", "C4", "CP5", "CP1",
                 "CP2", "CP6", "P7", "P3", "Pz", "P4", "P8", "O1", "Oz", "O2")
 
-make_plots("ERP_Design1_AC_Intercept_rERP", elec_all,
-    predictor = c("Intercept"), design = "Design1_AC",
-    model_labs = c("Intercept"))
+# make_plots("ERP_Design1_AC_Intercept_rERP", elec_all,
+#     predictor = c("Intercept"), design = "Design1_AC",
+#     model_labs = c("Intercept"))
 
-make_plots("ERP_Design1_AC_CondCode_rERP", elec_all,
-    predictor = c("Intercept", "CondCode"), design = "Design1_AC",
-    model_labs = c("Intercept", "Condition Code"))
+# make_plots("ERP_Design1_AC_CondCode_rERP", elec_all,
+#     predictor = c("Intercept", "CondCode"), design = "Design1_AC",
+#     model_labs = c("Intercept", "Condition Code"))
 
-make_plots("ERP_Design1_AC_cloze_rERP", elec_all,
-    predictor = c("Intercept", "Cloze"), design = "Design1_AC",
-    model_labs = c("Intercept", "Cloze"))
+# make_plots("ERP_Design1_AC_cloze_rERP", elec_all,
+#     predictor = c("Intercept", "Cloze"), design = "Design1_AC",
+#     model_labs = c("Intercept", "Cloze"))
 
-make_plots("ERP_Design1_cloze_rcnoun_rERP", elec_all,
-    predictor = c("Intercept", "Cloze", "rcnoun"), design = "Design1",
-    model_labs = c("Intercept", "Cloze", "Noun Association"))
+# make_plots("ERP_Design1_AC_logcloze_rERP", elec_all,
+#     predictor = c("Intercept", "logCloze"), design = "Design1_AC_log",
+#     model_labs = c("Intercept", "logCloze"))
 
-make_plots("ERP_Design1_cloze_rcnoun_across_rERP", elec_all,
-    predictor = c("Intercept", "Cloze", "rcnoun"),
-    inferential = TRUE, design = "Design1",
-    model_labs = c("Intercept", "Cloze", "Noun Association"))
+# make_plots("ERP_Design1_cloze_AssociationNoun_rERP", elec_all,
+#     predictor = c("Intercept", "Cloze", "Association_Noun"), design = "Design1",
+#     model_labs = c("Intercept", "Cloze", "Noun Association"))
+
+# make_plots("ERP_Design1_cloze_AssociationNoun_across_rERP", elec_all,
+#     predictor = c("Intercept", "Cloze", "Association_Noun"),
+#     inferential = TRUE, design = "Design1",
+#     model_labs = c("Intercept", "Cloze", "Noun Association"))
 
 make_plots("ERP_Design2_Plaus_Clozedist_rERP", elec_all,
     predictor = c("Intercept", "Plaus", "Cloze_distractor"), design = "Design2",

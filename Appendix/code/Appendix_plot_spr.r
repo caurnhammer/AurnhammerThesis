@@ -23,9 +23,8 @@ make_plots <- function(
 
     plot_rSPR(coef,
         file = paste0("../plots/", file, "/Coefficients.pdf"),
-        modus = "coefficients",
-        yunit = "ReadingTime", title = "Coefficients",
-        leg_labs = model_labs, leg_vals = model_vals)
+        modus = "coefficients", yunit = "ReadingTime", title = "Coefficients",
+        ylims = c(5.71, 5.825), leg_labs = model_labs, leg_vals = model_vals)
 
     # Models: t-value
     if (inferential == TRUE) {
@@ -95,11 +94,15 @@ make_plots <- function(
     }
 }
 
-make_plots("SPR2_Design1_Cloze_rcnoun_rRT",
-    predictor = c("Intercept", "Cloze", "rcnoun"),
-    model_labs = c("Intercept", "Cloze", "Noun Association"))
+make_plots("SPR2_Design1_logCloze_AssociationNoun_rRT",
+    predictor = c("Intercept", "logCloze", "rcnoun"),
+    model_labs = c("Intercept", "logCloze", "Noun Association"))
 
-make_plots("SPR2_Design1_Cloze_rcnoun_across_rRT",
-    predictor = c("Intercept", "Cloze", "rcnoun"),
+make_plots("SPR2_Design1_logCloze_AssociationNoun_across_rRT",
+    predictor = c("Intercept", "logCloze", "Association_Noun"),
     inferential = TRUE,
-    model_labs = c("Intercept", "Cloze", "Noun Association"))
+    model_labs = c("Intercept", "logCloze", "Noun Association"))
+
+make_plots("SPR2_Design1_logCloze_AssociationNoun_Interaction_rRT",
+    predictor = c("Intercept", "logCloze", "Association_Noun", "Interaction_logCloze_NounAssoc"),
+    model_labs = c("Intercept", "logCloze", "Noun Association", "Interaction"))
