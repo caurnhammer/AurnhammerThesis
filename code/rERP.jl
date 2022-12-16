@@ -532,17 +532,6 @@ function assign_estimate_quantiles(data, models)
 end
 
 function write_data(out_data, models, file)
-    write_full_data = true
-    if write_full_data
-        fdata = out_data[:,:]
-        dtype_dict = Dict(1 => "EEG", 2 => "est", 3 => "res");
-        dspec_dict = Dict([i => x for (i, x) in enumerate(models.Sets)]);
-        dspec_dict[42] = [:EEG];
-        fdata[!,:Type] = [dtype_dict[x] for x in fdata[:,:Type]];
-        fdata[!,:Spec] = [dspec_dict[x] for x in fdata[:,:Spec]];    
-        write(string("../data/", file, "_fulldata.csv"), fdata)
-    end
-
     if models.Quantiles
         out_data = assign_estimate_quantiles(out_data, models)
     end

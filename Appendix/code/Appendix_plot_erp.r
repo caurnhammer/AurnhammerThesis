@@ -181,30 +181,30 @@ elec_all <- c("Fp1", "Fp2", "F7", "F3", "Fz", "F4", "F8", "FC5",
                 "FC1", "FC2", "FC6", "C3", "Cz", "C4", "CP5", "CP1",
                 "CP2", "CP6", "P7", "P3", "Pz", "P4", "P8", "O1", "Oz", "O2")
 
-# make_plots("ERP_Design1_AC_Intercept_rERP", elec_all,
-#     predictor = c("Intercept"), design = "Design1_AC",
-#     model_labs = c("Intercept"))
+make_plots("ERP_Design1_AC_Intercept_rERP", elec_all,
+    predictor = c("Intercept"), design = "Design1_AC",
+    model_labs = c("Intercept"))
 
-# make_plots("ERP_Design1_AC_CondCode_rERP", elec_all,
-#     predictor = c("Intercept", "CondCode"), design = "Design1_AC",
-#     model_labs = c("Intercept", "Condition Code"))
+make_plots("ERP_Design1_AC_CondCode_rERP", elec_all,
+    predictor = c("Intercept", "CondCode"), design = "Design1_AC",
+    model_labs = c("Intercept", "Condition Code"))
 
-# make_plots("ERP_Design1_AC_cloze_rERP", elec_all,
-#     predictor = c("Intercept", "Cloze"), design = "Design1_AC",
-#     model_labs = c("Intercept", "Cloze"))
+make_plots("ERP_Design1_AC_Cloze_rERP", elec_all,
+    predictor = c("Intercept", "Cloze"), design = "Design1_AC",
+    model_labs = c("Intercept", "Cloze"))
 
-# make_plots("ERP_Design1_AC_logcloze_rERP", elec_all,
-#     predictor = c("Intercept", "logCloze"), design = "Design1_AC_log",
-#     model_labs = c("Intercept", "logCloze"))
+make_plots("ERP_Design1_AC_logCloze_rERP", elec_all,
+    predictor = c("Intercept", "logCloze"), design = "Design1_AC_log",
+    model_labs = c("Intercept", "logCloze"))
 
-# make_plots("ERP_Design1_cloze_AssociationNoun_rERP", elec_all,
-#     predictor = c("Intercept", "Cloze", "Association_Noun"), design = "Design1",
-#     model_labs = c("Intercept", "Cloze", "Noun Association"))
+make_plots("ERP_Design1_Cloze_Assocnoun_rERP", elec_all,
+    predictor = c("Intercept", "Cloze", "Assocnoun"), design = "Design1",
+    model_labs = c("Intercept", "Cloze", "Noun Association"))
 
-# make_plots("ERP_Design1_cloze_AssociationNoun_across_rERP", elec_all,
-#     predictor = c("Intercept", "Cloze", "Association_Noun"),
-#     inferential = TRUE, design = "Design1",
-#     model_labs = c("Intercept", "Cloze", "Noun Association"))
+make_plots("ERP_Design1_Cloze_Assocnoun_across_rERP", elec_all,
+    predictor = c("Intercept", "Cloze", "Assocnoun"),
+    inferential = TRUE, design = "Design1",
+    model_labs = c("Intercept", "Cloze", "Noun Association"))
 
 make_plots("ERP_Design2_Plaus_Clozedist_rERP", elec_all,
     predictor = c("Intercept", "Plaus", "Cloze_distractor"), design = "Design2",

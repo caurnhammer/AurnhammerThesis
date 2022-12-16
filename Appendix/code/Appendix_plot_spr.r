@@ -16,7 +16,7 @@ make_plots <- function(
         c("Pre-critical", "Critical", "Spillover", "Post-spillover")),
         levels = c("Pre-critical", "Critical", "Spillover", "Post-spillover"))
     mod$Timestamp <- NULL
-    model_vals <- c("black", "#E349F6", "#00FFFF")
+    model_vals <- c("black", "#E349F6", "#00FFFF", "#37cb8b")
 
     # Models: coefficent
     coef <- mod[Type == "Coefficient", ]
@@ -63,6 +63,8 @@ make_plots <- function(
         ylims = c(5.685, 5.865),
         leg_labs = data_labs, leg_vals = data_vals)
 
+    combo <- c("Intercept", "Intercept + Cloze", "Intercept + Noun Assoc.",
+            "Intercept + Cloze + Noun Assoc.")
     # Estimated
     est <- spr[Type == "est", ]
     for (i in seq(1, length(unique(est$Spec)))) {
@@ -73,7 +75,7 @@ make_plots <- function(
             file = paste0("../plots/", file, "/Estimated_",
                 name, ".pdf"),
             yunit = "logRT",
-            title = paste0("Estimated RTs: ", name),
+            title = paste0("Estimates: ", combo[i]),
             ylims = c(5.685, 5.865),
             leg_labs = data_labs, leg_vals = data_vals)
     }
@@ -88,21 +90,21 @@ make_plots <- function(
             file = paste0("../plots/", file, "/Residual_",
                 name, ".pdf"),
             yunit = "logRT",
-            title = paste0("Residual Error: ", name),
+            title = paste0("Residuals: ", combo[i]),
             ylims = c(-0.05, 0.05),
             leg_labs = data_labs, leg_vals = data_vals)
     }
 }
 
-make_plots("SPR2_Design1_logCloze_AssociationNoun_rRT",
-    predictor = c("Intercept", "logCloze", "rcnoun"),
-    model_labs = c("Intercept", "logCloze", "Noun Association"))
+make_plots("SPR2_Design1_Cloze_Assocnoun_rRT",
+    predictor = c("Intercept", "Cloze", "Assocnoun"),
+    model_labs = c("Intercept", "Cloze", "Noun Association"))
 
-make_plots("SPR2_Design1_logCloze_AssociationNoun_across_rRT",
-    predictor = c("Intercept", "logCloze", "Association_Noun"),
+make_plots("SPR2_Design1_Cloze_Assocnoun_across_rRT",
+    predictor = c("Intercept", "Cloze", "Assocnoun"),
     inferential = TRUE,
-    model_labs = c("Intercept", "logCloze", "Noun Association"))
+    model_labs = c("Intercept", "Cloze", "Noun Association"))
 
-make_plots("SPR2_Design1_logCloze_AssociationNoun_Interaction_rRT",
-    predictor = c("Intercept", "logCloze", "Association_Noun", "Interaction_logCloze_NounAssoc"),
-    model_labs = c("Intercept", "logCloze", "Noun Association", "Interaction"))
+make_plots("SPR2_Design1_Cloze_Assocnoun_Interaction_rRT",
+    predictor = c("Intercept", "Cloze", "Assocnoun", "Interactionclozeassocnoun"),
+    model_labs = c("Intercept", "Cloze", "Noun Association", "Interaction"))

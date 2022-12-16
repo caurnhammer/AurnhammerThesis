@@ -8,27 +8,27 @@ convert -density 250 ../plots/ERP_Design1_AC_CondCode_rERP/Waveforms/Coefficient
 	+append -page 500:250 \
 	final_pdf/ERP_Coef_Est_CondCode.pdf
 
-convert -density 250 ../plots/ERP_Design1_AC_cloze_rERP/Waveforms/Coefficients.pdf ../plots/ERP_Design1_AC_cloze_rERP/Waveforms/Estimated_InterceptCloze.pdf ../plots/ERP_Design1_AC_cloze_rERP/Waveforms/Residual_InterceptCloze.pdf \
+convert -density 250 ../plots/ERP_Design1_AC_Cloze_rERP/Waveforms/Coefficients.pdf ../plots/ERP_Design1_AC_Cloze_rERP/Waveforms/Estimated_InterceptCloze.pdf ../plots/ERP_Design1_AC_cloze_rERP/Waveforms/Residual_InterceptCloze.pdf \
 	+append -page 600:200 \
 	final_pdf/ERP_Coef_Est_Cloze.pdf
 
-convert -density 250 ../plots/ERP_Design1_AC_cloze_rERP/Waveforms/Residual_InterceptCloze.pdf ../plots/ERP_Design1_AC_logcloze_rERP/Waveforms/Residual_InterceptlogCloze.pdf \
+convert -density 250 ../plots/ERP_Design1_AC_Cloze_rERP/Waveforms/Residual_InterceptCloze.pdf ../plots/ERP_Design1_AC_logCloze_rERP/Waveforms/Residual_InterceptlogCloze.pdf \
 	+append -page 400:200 \
 	final_pdf/ERP_Res_Cloze_logCloze.pdf
 
-convert -density 250 ../plots/ERP_Design1_cloze_AssociationNoun_rERP/Waveforms/Observed.pdf ../plots/ERP_Design1_cloze_AssociationNoun_rERP/Waveforms/Coefficients.pdf \
+convert -density 250 ../plots/ERP_Design1_Cloze_Assocnoun_rERP/Waveforms/Observed.pdf ../plots/ERP_Design1_Cloze_Assocnoun_rERP/Waveforms/Coefficients.pdf \
 	+append -page 500:250 \
 	final_pdf/ERP_Data_Coef_Full.pdf
 
-montage -mode concatenate -density 125 \
-	../plots/ERP_Design1_cloze_AssociationNoun_rERP/Waveforms/Estimated_Intercept.pdf ../plots/ERP_Design1_cloze_AssociationNoun_rERP/Waveforms/Residual_Intercept.pdf \
-	../plots/ERP_Design1_cloze_AssociationNoun_rERP/Waveforms/Estimated_InterceptAssociation_Noun.pdf ../plots/ERP_Design1_cloze_AssociationNoun_rERP/Waveforms/Residual_InterceptAssociation_Noun.pdf \
-	../plots/ERP_Design1_cloze_AssociationNoun_rERP/Waveforms/Estimated_InterceptCloze.pdf ../plots/ERP_Design1_cloze_AssociationNoun_rERP/Waveforms/Residual_InterceptCloze.pdf \
-    ../plots/ERP_Design1_cloze_AssociationNoun_rERP/Waveforms/Estimated_InterceptClozeAssociation_Noun.pdf ../plots/ERP_Design1_cloze_AssociationNoun_rERP/Waveforms/Residual_InterceptClozeAssociation_Noun.pdf \
+montage -mode concatenate -density 250 \
+	../plots/ERP_Design1_Cloze_Assocnoun_rERP/Waveforms/Estimated_Intercept.pdf               ../plots/ERP_Design1_Cloze_Assocnoun_rERP/Waveforms/Residual_Intercept.pdf \
+	../plots/ERP_Design1_Cloze_Assocnoun_rERP/Waveforms/Estimated_InterceptAssocnoun.pdf      ../plots/ERP_Design1_Cloze_Assocnoun_rERP/Waveforms/Residual_InterceptAssocnoun.pdf \
+	../plots/ERP_Design1_Cloze_Assocnoun_rERP/Waveforms/Estimated_InterceptCloze.pdf          ../plots/ERP_Design1_Cloze_Assocnoun_rERP/Waveforms/Residual_InterceptCloze.pdf \
+    ../plots/ERP_Design1_Cloze_Assocnoun_rERP/Waveforms/Estimated_InterceptClozeAssocnoun.pdf ../plots/ERP_Design1_Cloze_Assocnoun_rERP/Waveforms/Residual_InterceptClozeAssocnoun.pdf \
 	-tile 2x4 \
 	final_pdf/ERP_Est_Res_Full.pdf
 
-cp ../plots/ERP_Design1_cloze_AssociationNoun_across_rERP/Waveforms/t-values.pdf final_pdf/ERP_tval_across.pdf
+cp ../plots/ERP_Design1_cloze_Assocnoun_across_rERP/Waveforms/t-values.pdf final_pdf/ERP_tval_across.pdf
 
 cp ../plots/ERP_Design1_AC_cloze_rERP/Waveforms/Coefficients_Full.pdf final_pdf/ERP_Coef_Cloze_Grid.pdf
 
@@ -42,21 +42,21 @@ convert -density 125 ../plots/ERP_Design2_Plaus_Clozedist_rERP/Topos/Estimated_I
 	+append -page 350:80 \
 	final_pdf/ERP_Estimated_Topos_B.pdf
 
-cp ../plots/SPR2_Design1_logCloze_AssociationNoun_rRT/Observed.pdf final_pdf/SPR_Observed.pdf
+cp ../plots/SPR2_Design1_Cloze_Assocnoun_rRT/Observed.pdf final_pdf/SPR_Observed.pdf
 
-montage -mode concatenate -density 125 \
-	../plots/SPR2_Design1_logCloze_AssociationNoun_rRT/Estimated_Intercept.pdf 			  		    ../plots/SPR2_Design1_logCloze_AssociationNoun_rRT/Residual_Intercept.pdf \
-	../plots/SPR2_Design1_logCloze_AssociationNoun_rRT/Estimated_InterceptAssociation_Noun.pdf      ../plots/SPR2_Design1_logCloze_AssociationNoun_rRT/Residual_InterceptAssociation_Noun.pdf \
-	../plots/SPR2_Design1_logCloze_AssociationNoun_rRT/Estimated_InterceptlogCloze.pdf 	  			../plots/SPR2_Design1_logCloze_AssociationNoun_rRT/Residual_InterceptlogCloze.pdf \
-    ../plots/SPR2_Design1_logCloze_AssociationNoun_rRT/Estimated_InterceptlogClozeAssociation_Noun.pdf ../plots/SPR2_Design1_logCloze_AssociationNoun_rRT/Residual_InterceptlogClozeAssociation_Noun.pdf \
+montage -mode concatenate -density 250 \
+	../plots/SPR2_Design1_Cloze_Assocnoun_rRT/Estimated_Intercept.pdf 			  		   ../plots/SPR2_Design1_Cloze_Assocnoun_rRT/Residual_Intercept.pdf \
+	../plots/SPR2_Design1_Cloze_Assocnoun_rRT/Estimated_InterceptAssocnoun.pdf      ../plots/SPR2_Design1_Cloze_Assocnoun_rRT/Residual_InterceptAssocnoun.pdf \
+	../plots/SPR2_Design1_Cloze_Assocnoun_rRT/Estimated_InterceptCloze.pdf 	  			   ../plots/SPR2_Design1_Cloze_Assocnoun_rRT/Residual_InterceptCloze.pdf \
+    ../plots/SPR2_Design1_Cloze_Assocnoun_rRT/Estimated_InterceptClozeAssocnoun.pdf ../plots/SPR2_Design1_Cloze_Assocnoun_rRT/Residual_InterceptClozeAssocnoun.pdf \
 	-tile 2x4 \
 	final_pdf/SPR_Est_Res_Full.pdf
 
-convert -density 250 ../plots/SPR2_Design1_logCloze_AssociationNoun_across_rRT/Coefficients.pdf ../plots/SPR2_Design1_logCloze_AssociationNoun_across_rRT/t-values.pdf \
+convert -density 250 ../plots/SPR2_Design1_Cloze_Assocnoun_across_rRT/Coefficients.pdf ../plots/SPR2_Design1_Cloze_Assocnoun_across_rRT/t-values.pdf \
 	+append -page 500:250 \
 	final_pdf/SPR_tval_across.pdf
 
-convert -density 250 ../plots/SPR2_Design1_logCloze_AssociationNoun_Interaction_rRT/Estimated_InterceptlogClozeAssociation_NounInteraction_logCloze_NounAssoc.pdf \
-	 ../plots/SPR2_Design1_logCloze_AssociationNoun_Interaction_rRT/Residual_InterceptlogClozeAssociation_NounInteraction_logCloze_NounAssoc.pdf \
+convert -density 250 ../plots/SPR2_Design1_Cloze_Assocnoun_Interaction_rRT/Estimated_InterceptClozeAssocnounInteractionclozeassocnoun.pdf \
+	 ../plots/SPR2_Design1_Cloze_Assocnoun_Interaction_rRT/Residual_InterceptClozeAssocnounInteractionclozeassocnoun.pdf \
 	+append -page 400:200 \
-	final_pdf/SPR_EstRest_Interaction.pdf
+	final_pdf/SPR_EstRes_Interaction.pdf
