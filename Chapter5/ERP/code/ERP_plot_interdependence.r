@@ -15,16 +15,6 @@ make_plots <- function(
     mod <- fread(paste0("../data/", file, "_models.csv"))
     mod$Spec <- factor(mod$Spec, levels = predictor)
 
-    # model_labs <- c("Intercept", "TimeWindow", "Segment")
-    # model_vals <- c("black", "#E349F6", "#00FFFF")
-    # model_labs <- c("Intercept", "N4minP6")
-    # model_vals <- c("black", "#E349F6")
-    # model_labs <- c("Intercept", "N400", "P600")
-    # model_vals <- c("black", "#E349F6", "#00FFFF")
-    # model_labs <- c("Intercept", "Segment")
-    # model_vals <- c("black", "#00FFFF")
-    # model_labs <- c("Intercept", "N400A", "N400B", "N400C", "Segment")
-    # model_vals <- c("black", "pink", "#E349F6", "purple", "#00FFFF")
     model_labs <- c("Intercept", "N400", "Segment")
     model_vals <- c("black", "#E349F6", "#00FFFF")
 
@@ -69,7 +59,7 @@ make_plots <- function(
 
     eeg$Condition <- factor(plyr::mapvalues(eeg$Condition, c(1, 2),
         c("A", "C")), levels = c("A", "C"))
-    data_labs <- c("A", "C")
+    data_labs <- c("A: Expected", "C: Unexpected")
     data_vals <- c("#000000", "#004488")
 
     # eeg$Condition <- factor(plyr::mapvalues(eeg$Condition, c(1, 2, 3),
@@ -94,8 +84,9 @@ make_plots <- function(
 
     # Estimated
     est <- eeg[Type == "est",]
-    # pred <- c("1", "1 + N400", "1 + Segment", "1 + N400 + Segment")
-    pred <- c("1", "1 + Time Window", "1 + Segment", "1 + Time Window + Segment")
+    pred <- c("ŷ = b0 + b1 * 0 + b2 * 0", "ŷ = b0 + b1 * N400 + b2 * 0",
+        "ŷ = b0 + b1 * 0 + b2 * Segment", "ŷ = b0 + b1 * N400 + b2 * Segment")
+    # pred <- c("1", "1 + Time Window", "1 + Segment", "1 + Time Window + Segment")
     for (i in seq(1, length(unique(est$Spec)))) {
         spec <- unique(est$Spec)[i]
         est_set <- est[Spec == spec, ]
@@ -103,14 +94,17 @@ make_plots <- function(
         name <- gsub("\\[|\\]|:|,| ", "", spec)
         plot_single_elec(est_set, elec,
                   file = paste0("../plots/", file, "/Waveforms/Estimated_",
-                  name, ".pdf"), modus = "Condition", ylims = c(10, -5),
-                  leg_labs = data_labs, leg_vals = data_vals, ci = FALSE)
+                  name, ".pdf"), title = paste0("Estimates ", pred[i]),
+                  modus = "Condition", ylims = c(10, -5),
+                  leg_labs = data_labs, leg_vals = data_vals, ci = TRUE)
     }
 
     # Residual
     res <- eeg[Type == "res", ]
-    # pred <- c("1", "1 + N400", "1 + Segment", "1 + N400 + Segment")
-    pred <- c("1", "1 + Time Window", "1 + Segment", "1 + Time Window + Segment")
+    pred <- c("ŷ = b0 + b1 * 0 + b2 * 0", "ŷ = b0 + b1 * N400 + b2 * 0",
+        "ŷ = b0 + b1 * 0 + b2 * Segment", "ŷ = b0 + b1 * N400 + b2 * Segment")
+    pred <- rep("y - ŷ", 4)
+    # pred <- c("1", "1 + Time Window", "1 + Segment", "1 + Time Window + Segment")
     for (i in seq(1, length(unique(res$Spec)))) {
         spec <- unique(res$Spec)[i]
         res_set <- res[Spec == spec, ]
@@ -118,9 +112,9 @@ make_plots <- function(
         name <- gsub("\\[|\\]|:|,| ", "", spec)
         plot_single_elec(res_set, elec,
                   file = paste0("../plots/", file, "/Waveforms/Residual_",
-                  name, ".pdf"), title = paste0("Residual Pz: ", pred[i]),
-                modus = "Condition", ylims = c(4, -4),
-                  leg_labs = data_labs, leg_vals = data_vals, ci = FALSE)
+                  name, ".pdf"), title = paste0("Residuals ", pred[i]),
+                  modus = "Condition", ylims = c(4, -4),
+                  leg_labs = data_labs, leg_vals = data_vals, ci = TRUE)
     }
 }
 
@@ -142,8 +136,5 @@ make_plots <- function(
 #         predictor = c("Intercept", "PzTimeWindow", "PzSegment"))
 # }
 
-make_plots(paste0("ERP_Design1_N400Segment"), c("Pz"),
+make_plots(paste0("ERP_Design1_N400Segment_AC"), c("Pz"),
     predictor = c("Intercept", "PzN400", "PzSegment"))
-
-# make_plots(paste0("ERP_Design2_N400Segment"), c("Pz"),
-#     predictor = c("Intercept", "PzN400", "PzSegment"))
