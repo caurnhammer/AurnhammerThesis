@@ -1,5 +1,4 @@
 # If components are provided, they are automatically inverted. I.e. no need to provide them to invert_preds argument
-
 include("../../../code/rERP.jl");
 
 # Aurnhammer et al. (2021), Condition A & C
@@ -7,50 +6,23 @@ elec = [:Pz];
 models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Intercept], quant = false);
 
 # Design 1
-@time dt = process_data("../../../data/ERP_Design1.csv", false, models, conds=["A", "C"], components=[:N400, :Segment]);
+dt = process_data("../../../data/ERP_Design1.csv", false, models, conds=["A", "C"], components=[:N400, :Segment]);
 # SWITCH ON AND OFF IN fit_models_components
 models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Intercept, :PzN400, :PzSegment], quant = false);
 @time fit_models(dt, models, "ERP_Design1_N400_AC");
 @time fit_models(dt, models, "ERP_Design1_Segment_AC");
 @time fit_models(dt, models, "ERP_Design1_N400Segment_AC");
 
+# dbc 19
+models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Intercept], quant = false);
+dta = process_data("../../../data/dbc19_data.csv", false, models, conds=["control"], components=[:N400, :Segment]);
+dtb = process_data("../../../data/dbc19_data.csv", false, models, conds=["script-related"], components=[:N400, :Segment]);
+dtc = process_data("../../../data/dbc19_data.csv", false, models, conds=["script-unrelated"], components=[:N400, :Segment]);
 
-transform!(dt,
-:Subject => PooledArray => :Subject,
-:ItemNum => PooledArray => :ItemNum);
-
-# @time process_data("../../../data/ERP_Design1.csv", "../data/ERP_Design1_rERP.csv", models, conds=["A"], components=[:N400, :Segment]);
-# @time dt = read_data("../data/ERP_Design1_rERP.csv", models);
-# include("../../../code/rERP.jl"); @time fit_models_components(dt, models, "ERP_Design1_N400Segment_A");
-
-# @time process_data("../../../data/ERP_Design1.csv", "../data/ERP_Design1_rERP.csv", models, conds=["B"], components=[:N400, :Segment]);
-# @time dt = read_data("../data/ERP_Design1_rERP.csv", models);
-# include("../../../code/rERP.jl"); @time fit_models_components(dt, models, "ERP_Design1_N400Segment_B");
-
-# @time process_data("../../../data/ERP_Design1.csv", "../data/ERP_Design1_rERP.csv", models, conds=["C"], components=[:N400, :Segment]);
-# @time dt = read_data("../data/ERP_Design1_rERP.csv", models);
-# include("../../../code/rERP.jl"); @time fit_models_components(dt, models, "ERP_Design1_N400Segment_C");
-
-# @time process_data("../../../data/ERP_Design1.csv", "../data/ERP_Design1_rERP.csv", models, conds=["D"], components=[:N400, :Segment]);
-# @time dt = read_data("../data/ERP_Design1_rERP.csv", models);
-# include("../../../code/rERP.jl"); @time fit_models_components(dt, models, "ERP_Design1_N400Segment_D");
-
-
-# models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Intercept]);
-# @time dt = process_data("../../../data/ERP_Design1.csv", false, models, conds=["A", "C"], components=[:N400, :Segment]);
-# models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Intercept, :PzN400, :PzSegment]);
-# include("../../../code/rERP.jl"); @time fit_models(dt, models, "ERP_Design1_N400Segment");
-
-
-# # dbc 19
-# include("../../../code/rERP.jl"); @time dt = process_data("../../../data/dbc_data.csv", false, models, conds=["control"], components=[:N400, :Segment]);
-# include("../../../code/rERP.jl"); @time fit_models_components(dt, models, "ERP_dbc19_N400Segment_A");
-
-# include("../../../code/rERP.jl"); @time dt = process_data("../../../data/dbc_data.csv", false, models, conds=["script-related"], components=[:N400, :Segment]);
-# include("../../../code/rERP.jl"); @time fit_models_components(dt, models, "ERP_dbc19_N400Segment_B");
-
-# include("../../../code/rERP.jl"); @time dt = process_data("../../../data/dbc_data.csv", false, models, conds=["script-unrelated"], components=[:N400, :Segment]);
-# include("../../../code/rERP.jl"); @time fit_models_components(dt, models, "ERP_dbc19_N400Segment_C");
+models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Intercept, :PzN400, :PzSegment], quant = false);
+fit_models(dta, models, "ERP_dbc19_N400Segment_A");
+fit_models(dtb, models, "ERP_dbc19_N400Segment_B");
+fit_models(dtc, models, "ERP_dbc19_N400Segment_C");
 
 # # Design 2
 # # SWITCH ON AND OFF IN fit_models_components

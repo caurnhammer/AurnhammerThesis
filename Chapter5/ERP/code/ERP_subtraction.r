@@ -161,6 +161,28 @@ round(cor(n4p6seg$N400, n4p6seg$P600), 3)
 library(ppcor)
 pcor.test(n4p6seg$N400, n4p6seg$P600, n4p6seg$Segment)
 
+#####################
+# DELOGU ET AL 2019 #
+#####################
+dt <- fread("../../../data/dbc19_data.csv")
+elec <- "Pz"
+cond <- "C"
+# Condition plotting properties
+cond_labels <- c("Baseline", "Event-rel.", "Event-unrel.")
+cond_values <- c("black", "red", "blue")
+
+# Condition averages
+dt_s <- dt[, lapply(.SD, mean),
+    by = list(Subject, Condition, Timestamp), .SDcols = elec]
+dt_avg <- dt_s[, lapply(.SD, mean),
+    by = list(Condition, Timestamp), .SDcols = elec]
+dt_avg$Pz_CI <- dt_s[, lapply(.SD, ci),
+    by = list(Condition, Timestamp), .SDcols = elec][,..elec]
+dt_avg$Spec <- dt_avg$Condition
+plot_single_elec(dt_avg, elec,
+    file = paste0("../plots/Subtraction/ERP_dbc19_Pz.pdf"),
+    modus = "Condition", ylims = c(9, -5),
+    leg_labs = cond_labels, leg_vals = cond_values)
 
 ######################
 # BASELINE CONDITION #
@@ -189,28 +211,6 @@ pcor.test(n4p6seg$N400, n4p6seg$P600, n4p6seg$Segment)
 #     leg_labs = quart_labels, leg_vals = quart_values)
 
 
-#####################
-# DELOGU ET AL 2019 #
-#####################
-# dt <- fread("../../../data/dbc_data.csv")
-# elec <- "Pz"
-# cond <- "C"
-# # Condition plotting properties
-# cond_labels <- c("Baseline", "Event-rel.", "Event-unrel.")
-# cond_values <- c("black", "red", "blue")
-
-# # Condition averages
-# dt_s <- dt[, lapply(.SD, mean),
-#     by = list(Subject, Condition, Timestamp), .SDcols = elec]
-# dt_avg <- dt_s[, lapply(.SD, mean),
-#     by = list(Condition, Timestamp), .SDcols = elec]
-# dt_avg$Pz_CI <- dt_s[, lapply(.SD, ci),
-#     by = list(Condition, Timestamp), .SDcols = elec][,..elec]
-# dt_avg$Spec <- dt_avg$Condition
-# plot_single_elec(dt_avg, elec,
-#     file = paste0("../plots/Subtraction/ERP_dbc19_Pz.pdf"),
-#     modus = "Condition", ylims = c(9, -5),
-#     leg_labs = cond_labels, leg_vals = cond_values)
 
 # # Binning per condition
 # conds <- c("control", "script-related", "script-unrelated")

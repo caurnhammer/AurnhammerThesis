@@ -24,7 +24,7 @@ make_plots <- function(
     print(unique(coef$Condition))
     plot_single_elec(coef, "Pz",
         file = paste0("../plots/", file, "/Waveforms/Coefficients_Pz.pdf"),
-        title = "rERP coefficients",
+        title = "rERP coefficients. Condition C",
         modus = "Coefficient", ylims = c(15, -23.5),
         leg_labs = model_labs, leg_vals = model_vals)
 
@@ -57,16 +57,34 @@ make_plots <- function(
     # data_labs <- c("A", "B", "C", "D")
     # data_vals <- c("#000000", "#BB5566", "#004488", "#DDAA33")
 
-    eeg$Condition <- factor(plyr::mapvalues(eeg$Condition, c(1, 2),
-        c("A", "C")), levels = c("A", "C"))
-    data_labs <- c("A: Expected", "C: Unexpected")
-    data_vals <- c("#000000", "#004488")
-
+    # eeg$Condition <- factor(plyr::mapvalues(eeg$Condition, c(1, 2),
+    #     c("A", "C")), levels = c("A", "C"))
+    # data_labs <- c("A: Expected", "C: Unexpected")
+    # data_vals <- c("#000000", "#004488")
+    
     # eeg$Condition <- factor(plyr::mapvalues(eeg$Condition, c(1, 2, 3),
     #     c("baseline", "event-related", "event-unrelated")),
     #     levels = c("baseline", "event-related", "event-unrelated"))
     # data_labs <- c("baseline", "event-related", "event-unrelated")
     # data_vals <- c("#000000", "red", "blue")
+
+    # eeg$Condition <- factor(plyr::mapvalues(eeg$Condition, c(1, 2),
+    #     c("baseline", "event-related")),
+    #     levels = c("baseline", "event-related"))
+    # data_labs <- c("baseline", "event-related")
+    # data_vals <- c("#000000", "red")
+
+    # eeg$Condition <- factor(plyr::mapvalues(eeg$Condition, c(1, 2),
+    #     c("baseline", "event-unrelated")),
+    #     levels = c("baseline", "event-unrelated"))
+    # data_labs <- c("baseline", "event-unrelated")
+    # data_vals <- c("#000000", "blue")
+
+    eeg$Condition <- factor(plyr::mapvalues(eeg$Condition, c(1),
+        c("baseline")),
+        levels = c("baseline"))
+    data_labs <- c("baseline")
+    data_vals <- c("#000000")
 
     # eeg$Condition <- factor(plyr::mapvalues(eeg$Condition, c(1, 2, 3),
     #     c("A", "B", "C")),
@@ -118,23 +136,21 @@ make_plots <- function(
     }
 }
 
-# tw_length = 200
-# tws = seq(-100, 1000, 100)
-# for (t in tws) {
-#     # make_plots(paste0("ERP_Design1_TimewindowSegment_", t, "-", t+tw_length), c("Pz"),
-#     #     predictor = c("Intercept", "PzTimeWindow", "PzSegment"))
-#     make_plots(paste0("ERP_Design1_TimewindowSmallSegment_", t, "-", t+tw_length), c("Pz"),
-#         predictor = c("Intercept", "PzTimeWindow", "PzSegment"))
-#     # make_plots(paste0("ERP_Design1_Segment_", t, "-", t+tw_length), c("Pz"),
-#     #     predictor = c("Intercept", "PzSegment"))
-#     # make_plots(paste0("ERP_Design1_TimeWindow_", t, "-", t+tw_length), c("Pz"),
-#     #     predictor = c("Intercept", "PzTimeWindow"))
-# }
-
-# for (t in tws) {
-#     make_plots(paste0("ERP_dbc19_TimeWindowSegment_", t, "-", t+tw_length), c("Pz"),
-#         predictor = c("Intercept", "PzTimeWindow", "PzSegment"))
-# }
-
 make_plots(paste0("ERP_Design1_N400Segment_AC"), c("Pz"),
+    predictor = c("Intercept", "PzN400", "PzSegment"))
+
+make_plots(paste0("ERP_dbc19_N400Segment_AB"), c("Pz"),
+    predictor = c("Intercept", "PzN400", "PzSegment"))
+
+make_plots(paste0("ERP_dbc19_N400Segment_AC"), c("Pz"),
+    predictor = c("Intercept", "PzN400", "PzSegment"))
+
+
+make_plots(paste0("ERP_dbc19_N400Segment_A"), c("Pz"),
+    predictor = c("Intercept", "PzN400", "PzSegment"))
+
+make_plots(paste0("ERP_dbc19_N400Segment_B"), c("Pz"),
+    predictor = c("Intercept", "PzN400", "PzSegment"))
+
+make_plots(paste0("ERP_dbc19_N400Segment_C"), c("Pz"),
     predictor = c("Intercept", "PzN400", "PzSegment"))

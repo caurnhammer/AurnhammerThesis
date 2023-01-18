@@ -20,16 +20,11 @@ montage -mode concatenate -density 250 \
      -tile 2x3 \
      final_pdf/ERP_isoestres_AC.pdf
 
-# convert -density 250 ../ERP/plots/Subtraction/Subtraction_Design1_N400minusSegment_Quartiles_A.pdf \
-#    ../ERP/plots/ERP_Design1_N400Segment_A/Waveforms/Coefficients_Pz.pdf \
-#    +append -page 200:100 \
-#    final_pdf/ERP_Baseline.pdf
+cp ../ERP/plots/Subtraction/ERP_dbc19_Pz.pdf final_pdf/ERP_dbc19_Pz.pdf
 
-# cp ../ERP/plots/Subtraction/ERP_dbc19_Pz.pdf final_pdf/ERP_dbc19_Pz.pdf
-
-# montage -mode concatenate -density 250 \
-#     ../ERP/plots/Subtraction/Subtraction_dbc19_N400minusSegment_Quantiles_Baseline.pdf ../ERP/plots/ERP_dbc19_N400Segment_A/Waveforms/Coefficients_Pz.pdf \
-#     ../ERP/plots/Subtraction/Subtraction_dbc19_N400minusSegment_Quantiles_Event-related.pdf ../ERP/plots/ERP_dbc19_N400Segment_B/Waveforms/Coefficients_Pz.pdf \
-#     ../ERP/plots/Subtraction/Subtraction_dbc19_N400minusSegment_Quantiles_Event-unrelated.pdf ../ERP/plots/ERP_dbc19_N400Segment_C/Waveforms/Coefficients_Pz.pdf \
-#     -tile 2x3 \
-#     final_pdf/ERP_dbc19_analyses.pdf
+montage -mode concatenate -density 250 \
+    ../ERP/plots/ERP_dbc19_N400Segment_A/Waveforms/Coefficients_Pz.pdf \
+    ../ERP/plots/ERP_dbc19_N400Segment_B/Waveforms/Coefficients_Pz.pdf \
+    ../ERP/plots/ERP_dbc19_N400Segment_C/Waveforms/Coefficients_Pz.pdf \
+    -tile 3x1 \
+    final_pdf/ERP_dbc19_analyses.pdf
