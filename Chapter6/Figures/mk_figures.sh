@@ -8,3 +8,8 @@ convert -density 250 ../../Chapter4/ERP/plots/Design2_Plaus_Clozedist/Waveforms/
     ../../Chapter4/SPR/plots/Design2_Plaus_Clozedist/RT_logRT.pdf \
     +append -page 400:200 \
     final_pdf/Design2_Results.pdf
+
+convert -density 250 ../../Chapter5/ERP/plots/adsbc21_N400Segment_AC/Coefficients_Pz.pdf \
+    ../../Chapter5/ERP/plots/adsbc21_N400Segment_AC/Estimated_InterceptPzN400.pdf \
+    +append -page 400:200 \
+    final_pdf/PO_Results.pdf
