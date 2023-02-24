@@ -28,7 +28,7 @@ make_plots <- function(
         leg_labs = model_labs, leg_vals = model_vals)
 
     ## DATA
-    # Observed data
+    # Observed
     eeg <- fread(paste0("../data/", file, "_data.csv"))
     eeg$Condition <- factor(plyr::mapvalues(eeg$Condition,
         c(1:length(unique(eeg$Condition))),

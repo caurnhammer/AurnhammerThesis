@@ -7,6 +7,7 @@ models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Interc
 
 # Design 1
 dt = process_data("../../../data/ERP_Design1.csv", false, models, conds=["A", "C"], components=[:N400, :Segment]);
+<<<<<<< HEAD
 models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Intercept, :PzN400, :PzSegment]);
 @time fit_models(dt, models, "adsbc21_N400Segment_AC");
 
