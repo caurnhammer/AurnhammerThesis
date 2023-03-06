@@ -263,7 +263,7 @@ function fit_models(data, models, file)
     num = num_mod(data, models)
     print("Fitting ", num, " models using ", Threads.nthreads(), " threads. \n")   
     Threads.@threads for i in 1:length(s_indices)
-        local ind = make_Ind(data, models, m_indices, s_indices[i], e_indices[i], m_indices[i]);
+	    local ind = make_Ind(data, models, m_indices, s_indices[i], e_indices[i], m_indices[i]);
         
         # Take subset
         df = @view data[ind.s:ind.e,:];
@@ -303,14 +303,7 @@ function fit_models_components(dt, models, file)
     out_models = []
     for (i, e) in enumerate(models.Electrodes)
         println("Electrode $e ")
-        # models_e = make_models(models.Descriptors, models.NonDescriptors, [e], [:Intercept, Symbol(e, "Segment")]; quant = models.Quantiles);
-        # models_e = make_models(models.Descriptors, models.NonDescriptors, [e], [:Intercept, Symbol(e, "Segment")]; quant = models.Quantiles);
         models_e = make_models(models.Descriptors, models.NonDescriptors, [e], [:Intercept, Symbol(e, "N400"), Symbol(e, "Segment")]; quant = models.Quantiles);
-        # models_e = make_models(models.Descriptors, models.NonDescriptors, [e], [:Intercept, Symbol(e, "N400"), Symbol(e, "P600"), Symbol(e, "Segment")]; quant = models.Quantiles);
-        # models_e = make_models(models.Descriptors, models.NonDescriptors, [e], [:Intercept, Symbol(e, "TimeWindow")]; quant = false);
-        # models_e = make_models(models.Descriptors, models.NonDescriptors, [e], [:Intercept, Symbol(e, "Segment")]; quant = false);
-        # models_e = make_models(models.Descriptors, models.NonDescriptors, [e], [:Intercept, Symbol(e, "TimeWindow"), Symbol(e, "Segment")]; quant = false);
-        # models_e = make_models(models.Descriptors, models.NonDescriptors, [e], [:Intercept, Symbol(e, "N400"), Symbol(e, "P600")]; quant = false);
         output = fit_models(dt, models_e, "none")
         if i .== 1
             out_data = output[1]
@@ -434,10 +427,8 @@ end
 function standarderror(out_data, out_models, df, models, ind)
     res = out_data[ind.s + ind.n * 2 * length(models.Sets): ind.e + ind.n * 2 * length(models.Sets),models.Electrodes]
     preds = Array(@view df[:,models.Predictors])
-
-    # sigma_sq = SSE / (n-numpred)
-    # std_error = sqrt.(sigma_sq .* diag(inv(cholesky)) )
-    std_error = sqrt.(transpose(sum.(eachcol(res.^2)) ./ (nrow(df) - ind.numpred)) .* diag(inv(cholesky(transpose(preds) * preds))))
+    
+    std_error = sqrt.(transpose(sum.(eachcol(res.^2)) ./ (nrow(df) - ind.numpred)) .* diag(inv(transpose(preds) * preds)))
 
     offset = 0
     for (p_num, p) in enumerate(models.Predictors)
