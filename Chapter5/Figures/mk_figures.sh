@@ -20,6 +20,10 @@ montage -mode concatenate -density 250 \
      -tile 2x3 \
      final_pdf/ERP_isoestres_AC.pdf
 
+convert -density 250 ../ERP/plots/ERP_Design1_N400Segment_A/Waveforms/Coefficients_Pz.pdf ../ERP/plots/ERP_Design1_N400Segment_C/Waveforms/Coefficients_Pz.pdf \
+   +append -page 200:100 \
+   final_pdf/ERP_Coefs_AC_iso.pdf
+
 cp ../ERP/plots/Subtraction/ERP_dbc19_Pz.pdf final_pdf/ERP_dbc19_Pz.pdf
 
 montage -mode concatenate -density 250 \

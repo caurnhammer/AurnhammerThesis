@@ -24,7 +24,7 @@ make_plots <- function(
     print(unique(coef$Condition))
     plot_single_elec(coef, "Pz",
         file = paste0("../plots/", file, "/Waveforms/Coefficients_Pz.pdf"),
-        title = "rERP coefficients. Condition C",
+        title = "rERP coefficients. Unxpected Condition.",
         modus = "Coefficient", ylims = c(15, -23.5),
         leg_labs = model_labs, leg_vals = model_vals)
 
@@ -139,12 +139,11 @@ make_plots <- function(
 make_plots(paste0("ERP_Design1_N400Segment_AC"), c("Pz"),
     predictor = c("Intercept", "PzN400", "PzSegment"))
 
-make_plots(paste0("ERP_dbc19_N400Segment_AB"), c("Pz"),
+make_plots(paste0("ERP_Design1_N400Segment_A"), c("Pz"),
     predictor = c("Intercept", "PzN400", "PzSegment"))
 
-make_plots(paste0("ERP_dbc19_N400Segment_AC"), c("Pz"),
+make_plots(paste0("ERP_Design1_N400Segment_C"), c("Pz"),
     predictor = c("Intercept", "PzN400", "PzSegment"))
-
 
 make_plots(paste0("ERP_dbc19_N400Segment_A"), c("Pz"),
     predictor = c("Intercept", "PzN400", "PzSegment"))
