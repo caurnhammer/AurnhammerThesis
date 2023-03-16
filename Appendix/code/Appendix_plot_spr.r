@@ -58,7 +58,7 @@ make_plots <- function(
                     levels = c("Pre-critical-2", "Pre-critical", "Critical",
                                 "Spillover", "Post-spillover"))
     spr$Timestamp <- NULL
-    data_labs <- c("A", "B", "C", "D")
+    data_labs <- c("A: A+E+", "B: A-E+", "C: A+E-", "D: A-E-")
     data_vals <- c("#000000", "#BB5566", "#004488", "#DDAA33")
 
     # Observed

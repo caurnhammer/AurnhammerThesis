@@ -5,6 +5,7 @@
 source("../../code/plot_rERP.r")
 
 quad_density <- function(path, file, leg_labs, leg_vals) {
+    system("mkdir -p ../Figures/Stimuli/")
     dt <- fread(path)
 
     cloze   <- items_and_means(dt, "Cloze")
@@ -41,7 +42,7 @@ quad_density <- function(path, file, leg_labs, leg_vals) {
 
 quad_density(
     "../../data/Stimuli_Design1.csv",
-    "../Figures/Design1_Densities.pdf",
+    "../Figures/Stimuli/Design1_Densities.pdf",
     c("A: A+E+", "B: A-E+", "C: A+E-", "D: A-E-"),
     c("#000000", "#BB5566", "#004488", "#DDAA33")
 )

@@ -8,7 +8,7 @@ produce_rt_plots <- function(
     model_vals
 ) {
     name <- paste0("../plots/", substr(path, 9, nchar(path) - 4))
-    system(paste("mkdir", name))
+    system(paste("mkdir -p", name))
 
     # read data
     lmerRT <- fread(path)

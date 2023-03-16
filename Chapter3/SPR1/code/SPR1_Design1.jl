@@ -12,5 +12,5 @@ dt = exclude_trial(dt[((dt.Region .!== "Pre-critical-2") .& (dt.Duplicated .!== 
 
 # Model fitting
 f = @formula(logRT ~ 1 + logCloze + Association_Noun + (1 + logCloze + Association_Noun | Item) + (1 + logCloze + Association_Noun | Subject));
-lmerRT = fit_models(dt, f, contr);
+lmerRT = fit_lmer_models(dt, f, contr);
 generate_results(lmerRT, f, "../data/lmerRT_logCloze_AssocNoun.csv");

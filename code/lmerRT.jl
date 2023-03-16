@@ -96,7 +96,7 @@ function subj_coef(b_array,index,n_sub,n_it,n_pred)
     repeat(reshape(b_array,(n_sub*n_pred))[index:n_pred:(n_sub*n_pred)], inner=(n_it))
 end
 
-function fit_models(data, form, f_contr)
+function fit_lmer_models(data, form, f_contr)
     # Determine data properties
     num_groupings = length(f_contr);             # number of grouping factors (in ranefs)
     numpred = length(form.rhs) - num_groupings;  # number of predictors (including zval_intercept)

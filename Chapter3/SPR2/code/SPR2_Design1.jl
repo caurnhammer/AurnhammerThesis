@@ -8,12 +8,12 @@ contr = Dict(:Subject => Grouping(), :Item => Grouping());
 dt = read_spr_data("../../../data/SPR2_Design1.csv", false);
 dt = exclude_trial(dt[((dt.Region .!== "Pre-critical-2") .& (dt.Duplicated .!== "multi")),:], 50, 2500, 50, 6000);
 f = @formula(logRT ~ 1 + logCloze + Association_Noun + (1 + logCloze + Association_Noun | Item) + (1 + logCloze + Association_Noun | Subject));
-lmerRT = fit_models(dt, f, contr);
+lmerRT = fit_lmer_models(dt, f, contr);
 generate_results(lmerRT, f, "../data/lmerRT_logCloze_AssocNoun.csv");
 
 # logCloze in condition A
 dt = read_spr_data("../../../data/SPR2_Design1.csv", ["A"]);
 dt = exclude_trial(dt[((dt.Region .!== "Pre-critical-2") .& (dt.Duplicated .!== "multi")),:], 50, 2500, 50, 6000);
 f = @formula(logRT ~ 1 + logCloze + (1 + logCloze | Item) + (1 + logCloze | Subject));
-lmerRT = fit_models(dt, f, contr);
+lmerRT = fit_lmer_models(dt, f, contr);
 generate_results(lmerRT, f, "../data/lmerRT_A_logCloze.csv");

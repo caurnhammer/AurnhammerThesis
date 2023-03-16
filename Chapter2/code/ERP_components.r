@@ -43,7 +43,9 @@ nl <- theme(legend.position = "none")
 p <- arrangeGrob(p + nl + ggtitle("Pz"),
             legend, heights = c(10, 1))
 
-ggsave(file = "../Figures/ERP_Design1_AC_Pz.pdf", p,
+system("mkdir -p ../Figures/Ch2")
+
+ggsave(file = "../Figures/Ch2/ERP_Design1_AC_Pz.pdf", p,
     device = cairo_pdf, width = 3, height = 3)
 
 if (file.exists("Rplots.pdf")){

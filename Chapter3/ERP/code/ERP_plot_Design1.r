@@ -7,6 +7,7 @@
 # load plotting functions into workspace
 source("../../../code/plot_lmerERP.r")
 source("../../../code/benjamini-hochberg.r")
+source("../../../code/plot_rERP.r")
 
 # produce single midline plot.
 lmerERPplot <- function(
@@ -163,7 +164,7 @@ produce_lmer_plots <- function(
     # Observed data
     lmerERPplot(lmerERP,
                 "EEG",
-                yunit = paste0("Amplitude (", "\u03BC", "Volt)"),
+                yunit = "Amplitude (μVolt)",
                 title = "Observed ERP",
                 ylims = c(9, -7),
                 ci = TRUE,
@@ -176,7 +177,7 @@ produce_lmer_plots <- function(
     for (x in estimates) {
         lmerERPplot(lmerERP,
                     x,
-                    yunit = paste0("Amplitude (", "\u03BC", "Volt)"),
+                    yunit = "Amplitude (μVolt)",
                     title = "Estimated ERPs",
                     ylims = c(9, -7),
                     ci = TRUE,
@@ -190,7 +191,7 @@ produce_lmer_plots <- function(
     for (x in residuals) {
         lmerERPplot(lmerERP,
                     x,
-                    yunit = paste0("Amplitude (", "\u03BC", "Volt)"),
+                    yunit = "Amplitude (μVolt)",
                     title = "Residuals: Noun Association",
                     ci = TRUE,
                     ylims = c(4.5, -4.5),
@@ -229,12 +230,40 @@ produce_lmer_plots <- function(
                     mode = "A_estimates",
                     ci = TRUE,
                     subject_avg = TRUE,
-                    ylims = c(10, -10),
+                    ylims = c(8, -6),
                     title = "Estimated ERPs: Log(Cloze) Levels",
                     leg_labs = data_labs,
                     leg_vals = data_vals,
                     name = name)
     }
+}
+
+make_grid_plot <- function(
+    path,
+    data_labs,
+    data_vals
+) {
+    system(paste0("mkdir -p ../plots/", path))
+
+    elec_all <- c("Fp1", "Fp2", "F7", "F3", "Fz", "F4", "F8", "FC5",
+                "FC1", "FC2", "FC6", "C3", "Cz", "C4", "CP5", "CP1",
+                "CP2", "CP6", "P7", "P3", "Pz", "P4", "P8", "O1", "Oz", "O2")
+
+    eeg <- fread(paste0("../data/", path, "_data.csv"))
+    eeg$Condition <- factor(plyr::mapvalues(eeg$Condition, c(2, 1, 3, 4),
+                     c("B", "A", "C", "D")), levels = c("A", "B", "C", "D"))
+    obs <- eeg[Type == "EEG", ]
+
+    plot_full_elec(
+        data = obs, 
+        e = elec_all, 
+        file = paste0("../plots/", path, "/Observed_Full.pdf"),
+        title = "Observed",
+        modus = "Condition",
+        ci = FALSE,
+        ylims = c(9, -5.5),
+        leg_labs = data_labs,
+        leg_vals = data_vals)
 }
 
 produce_lmer_plots(
@@ -283,4 +312,9 @@ produce_lmer_plots(
     c("#000000"),
     c("Intercept", "log(Cloze)"),
     c("#000000", "#E349F6")
+)
+
+make_grid_plot("ERP_Design1_rERP",
+    data_labs = c("A: A+E+", "B: A-E+", "C: A+E-", "D: A-E-"),
+    data_vals = c("#000000", "#BB5566", "#004488", "#DDAA33")
 )

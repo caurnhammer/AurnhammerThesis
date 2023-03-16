@@ -77,11 +77,11 @@ plot_lmerRT <- function(
     # conditional plot processing
     if (!(DV %in% c("zvalue", "coefficients"))) {
         p <- p + geom_errorbar(aes(ymin = DV - SE, ymax = DV + SE),
-            width = .1, size = 0.3)
+            width = .1, linewidth = 0.3)
     }
     if (DV == "coefficients") {
         p <- p + geom_errorbar(aes(ymin = DV - SE, ymax = DV + SE),
-            width = .1, size = 0.3)
+            width = .1, linewidth = 0.3)
         p <- p + scale_color_manual(name = "Coefficients",
             values = leg_vals, labels = leg_labs)
     } else if (DV == "zvalue") {

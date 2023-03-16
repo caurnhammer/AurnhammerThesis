@@ -72,17 +72,19 @@ make_plots <- function(
     if (design %in% c("Design1_AC", "Design1_AC_log")) {
         eeg$Condition <- factor(plyr::mapvalues(eeg$Condition, c(1, 2),
                         c("A", "C")), levels = c("A", "C"))
-        data_labs <- c("A", "C")
+        data_labs <- c("A: A+E+", "C: A+E-")
         data_vals <- c("black", "#004488")
     } else if (design == "Design1") {
         eeg$Condition <- factor(plyr::mapvalues(eeg$Condition, c(2, 1, 3, 4),
                      c("B", "A", "C", "D")), levels = c("A", "B", "C", "D"))
-        data_labs <- c("A", "B", "C", "D")
+        data_labs <- c("A: A+E+", "B: A-E+", "C: A+E-", "D: A-E-")
         data_vals <- c("#000000", "#BB5566", "#004488", "#DDAA33")
     } else if (design == "Design2") {
         eeg$Condition <- factor(plyr::mapvalues(eeg$Condition, c(2, 1, 3),
                         c("B", "A", "C")), levels = c("A", "B", "C"))
-        data_labs <- c("A", "B", "C")
+        data_labs <- c("A: Plausible",
+                       "B: Less plausible, attraction",
+                       "C: Implausible, no attraction")
         data_vals <- c("#000000", "red", "blue")
     }
 
@@ -199,7 +201,7 @@ plot_zscores <- function(file, pred) {
     p <- p + geom_hline(yintercept = mean(dt$Cloze), linetype = "dashed")
     p <- p + labs(x = "z-standardized Cloze", title = "Z-standardization")
 
-    ggsave(p, filename = "../Figures/Stimuli_zscore.pdf",
+    ggsave(p, filename = "../Figures/App/Stimuli_zscore.pdf",
             device = cairo_pdf, width = 3, height = 3)
     p
 }
