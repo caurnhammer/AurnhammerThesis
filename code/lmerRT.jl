@@ -1,11 +1,14 @@
 ##
 # Christoph Aurnhammer <aurnhammer@coli.uni-saarland.de>
 #
-# Functions implementing rRT analyses
+# Functions implementing (lmer)rRT analyses
 # analogous to rERPs (Smith & Kutas, 2015, Psychophysiology)
 ##
 
-using CSV, DataFrames, MixedModels, PooledArrays
+using CSV
+using DataFrames
+using MixedModels
+using PooledArrays
 using StatsBase: mean, std, zscore
 
 function exclude(df, sd_cutoff)
@@ -35,37 +38,55 @@ function exclude_trial(df, lower, upper, lower_rc, upper_rc)
             if sum(dti.ReactionTime .=== missing) > 1
                 exc = sum((dti.ReadingTime .> upper) .| (dti.ReadingTime .< lower)) > 0;
                 if exc == true
-                    #print(dti[:,[:ReadingTime]], "\n")
                     df_out = df_out[.!((df_out.Subject .== s) .& (df_out.Item .== i)),:];
                 end
             elseif sum(dti.ReactionTime .=== missing) == 0
                 exc = sum((dti.ReadingTime .> upper) .| (dti.ReadingTime .< lower) .| (dti.ReactionTime .> upper_rc) .| (dti.ReactionTime .< lower_rc)) > 0;
                 if exc == true
-                    #print(dti[:,[:ReactionTime, :ReadingTime]], "\n")
                     df_out = df_out[.!((df_out.Subject .== s) .& (df_out.Item .== i)),:];
                 end
             end
         end
     end
 
+    println(nrow(df)-nrow(df_out), " / ", nrow(df), " excluded (", (nrow(df)-nrow(df_out))*100/nrow(df) ,"%).")
+    
     df_out
 end
 
-function read_spr_data(path) 
-    dt = transform!(
-    DataFrame(CSV.File(path)),
-    :Subject => PooledArray => :Subject,
-    :Item => PooledArray => :Item);
+function read_spr_data(path, conds)
+    data = DataFrame(CSV.File(path))
+    
+    # Take condition subsets at this point (i.e. before any z-scoring takes place)
+    if conds != false
+        data = data[subset_inds(data, conds),:]
+    end
 
-    dt.Plaus = zscore(dt.Plaus) .* -1
-    dt.Cloze_distractor = zscore(dt.Cloze_distractor)
-    dt.PrecritRT = zscore(dt.PrecritRT)
+    data.logCloze = zscore(data.logCloze)
+    data.Association_Noun = zscore(data.Association_Noun)
 
-    dt.logRT = log.(dt.ReadingTime)
+    data.logCloze = data.logCloze .* -1
+    data.Association_Noun = data.Association_Noun .* -1
 
-    dt
+    data = data[:,[:Condition, :Item, :Subject, :Region, :Duplicated, :logRT,
+                   :ReadingTime, :ReactionTime, :logCloze, :Association_Noun]]
+
+    data = transform!(data,
+            :Subject => PooledArray => :Subject,
+            :Item => PooledArray => :Item);
+
+    data
 end
 
+function subset_inds(data, conds)
+    ind = Int.(zeros(nrow(data)))
+    for x in conds
+        ind_curr = (data.Condition .== x)
+        ind = ind .| ind_curr
+    end
+
+    Bool.(ind)
+end
 
 function item_coef(b_array,index,n_sub,n_it,n_pred)
     collect(Iterators.flatten(fill(reshape(b_array,(n_it*n_pred))[index:n_pred:(n_it*n_pred)],n_sub)))
@@ -110,7 +131,7 @@ function fit_models(data, form, f_contr)
         te_dt = data[(data.Region .== t),:];
         
         # fit model
-        m = fit(MixedModel, form, te_dt, contrasts=f_contr);
+        m = fit(MixedModel, form, te_dt, contrasts=f_contr, progress=false);
         zvals = m.beta ./ m.stderror
         aic = m.objective + 2 * dof(m)
         bic = m.objective + dof(m) * log(nobs(m))
@@ -129,6 +150,22 @@ function fit_models(data, form, f_contr)
     output
 end
 
+function generate_results(fitted, form, output_path)
+    # prepare data
+    numpred = length(form.rhs) - 2;
+    coefs = [Symbol(x) for x in string.(f.rhs[1:numpred])];
+    fitted = combine_datasets(dt, fitted, coefs[2:length(coefs)]);
+    
+    # compute estimates & residuals & add coefs to intercept
+    fitted = compute_estimates(fitted, coefs);
+    estimates = names(fitted)[occursin.("est_", names(fitted))];
+    fitted = compute_residuals(fitted, estimates);
+    fitted = compute_coefs(fitted, coefs); 
+
+    # Write to disk
+    CSV.write(output_path, fitted);
+end
+
 function combine_datasets(data, lmer_data, preds)
     # collapse eeg data to item * subject subset of non-excluded trials. Rename predictor cols to z*. (zscored predictors)
     stim = combine(groupby(data, [:Subject, :Item, :Condition]), [x => mean => string("z_", x) for x in preds]);
@@ -138,7 +175,7 @@ function combine_datasets(data, lmer_data, preds)
     lmer_data
 end
 
-function compute_RTs(lmer_data, preds)
+function compute_estimates(lmer_data, preds)
     # Exclude intercept in combinations
     if preds[1] == Symbol("1")
         combi = [[x] for x in preds[2:length(preds)]];
