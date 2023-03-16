@@ -72,7 +72,7 @@ plot_grandavg_ci <- function(
     # For all plots
     if (ci == TRUE) {
     p <- p + geom_ribbon(aes(x = Timestamp,
-        ymax = V + V_CI, ymin = V - V_CI), alpha = 0.20, color = NA)
+        ymax = V + V_CI, ymin = V - V_CI), alpha = 0.15, color = NA)
     }
     p <- p + geom_hline(yintercept = 0, linetype = "dashed")
     p <- p + geom_vline(xintercept = 0, linetype = "dashed")
@@ -148,7 +148,9 @@ plot_single_elec <- function(
     tws = list(c(250, 400), c(600, 1000)),
     ci = TRUE,
     leg_labs,
-    leg_vals
+    leg_vals,
+    omit_legend = FALSE,
+    save_legend = FALSE
 ) { 
     if (modus %in% c("Quantile", "Condition")) {
         cols <- c("Spec", "Timestamp", modus)
@@ -165,7 +167,7 @@ plot_single_elec <- function(
                 df = cbind(data[, ..cols], data[, ..varforward]),
                 ttl = e,
                 yunit = yunit,
-                ylims = ylims, 
+                ylims = ylims,
                 modus = modus,
                 tws = tws,
                 ci = FALSE,
@@ -204,10 +206,24 @@ plot_single_elec <- function(
             legend.text = element_text(size = 7))
         gg <- gg + theme(plot.title = element_text(size = 7.5))
 
-        legend <- get_legend(gg)
-        nl <- theme(legend.position = "none")
-        gg <- arrangeGrob(gg + nl + ggtitle(paste0(e, ": ", title)),
+        if (omit_legend) {
+            if (save_legend) {
+                lgnd <- get_legend(gg)
+                file_trimmed <- strtrim(file, nchar(file) - 4)
+                ggsave(paste0(file_trimmed, "_wavelegend.pdf"),
+                        lgnd, device = cairo_pdf,
+                        width = 4.5, height = 0.5)
+            }
+            gg <- gg + theme(legend.position = "none")
+            gg <- arrangeGrob(gg + ggtitle(paste0(e, ": ", title)),
+                    heights = c(10, 0.25))
+        } else {
+            legend <- get_legend(gg)
+            nl <- theme(legend.position = "none")
+            gg <- arrangeGrob(gg + nl + ggtitle(paste0(e, ": ", title)),
             legend, heights = c(10, 2))
+        }
+
         ggsave(file, gg, device = cairo_pdf, width = 3, height = 3)
     } else {
         p

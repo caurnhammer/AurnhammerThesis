@@ -25,18 +25,6 @@ quad_density <- function(path, file, leg_labs, leg_vals) {
             "Density", "Rating", "Plaus_distractor",
             leg_labs, leg_vals, c(0, 1.5), c(1:7))
 
-    names <- c("Cloze", "Cloze_distractor", "Plaus", "Plaus_distractor")
-    plots <- list(cl, cl_d, pl, pl_d)
-    for (i in c(1:4)) {
-        p <- plots[[i]] + theme(legend.key.size = unit(1, 'cm'),
-                legend.key.height = unit(0.5, 'cm'),
-                legend.key.width = unit(0.5, 'cm'),
-                legend.title = element_text(size = 10),
-                legend.text = element_text(size = 8))
-        ggsave(paste0("Densities_", names[i], ".pdf"), p, device = cairo_pdf,
-                width = 3.5, height = 3.5)
-    }
-
     leg <- get_legend(pl)
     nl <- theme(legend.position = "none")
     ttlpos <- theme(plot.title = element_text(hjust = 0.5))
@@ -52,7 +40,8 @@ quad_density <- function(path, file, leg_labs, leg_vals) {
 
 quad_density(
     "../../data/Stimuli_Design2.csv",
-    "../Figures/final_pdf/Design2_Densities.pdf",
-    c("A", "B", "C"),
+    "Design2_Densities.pdf",
+    c("A: Plausible", "B: Less plausible, attraction",
+        "C: Implausible, no attraction"),
     c("black", "red", "blue")
 )

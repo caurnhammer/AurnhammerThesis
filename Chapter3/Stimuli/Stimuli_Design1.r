@@ -5,7 +5,6 @@
 source("../../code/plot_rERP.r")
 
 quad_density <- function(path, file, leg_labs, leg_vals) {
-    system("mkdir -p ../Figures/Stimuli/")
     dt <- fread(path)
 
     cloze   <- items_and_means(dt, "Cloze")
@@ -36,13 +35,12 @@ quad_density <- function(path, file, leg_labs, leg_vals) {
             as_v + nl + ggtitle("Verb Association") + ttlpos,
             layout_matrix = matrix(1:4, ncol = 2)),
             leg, heights = c(10, 1))
-
     ggsave(file, gg, device = cairo_pdf, width = 7, height = 7)
 }
 
 quad_density(
     "../../data/Stimuli_Design1.csv",
-    "../Figures/Stimuli/Design1_Densities.pdf",
+    "Design1_Densities.pdf",
     c("A: A+E+", "B: A-E+", "C: A+E-", "D: A-E-"),
     c("#000000", "#BB5566", "#004488", "#DDAA33")
 )

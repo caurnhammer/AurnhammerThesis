@@ -1,4 +1,8 @@
-mkdir -p ERP SPR1 SPR2
+mkdir -p Stimuli ERP SPR1 SPR2
+
+## Stimuli
+
+cp ../Stimuli/Design1_Densities.pdf Stimuli/Design1_Densities.pdf
 
 ## ERP
 

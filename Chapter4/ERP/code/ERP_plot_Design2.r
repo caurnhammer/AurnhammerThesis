@@ -7,34 +7,57 @@ make_plots <- function(
     predictor = "Intercept"
 ) {
     # make dirs
-    system(paste0("mkdir ../plots/", file))
-    system(paste0("mkdir ../plots/", file, "/Waveforms"))
-    system(paste0("mkdir ../plots/", file, "/Topos"))
+    system(paste0("mkdir -p ../plots/", file))
+    system(paste0("mkdir -p ../plots/", file, "/Waveforms"))
+    system(paste0("mkdir -p ../plots/", file, "/Topos"))
 
     # nine elecs
     elec_nine <-  c("F3", "Fz", "F4", "C3", "Cz", "C4", "P3", "Pz", "P4")
 
     # MODELS
+    # Coefficents
     mod <- fread(paste0("../data/", file, "_models.csv"))
     mod$Spec <- factor(mod$Spec, levels = predictor)
-    model_labs <- c("Intercept", "Plausibility", "Distractor Cloze")
-    model_vals <- c("black", "#E349F6", "#00FFFF")
-
-    # Models: coefficent
     coef <- mod[Type == "Coefficient", ]
     coef$Condition <- coef$Spec
-    plot_nine_elec(coef, elec_nine,
-        file = paste0("../plots/", file, "/Waveforms/Coefficients.pdf"),
-        modus = "Coefficient", ylims = c(10, -5.5),
-        leg_labs = model_labs, leg_vals = model_vals)
-    plot_single_elec(coef, "C3",
-        file = paste0("../plots/", file, "/Waveforms/Coefficients_C3_noci.pdf"),
-        modus = "Coefficient", ylims = c(10, -5.5),
-        leg_labs = model_labs, leg_vals = model_vals)
-    plot_single_elec(coef, "Pz", 
-        file = paste0("../plots/", file, "/Waveforms/Coefficients_Pz_noci.pdf"),
-        modus = "Coefficient", ylims = c(10, -5.5),
-        leg_labs = model_labs, leg_vals = model_vals)
+    if (predictor[2] != "ReadingTime") {
+        model_labs <- c("Intercept", "Plausibility", "Distractor Cloze")
+        model_vals <- c("black", "#E349F6", "#00FFFF")
+        plot_single_elec(
+            data = coef,
+            e = "C3",
+            file = paste0("../plots/", file, "/Waveforms/Coefficients_C3.pdf"),
+            title = "Coefficients",
+            ylims = c(10, -5.5),
+            modus = "Coefficient",
+            leg_labs = model_labs,
+            leg_vals = model_vals,
+            omit_legend = TRUE,
+            save_legend = TRUE)
+        plot_single_elec(
+            data = coef,
+            e = "Pz",
+            file = paste0("../plots/", file, "/Waveforms/Coefficients_Pz.pdf"),
+            title = "Coefficients",
+            ylims = c(10, -5.5),
+            modus = "Coefficient",
+            leg_labs = model_labs,
+            leg_vals = model_vals,
+            omit_legend = TRUE,
+            save_legend = FALSE)
+    } else {
+        model_labs <- c("Intercept", "Reading Time")
+        model_vals <- c("black", "#E349F6")
+        plot_single_elec(
+            data = coef,
+            e = "Pz",
+            file = paste0("../plots/", file, "/Waveforms/Coefficients_Pz.pdf"),
+            title = "Coefficients",
+            ylims = c(11, -5.5),
+            modus = "Coefficient",
+            leg_labs = model_labs,
+            leg_vals = model_vals)
+    }
 
     # Models: t-value
     time_windows <- list(c(300, 500), c(600, 1000))
@@ -48,10 +71,14 @@ make_plots <- function(
     mod$Spec <- factor(mod$Spec, levels = predictor)
     tval$Condition <- tval$Spec
 
-    plot_nine_elec(tval, elec_nine,
+    plot_nine_elec(
+        data = tval,
+        e = elec_nine,
         file = paste0("../plots/", file, "/Waveforms/t-values.pdf"),
         title = "Inferential statistics",
-        modus = "t-value", ylims = c(7, -5), tws = time_windows,
+        ylims = c(7, -5),
+        modus = "t-value",
+        tws = time_windows,
         leg_labs = model_labs[2:length(model_vals)],
         leg_vals = model_vals[2:length(model_vals)])
 
@@ -59,46 +86,81 @@ make_plots <- function(
     eeg <- fread(paste0("../data/", file, "_data.csv"))
     eeg$Condition <- factor(plyr::mapvalues(eeg$Condition, c(2, 1, 3),
                              c("B", "A", "C")), levels = c("A", "B", "C"))
-
-    data_labs <- c("A", "B", "C")
+    data_labs <- c("A: Plausible", "B: Less plausible, attraction",
+                   "C: Implausible, no attraction")
     data_vals <- c("black", "red", "blue")
 
     # Observed
     obs <- eeg[Type == "EEG", ]
-    plot_nine_elec(obs, elec_nine,
-        file = paste0("../plots/", file,  "/Waveforms/Observed.pdf"),
-        modus = "Condition", ylims = c(10.5, -5.5),
-        leg_labs = data_labs, leg_vals = data_vals)
-    plot_full_elec(data = obs, e = elec_all, 
+    plot_full_elec(
+        data = obs,
+        e = elec_all,
         file = paste0("../plots/", file, "/Waveforms/Observed_Full.pdf"),
-        title = "Observed ERPs", modus = "Condition",
-        ylims = c(9, -5), leg_labs = data_labs, leg_vals = data_vals)
-    plot_single_elec(obs, "Pz",
-            file = paste0("../plots/", file, "/Waveforms/Observed_Pz.pdf"),
-            modus = "Condition", ylims = c(10.5, -5.5),
-            leg_labs = data_labs, leg_vals = data_vals)
+        title = "Observed ERPs",
+        ylims = c(9, -5),
+        modus = "Condition",
+        leg_labs = data_labs,
+        leg_vals = data_vals)
+    plot_single_elec(
+        data = obs,
+        e = "Pz",
+        file = paste0("../plots/", file, "/Waveforms/Observed_Pz.pdf"),
+        ylims = c(10.5, -5.5),
+        modus = "Condition",
+        leg_labs = data_labs,
+        leg_vals = data_vals)
 
-    plot_topo(obs, file = paste0("../plots/", file, "/Topos/Observed"),
-                tw = c(250, 350), cond_man = "B", cond_base = "A",
-                add_title = "\nObserved", omit_legend = TRUE,
-                save_legend = TRUE)
-    plot_topo(obs, file = paste0("../plots/", file, "/Topos/Observed"),
-                tw = c(300, 500), cond_man = "B", cond_base = "A",
-                add_title = "\nObserved", omit_legend = TRUE,
-                save_legend = TRUE)
-    plot_topo(obs, file = paste0("../plots/", file, "/Topos/Observed"),
-                tw = c(600, 1000), cond_man = "B", cond_base = "A",
-                add_title = "\nObserved", omit_legend = TRUE)
-    plot_topo(obs, file = paste0("../plots/", file, "/Topos/Observed"),
-                tw = c(250, 350), cond_man = "C", cond_base = "A",
-                add_title = "\nObserved", omit_legend = TRUE)
-    plot_topo(obs, file = paste0("../plots/", file, "/Topos/Observed"),
-                tw = c(300, 500), cond_man = "C", cond_base = "A",
-                add_title = "\nObserved", omit_legend = TRUE,
-                save_legend = TRUE)
-    plot_topo(obs, file = paste0("../plots/", file, "/Topos/Observed"),
-                tw = c(600, 1000), cond_man = "C", cond_base = "A",
-                add_title = "\nObserved", omit_legend = TRUE)
+    plot_topo(
+        data = obs,
+        file = paste0("../plots/", file, "/Topos/Observed"),
+        tw = c(250, 400),
+        cond_man = "B",
+        cond_base = "A",
+        add_title = "\nObserved",
+        omit_legend = TRUE,
+        save_legend = TRUE)
+    plot_topo(
+        data = obs,
+        file = paste0("../plots/", file, "/Topos/Observed"),
+        tw = c(300, 500),
+        cond_man = "B",
+        cond_base = "A",
+        add_title = "\nObserved",
+        omit_legend = TRUE,
+        save_legend = TRUE)
+    plot_topo(
+        data = obs,
+        file = paste0("../plots/", file, "/Topos/Observed"),
+        tw = c(600, 1000),
+        cond_man = "B",
+        cond_base = "A",
+        add_title = "\nObserved",
+        omit_legend = TRUE)
+    plot_topo(
+        data = obs,
+        file = paste0("../plots/", file, "/Topos/Observed"),
+        tw = c(250, 400),
+        cond_man = "C",
+        cond_base = "A",
+        add_title = "\nObserved",
+        omit_legend = TRUE)
+    plot_topo(
+        data = obs,
+        file = paste0("../plots/", file, "/Topos/Observed"),
+        tw = c(300, 500),
+        cond_man = "C",
+        cond_base = "A",
+        add_title = "\nObserved",
+        omit_legend = TRUE,
+        save_legend = TRUE)
+    plot_topo(
+        data = obs,
+        file = paste0("../plots/", file, "/Topos/Observed"),
+        tw = c(600, 1000),
+        cond_man = "C",
+        cond_base = "A",
+        add_title = "\nObserved",
+        omit_legend = TRUE)
 
     # Estimated
     est <- eeg[Type == "est",]
@@ -111,48 +173,61 @@ make_plots <- function(
         est_set <- est[Spec == spec, ]
         spec <- unique(est_set$Spec)
         name <- gsub("\\[|\\]|:|,| ", "", spec)
-        plot_nine_elec(est_set, elec_nine,
-            file = paste0("../plots/", file, "/Waveforms/Estimated_",
-            name, ".pdf"), modus = "Condition", ylims = c(10.5, -5.5),
-            leg_labs = data_labs, leg_vals = data_vals)
-        plot_single_elec(est_set, "Pz",
-            file = paste0("../plots/", file, "/Waveforms/EstimatedPz_",
-            name, ".pdf"), modus = "Condition", ylims = c(10.5, -5.5),
-            leg_labs = data_labs, leg_vals = data_vals,
-            title = paste("Isolated contribution of", predictor[i]))
-        plot_single_elec(est_set, "Fp1",
-            file = paste0("../plots/", file, "/Waveforms/EstimatedFp1_",
-            name, ".pdf"), modus = "Condition", ylims = c(10.5, -5.5),
-            leg_labs = data_labs, leg_vals = data_vals,
-            title = paste("Isolated contribution of", predictor[i]))
-        plot_topo(est_set, 
+        if (i < length(unique(est$Spec))) {
+            plot_single_elec(
+                data = est_set,
+                e = "Pz",
+                file = paste0("../plots/", file, "/Waveforms/EstimatedPz_",
+                                name, ".pdf"),
+                title = paste("Isolated contribution of", predictor[i]),
+                ylims = c(10.5, -5.5),
+                modus = "Condition",
+                leg_labs = data_labs,
+                leg_vals = data_vals,
+                omit_legend = TRUE,
+                save_legend = FALSE)
+        }
+        else {
+            plot_single_elec(
+                data = est_set,
+                e = "Pz",
+                file = paste0("../plots/", file, "/Waveforms/EstimatedPz_",
+                                name, ".pdf"),
+                title = paste("Estimated ERPs"),
+                modus = "Condition",
+                ylims = c(10.5, -5.5),
+                leg_labs = data_labs,
+                leg_vals = data_vals,
+                omit_legend = TRUE,
+                save_legend = TRUE)
+        }
+
+        plot_topo(
+            data = est_set,
             file = paste0("../plots/", file, "/Topos/Estimated_", name),
-            tw = c(600, 1000), cond_man = "B", cond_base = "A",
-            add_title = paste("\nEstimate", pred[i]), omit_legend = TRUE)
+            tw = c(600, 1000),
+            cond_man = "B",
+            cond_base = "A",
+            add_title = paste("\nEstimate", pred[i]),
+            omit_legend = TRUE)
     }
 
     # Residual
     res <- eeg[Type == "res", ]
-    pred <- c("Intercept", "Tar. Plaus.", "Dist. Cloze",
-              "Dist. Cloze + Tar. Plaus.")
-    for (i in seq(1, length(unique(res$Spec)))) {
-        spec <- unique(res$Spec)[i]
-        res_set <- res[Spec == spec, ]
-        spec <- unique(res_set$Spec)
-        name <- gsub("\\[|\\]|:|,| ", "", spec)
-        plot_nine_elec(res_set, elec_nine,
-            file = paste0("../plots/", file, "/Waveforms/Residual_",
-            name, ".pdf"), modus = "Condition", ylims = c(4.7, -4),
-            leg_labs = data_labs, leg_vals = data_vals)
-        plot_single_elec(res_set, "Pz",
-            file = paste0("../plots/", file, "/Waveforms/ResidualPz_",
-            name, ".pdf"), modus = "Condition", ylims = c(4.7, -4),
-            leg_labs = data_labs, leg_vals = data_vals)
-        plot_topo(res_set, 
-            file = paste0("../plots/", file, "/Topos/Residual_", name),
-            tw = c(600, 1000), cond_man = "B", cond_base = "A",
-            add_title = paste("\nEstimate", pred[i]), omit_legend = TRUE)
-    }
+    spec <- unique(est$Spec)[max(length(unique(est$Spec)))]
+    res_set <- res[Spec == spec, ]
+    plot_single_elec(
+        data = res_set,
+        e = "Pz",
+        file = paste0("../plots/", file, "/Waveforms/ResidualPz_",
+                        name, ".pdf"),
+        title = paste("Residuals (Observed - Estimated)"),
+        ylims = c(4.7, -4),
+        modus = "Condition",
+        leg_labs = data_labs,
+        leg_vals = data_vals,
+        omit_legend = TRUE,
+        save_legend = FALSE)
 }
 
 elec_all <- c("Fp1", "Fp2", "F7", "F3", "Fz", "F4", "F8", "FC5",
