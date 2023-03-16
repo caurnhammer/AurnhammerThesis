@@ -13,13 +13,15 @@ The data are provided as a release within this repository and to be placed in th
 
 **```julia v1.7.3```**
 
-```DataFrames v1.3.4```
+```CategoricalArrays v0.10.7```
 ```Combinatorics v1.0.2```
-```CSV v0.10.4```
-```Distributions v0.25.62```
-```StatsBase v0.33.17```
+```CSV v0.10.9```
+```DataFrames v1.5.0```
+```Distributed (standard)```
+```Distributions v0.25.86```
 ```LinearAlgebra (standard)```
-```CategoricalArrays v0.10.6```
+```PooledArrays v1.4.2```
+```StatsBase v0.33.21```
 
 **```R v4.1.2```**
 
