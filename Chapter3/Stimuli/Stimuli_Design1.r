@@ -8,7 +8,7 @@ quad_density <- function(path, file, leg_labs, leg_vals) {
     dt <- fread(path)
 
     cloze   <- items_and_means(dt, "Cloze")
-    assoc_m <- items_and_means(dt, "Association_MC")
+    assoc_m <- items_and_means(dt, "Association_MainVerb")
     assoc_n <- items_and_means(dt, "Association_Noun")
     assoc_v <- items_and_means(dt, "Association_Verb")
 
@@ -16,7 +16,7 @@ quad_density <- function(path, file, leg_labs, leg_vals) {
             "Density", "Probability", "Cloze",
             leg_labs, leg_vals, c(0, 21), c(0, 0.25, 0.5, 0.75, 1))
     as_d <- plot_density(assoc_m[[1]], assoc_m[[2]],
-            "Density", "Rating", "Association_MC",
+            "Density", "Rating", "Association_MainVerb",
             leg_labs, leg_vals, c(0, 1.5), c(1:7))
     as_n <- plot_density(assoc_n[[1]], assoc_n[[2]],
             "Density", "Rating",  "Association_Noun",
@@ -35,12 +35,13 @@ quad_density <- function(path, file, leg_labs, leg_vals) {
             as_v + nl + ggtitle("Verb Association") + ttlpos,
             layout_matrix = matrix(1:4, ncol = 2)),
             leg, heights = c(10, 1))
+
     ggsave(file, gg, device = cairo_pdf, width = 7, height = 7)
 }
 
 quad_density(
     "../../data/Stimuli_Design1.csv",
-    "Design1_Densities.pdf",
+    "../Figures/Design1_Densities.pdf",
     c("A: A+E+", "B: A-E+", "C: A+E-", "D: A-E-"),
     c("#000000", "#BB5566", "#004488", "#DDAA33")
 )
