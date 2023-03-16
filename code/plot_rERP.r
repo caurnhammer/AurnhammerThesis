@@ -24,7 +24,7 @@ se <- function(
 # Return only the legend of an ggplot object
 get_legend <- function(
     a_gplot
-) {
+) { 
     tmp <- ggplot_gtable(ggplot_build(a_gplot +
             theme(legend.box = "vertical",
                   legend.spacing.y = unit(0.005, "inch"))))
@@ -46,10 +46,8 @@ plot_grandavg_ci <- function(
     leg_vals
 ) {
     ###### DATA PROC
-    if (modus %in% c("Quantile", "Condition")) {
+    if (modus %in% c("Condition", "Quantile")) {
         colnames(df)[c(4, 5)] <- c("V", "V_CI")
-    } else if (modus == "ConditionQuantile") {
-        colnames(df)[c(5, 6)] <- c("V", "V_CI")
     } else if (modus == "Coefficient") {
         colnames(df)[c(3, 4)] <- c("V", "V_CI")
     } else if (modus == "t-value") {
@@ -68,11 +66,8 @@ plot_grandavg_ci <- function(
             color = Spec, fill = Spec)) + geom_line()
     }
     else if (modus %in% c("Condition", "Quantile")) {
-        p <- ggplot(df, aes_string(x = "Timestamp", y = "V",
-            color = modus, fill = modus)) + geom_line()
-    } else if (modus == "ConditionQuantile") {
-        p <- ggplot(df, aes_string(x = "Timestamp", y = "V",
-            color = "Condition", linetype = "Spec")) + geom_line()
+        p <- ggplot(df, aes(x = Timestamp, y = V,
+            color = df[[modus]], fill = df[[modus]])) + geom_line()
     }
 
     # For all plots
@@ -83,10 +78,10 @@ plot_grandavg_ci <- function(
     p <- p + geom_hline(yintercept = 0, linetype = "dashed")
     p <- p + geom_vline(xintercept = 0, linetype = "dashed")
     p <- p + theme(panel.background = element_rect(fill = "#FFFFFF",
-                    color = "#000000", size = 0.1, linetype = "solid"),
-                panel.grid.major = element_line(size = 0.3,
+                    color = "#000000", linewidth = 0.1, linetype = "solid"),
+                panel.grid.major = element_line(linewidth = 0.3,
                     linetype = "solid", color = "#A9A9A9"),
-                panel.grid.minor = element_line(size = 0.15,
+                panel.grid.minor = element_line(linewidth = 0.15,
                     linetype = "solid", color = "#A9A9A9"),
             legend.position = "top")
 
@@ -98,31 +93,27 @@ plot_grandavg_ci <- function(
     }
     if (modus == "Quantile") {
         p <- p + labs(y = yunit, x = "Time (ms)", title = ttl)
-        p <- p + scale_color_manual(name = "N400 Quantile",
+        p <- p + scale_color_manual(
+                name = "N400 Quantile",
                 labels = leg_labs,
                 values = leg_vals)
-        p <- p + scale_fill_manual(name = "N400 Quantile",
+        p <- p + scale_fill_manual(
+                name = "N400 Quantile",
                 labels = leg_labs,
                 values = leg_vals)
     } else if (modus == "Condition") {
         p <- p + labs(y = yunit, x = "Time (ms)", title = ttl)
         p <- p + scale_color_manual(name = "Condition",
-                labels = leg_labs, values = leg_vals)
-        p <- p + scale_fill_manual(name = "Condition",
-                labels = leg_labs, values = leg_vals)
-    } else if (modus == "ConditionQuantile") {
-        p <- p + labs(y = yunit, x = "Time (ms)", title = ttl)
-        p <- p + scale_linetype_manual(name = "Quantile",
-                labels = leg_labs, values = leg_vals)
-        p <- p + scale_color_manual(name = "Condition",
-                #labels = "D: E-A-", values = "#DDAA33")
-                labels = c("A: E+A+", "B: E+A-", "C: E-A+", "D: E-A-"),
-                values = c("#000000", "#BB5566", "#004488", "#DDAA33"))
-                #labels = c("A", "B", "C"),
-                #values = c("#000000", "red", "blue"))
+                labels = leg_labs,
+                values = leg_vals)
+        p <- p + scale_fill_manual(
+                name = "Condition",
+                labels = leg_labs,
+                values = leg_vals)
     } else if (modus == "Coefficient") {
-        p <- p + labs(y = "Intercept + Coefficient", x = "Time (ms)",
-                    title = ttl)
+        p <- p + labs(  y = "Intercept + Coefficient", 
+                        x = "Time (ms)",
+                        title = ttl)
         p <- p + scale_color_manual(name = modus,
                 labels = leg_labs, values = leg_vals)
         p <- p + scale_fill_manual(name = modus,
@@ -160,12 +151,9 @@ plot_single_elec <- function(
     leg_labs,
     leg_vals
 ) { 
-    if (modus %in% c("Tertile", "Quantile", "Condition")) {
+    if (modus %in% c("Quantile", "Condition")) {
         cols <- c("Spec", "Timestamp", modus)
-    } else if (modus == "ConditionQuantile") {
-        cols <- c("Spec", "Timestamp", modus, "Condition")
-    }
-    else if (modus %in% c("Coefficient", "t-value")) {
+    } else if (modus %in% c("Coefficient", "t-value")) {
         data[,"Spec"] <- as.factor(data$Spec)
         cols <- c("Spec", "Timestamp")
     }
@@ -173,47 +161,41 @@ plot_single_elec <- function(
     # Make individual plots
     plotlist <- vector(mode = "list", length = length(e))
     if (modus == "t-value") {
-        for (i in 1:length(e)) {
-            varforward <- c(e[i], paste0(e[i], "_CI"), paste0(e[i], "_sig"))
-            plotlist[[i]] <- plot_grandavg_ci(cbind(data[, ..cols],
-                    data[, ..varforward]), e[i], yunit,
-                    ylims, modus, tws, ci = FALSE,
-                    leg_labs = leg_labs, leg_vals = leg_vals)
-        }
-    } else if (modus %in% c("Coefficient", "Tertile")) {
-        for (i in 1:length(e)) {
-            varforward <- c(e[i], paste0(e[i], "_CI"))
-            plotlist[[i]] <- plot_grandavg_ci(cbind(data[, ..cols],
-                    data[, ..varforward]), e[i], yunit = yunit,
-                    ylims = ylims, modus = modus, ci = ci,
-                    leg_labs = leg_labs, leg_vals = leg_vals)
-        }
-    } else if (modus %in% c("Tertile", "Quantile", "Condition", "ConditionQuantile")) {
-        for (i in 1:length(e)) {
-            varforward <- c(e[i], paste0(e[i], "_CI"))
-            plotlist[[i]] <- plot_grandavg_ci(cbind(data[, ..cols],
-                    data[, ..varforward]), e[i], yunit = yunit,
-                    ylims = ylims, modus = modus, ci = ci,
-                    leg_labs = leg_labs, leg_vals = leg_vals)
-        }
+        varforward <- c(e, paste0(e, "_CI"), paste0(e, "_sig"))
+        p <- plot_grandavg_ci(cbind(data[, ..cols],
+                data[, ..varforward]), e, yunit,
+                ylims, modus, tws, ci = FALSE,
+                leg_labs = leg_labs, leg_vals = leg_vals)
+    } else if (modus %in% c("Coefficient")) {
+        varforward <- c(e, paste0(e, "_CI"))
+        p <- plot_grandavg_ci(cbind(data[, ..cols],
+                data[, ..varforward]), e, yunit = yunit,
+                ylims = ylims, modus = modus, ci = ci,
+                leg_labs = leg_labs, leg_vals = leg_vals)
+    } else if (modus %in% c("Quantile", "Condition")) {
+        varforward <- c(e, paste0(e, "_CI"))
+        p <- plot_grandavg_ci(cbind(data[, ..cols],
+                data[, ..varforward]), e, yunit = yunit,
+                ylims = ylims, modus = modus, ci = ci,
+                leg_labs = leg_labs, leg_vals = leg_vals)
     }
 
-    gg <- plotlist[[1]]
-    gg <- gg + theme(legend.key.size = unit(0.5, 'cm'), #change legend key size
-        legend.key.height = unit(0.5, 'cm'), #change legend key height
-        legend.key.width = unit(0.5, 'cm'), #change legend key width
-        legend.title = element_text(size = 8), #change legend title font size
-        legend.text = element_text(size = 7))
-    gg <- gg + theme(plot.title = element_text(size = 7.5))
-    legend <- get_legend(gg)
-    nl <- theme(legend.position = "none")
-    gg <- arrangeGrob(gg + nl + ggtitle(paste0(e, ": ", title)),
-            legend, heights = c(10, 2))
+    if (file) {
+        gg <- p
+        gg <- gg + theme(legend.key.size = unit(0.5, 'cm'), # lgnd key size
+            legend.key.height = unit(0.5, 'cm'),            # lgnd key height
+            legend.key.width = unit(0.5, 'cm'),             # lgnd key width
+            legend.title = element_text(size = 8),          # lgnd ttl font size
+            legend.text = element_text(size = 7))
+        gg <- gg + theme(plot.title = element_text(size = 7.5))
 
-    if (file != FALSE) {
-       ggsave(file, gg, device = cairo_pdf, width = 3, height = 3)
+        legend <- get_legend(gg)
+        nl <- theme(legend.position = "none")
+        gg <- arrangeGrob(gg + nl + ggtitle(paste0(e, ": ", title)),
+            legend, heights = c(10, 2))
+        ggsave(file, gg, device = cairo_pdf, width = 3, height = 3)
     } else {
-       plotlist[[1]]
+        p
     }
 }
 
@@ -231,7 +213,7 @@ plot_nine_elec <- function(
     leg_labs,
     leg_vals
 ) {
-    if (modus %in% c("Tertile", "Quantile", "Condition")) {
+    if (modus %in% c("Quantile", "Condition")) {
         cols <- c("Spec", "Timestamp", modus)
     } else if (modus %in% c("Coefficient", "t-value")) {
         data[,"Spec"] <- as.factor(data$Spec)
@@ -248,7 +230,7 @@ plot_nine_elec <- function(
                     ylims, modus, tws, ci = FALSE,
                     leg_labs = leg_labs, leg_vals = leg_vals)
         }
-    } else if (modus %in% c("Coefficient", "Tertile")) {
+    } else if (modus %in% c("Coefficient")) {
         for (i in 1:length(e)) {
             varforward <- c(e[i], paste0(e[i], "_CI"))
             plotlist[[i]] <- plot_grandavg_ci(cbind(data[, ..cols],
@@ -256,7 +238,7 @@ plot_nine_elec <- function(
                     ylims = ylims, modus = modus, ci = ci,
                     leg_labs = leg_labs, leg_vals = leg_vals)
         }
-    } else if (modus %in% c("Tertile", "Quantile", "Condition")) {
+    } else if (modus %in% c("Quantile", "Condition")) {
         for (i in 1:length(e)) {
             varforward <- c(e[i], paste0(e[i], "_CI"))
             plotlist[[i]] <- plot_grandavg_ci(cbind(data[, ..cols],
@@ -309,7 +291,7 @@ plot_full_elec <- function(
     leg_labs,
     leg_vals
 ) {
-    if (modus %in% c("Tertile", "Quantile", "Condition")) {
+    if (modus %in% c("Quantile", "Condition")) {
         cols <- c("Spec", "Timestamp", modus)
     } else if (modus %in% c("Coefficient", "t-value")) {
         data[,"Spec"] <- as.factor(data$Spec)
@@ -326,7 +308,7 @@ plot_full_elec <- function(
                             ylims, modus, tws, ci = FALSE,
                             leg_labs = leg_labs, leg_vals = leg_vals)
         }
-    } else if (modus %in% c("Coefficient", "Tertile")) {
+    } else if (modus %in% c("Coefficient")) {
         for (i in 1:length(e)) {
             varforward <- c(e[i], paste0(e[i], "_CI"))
             plotlist[[i]] <- plot_grandavg_ci(cbind(data[, ..cols],
@@ -334,7 +316,7 @@ plot_full_elec <- function(
                             ylims = ylims, modus = modus, ci = ci,
                             leg_labs = leg_labs, leg_vals = leg_vals)
         }
-    } else if (modus %in% c("Tertile", "Quantile", "Condition")) {
+    } else if (modus %in% c("Quantile", "Condition")) {
         for (i in 1:length(e)) {
             varforward <- c(e[i], paste0(e[i], "_CI"))
             plotlist[[i]] <- plot_grandavg_ci(cbind(data[, ..cols],
@@ -625,16 +607,16 @@ items_and_means <- function(data, Predictor) {
 
 plot_density <- function(data, data_means, ylab, xlab, predictor,
                         leg_labs, leg_vals, ylimits, xbreaks) {
-    p <- ggplot(data, aes_string(x = predictor, color = "Condition",
-                fill = "Condition"))
+    p <- ggplot(data, aes(x = data[[predictor]], color = Condition,
+                fill = Condition))
     p <- p + geom_density(alpha = 0.4) + theme_minimal()
     p <- p + ylim(ylimits)
-    p <- p + geom_vline(data = data_means, aes_string(xintercept = predictor,
-                color = "Condition"), linetype = "dashed")
+    p <- p + geom_vline(data = data_means, aes(xintercept = .data[[predictor]],
+                color = Condition), linetype = "dashed")
     p <- p + scale_color_manual(labels = leg_labs, values = leg_vals)
     p <- p + scale_fill_manual(labels = leg_labs, values = leg_vals)
     p <- p + scale_x_continuous(name = xlab, breaks = xbreaks)
-    p <- p + labs(y = ylab)
+    p <- p + labs(y = ylab, x = xlab)
     p <- p + theme(legend.position = "bottom")
     p
 }
