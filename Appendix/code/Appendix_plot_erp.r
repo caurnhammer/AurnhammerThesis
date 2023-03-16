@@ -169,13 +169,12 @@ plot_zscores <- function(file, pred) {
     p <- p + geom_hline(yintercept = mean(dt$Cloze), linetype = "dashed")
     p <- p + labs(x = "z-standardized Cloze", title = "Z-standardization")
 
-    ggsave(p, filename = "../Figures/final_pdf/Stimuli_zscore.pdf",
+    ggsave(p, filename = "../Figures/Stimuli_zscore.pdf",
             device = cairo_pdf, width = 3, height = 3)
     p
 }
 
 plot_zscores("../../data/Stimuli_Design1.csv", "Cloze")
-
 
 elec_all <- c("Fp1", "Fp2", "F7", "F3", "Fz", "F4", "F8", "FC5",
                 "FC1", "FC2", "FC6", "C3", "Cz", "C4", "CP5", "CP1",
