@@ -70,15 +70,15 @@ models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Interc
 
 # Fit models on all conditions using cloze probability and association
 # In order to not take any condition subset, set conds = false.
-models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Intercept, :Cloze, :Assocnoun]);
-@time dt = process_data("../../data/ERP_Design1.csv", false, models, invert_preds=[:Cloze, :Assocnoun]);
-@time fit_models(dt, models, "../data/ERP_Design1_Cloze_Assocnoun_rERP");
+models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Intercept, :Cloze, :Association_Noun]);
+@time dt = process_data("../../data/ERP_Design1.csv", false, models, invert_preds=[:Cloze, :Association_Noun]);
+@time fit_models(dt, models, "../data/ERP_Design1_Cloze_AssocNoun_rERP");
 
 # Fit models across subjects by setting all subjects to 1
-models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Intercept, :Cloze, :Assocnoun]);
-@time dt = process_data("../../data/ERP_Design1.csv", false, models, invert_preds=[:Cloze, :Assocnoun]);
+models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Intercept, :Cloze, :Association_Noun]);
+@time dt = process_data("../../data/ERP_Design1.csv", false, models, invert_preds=[:Cloze, :Association_Noun]);
 dt.Subject = ones(nrow(dt));
-@time fit_models(dt, models, "../data/ERP_Design1_Cloze_Assocnoun_across_rERP");
+@time fit_models(dt, models, "../data/ERP_Design1_Cloze_AssocNoun_across_rERP");
 
 ################################
 # Modeling Scalp Distributions #
@@ -91,32 +91,30 @@ models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Interc
 ##############################################
 # linear mixed effects regression-based ERPs #
 ##############################################
-
+include("../../code/lmerERP.jl");
+contr = Dict(:Item => Grouping(), :Subject => Grouping());
+dt = read_data("../../data/ERP_Design1.csv", ["A"]);
+f = @formula(EEG ~ 1 + logCloze + (1 + logCloze | Item) + (1 + logCloze | Subject));
+lmerERP = fit_lmer_models(dt, f, contr, parallel = true);
+generate_results(lmerERP, f, "../data/lmerERP_A_logCloze.csv");
 
 ###############################################
 # Beyond ERPs: Regression-based reading times #
 ###############################################
 # Pretend RT regions levels are electrodes
-models = make_models([:Subject, :Timestamp], [:Item, :Condition, :ReadingTime, :ReactionTime], [:logRT], [:Intercept, :Cloze, :Assocnoun, :Interactionclozeassocnoun])
-@time dt = process_spr_data("../../data/SPR2_Design1.csv", false, models, invert_preds=[:Cloze, :Assocnoun, :Interactionclozeassocnoun]);
+models = make_models([:Subject, :Timestamp], [:Item, :Condition, :ReadingTime, :ReactionTime], [:logRT], [:Intercept, :Cloze, :Association_Noun]);
+@time dt = process_spr_data("../../data/SPR2_Design1.csv", false, models, invert_preds=[:Cloze, :Association_Noun]);
 
 # exclude data
-before = nrow(combine(groupby(dt, [:Condition, :Item, :Subject]), [:ReadingTime => mean => :ReadingTime]));
-dt = exclude_trial(dt[((dt.Timestamp .!= "critical -2")),:], 50, 2500, 50, 6000);
-after = nrow(combine(groupby(dt, [:Condition, :Item, :Subject]), [:ReadingTime => mean => :ReadingTime]));
-round((before - after) / before * 100, digits=2)
+dt = exclude_trial(dt[((dt.Timestamp .!= "Pre-critical-2")),:], 50, 2500, 50, 6000);
 
 dt = transform_conds(dt, verbose = true, column = :Timestamp);
 select!(dt, Not([:ReadingTime, :ReactionTime]));
 
-models = make_models([:Subject, :Timestamp], [:Item, :Condition], [:logRT], [:Intercept, :Cloze, :Assocnoun]);
-@time fit_models(dt, models, "SPR2_Design1_Cloze_Assocnoun_rRT");
-
-# with interaction
-models = make_models([:Subject, :Timestamp], [:Item, :Condition], [:logRT], [:Intercept, :Cloze, :Assocnoun, :Interactionclozeassocnoun])
-@time fit_models(dt, models, "SPR2_Design1_Cloze_Assocnoun_Interaction_rRT");
+models = make_models([:Subject, :Timestamp], [:Item, :Condition], [:logRT], [:Intercept, :Cloze, :Association_Noun]);
+@time fit_models(dt, models, "SPR2_Design1_Cloze_AssocNoun_rRT");
 
 # rRTs across subjects
 dt.Subject = ones(nrow(dt));
-models = make_models([:Subject, :Timestamp], [:Item, :Condition], [:logRT], [:Intercept, :Cloze, :Assocnoun]);
-@time fit_models(dt, models, "SPR2_Design1_Cloze_Assocnoun_across_rRT");
+models = make_models([:Subject, :Timestamp], [:Item, :Condition], [:logRT], [:Intercept, :Cloze, :Association_Noun]);
+@time fit_models(dt, models, "SPR2_Design1_Cloze_AssocNoun_across_rRT");

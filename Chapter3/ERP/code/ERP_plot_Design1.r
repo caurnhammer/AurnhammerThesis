@@ -155,7 +155,7 @@ produce_lmer_plots <- function(
 ) {
     # Create output dir
     name = paste0("../plots/", substr(path, 9, nchar(path) - 4))
-    system(paste("mkdir", name))
+    system(paste("mkdir -p", name))
 
     # LMER ERP DATA
     lmerERP <- fread(path)

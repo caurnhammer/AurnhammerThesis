@@ -238,6 +238,8 @@ function exclude_trial(df, lower, upper, lower_rc, upper_rc)
         end
     end
 
+    println(nrow(df)-nrow(df_out), " / ", nrow(df), " excluded (", (nrow(df)-nrow(df_out))*100/nrow(df) ,"%).")
+
     df_out
 end
 

@@ -6,7 +6,6 @@
 
 library(data.table)
 library(ggplot2)
-library(grid)
 library(gridExtra)
 
 # compute standard error
@@ -37,7 +36,7 @@ get_legend <- function(
 plot_grandavg_ci <- function(
     df,
     ttl,
-    yunit = paste0("Amplitude (", "\u03BC", "Volt\u29"),
+    yunit = "Amplitude (\U00B5Volt)",
     ylims = NULL,
     modus = "Condition",
     tws = list(c(300, 500), c(600, 1000)),
@@ -124,7 +123,7 @@ plot_grandavg_ci <- function(
                 labels = leg_labs, values = leg_vals)
         p <- p + scale_fill_manual(name = "Predictor",
                 labels = leg_labs, values = leg_vals)
-        p <- p + geom_point(data=sig_dt,
+        p <- p + geom_point(data = sig_dt,
                     aes(x = Timestamp, y = posit, shape = sig), size = 2)
         p <- p + scale_shape_manual(values = c(32, 108),
                     name = "Corrected p-values",
@@ -143,7 +142,7 @@ plot_single_elec <- function(
     e,
     file = FALSE,
     title = "ERPs",
-    yunit = paste0("Amplitude (", "\u03BC", "Volt\u29"),
+    yunit = "Amplitude (\U00B5Volt)",
     ylims = NULL,
     modus = "Condition",
     tws = list(c(250, 400), c(600, 1000)),
@@ -162,25 +161,41 @@ plot_single_elec <- function(
     plotlist <- vector(mode = "list", length = length(e))
     if (modus == "t-value") {
         varforward <- c(e, paste0(e, "_CI"), paste0(e, "_sig"))
-        p <- plot_grandavg_ci(cbind(data[, ..cols],
-                data[, ..varforward]), e, yunit,
-                ylims, modus, tws, ci = FALSE,
-                leg_labs = leg_labs, leg_vals = leg_vals)
+        p <- plot_grandavg_ci(
+                df = cbind(data[, ..cols], data[, ..varforward]),
+                ttl = e,
+                yunit = yunit,
+                ylims = ylims, 
+                modus = modus,
+                tws = tws,
+                ci = FALSE,
+                leg_labs = leg_labs,
+                leg_vals = leg_vals)
     } else if (modus %in% c("Coefficient")) {
         varforward <- c(e, paste0(e, "_CI"))
-        p <- plot_grandavg_ci(cbind(data[, ..cols],
-                data[, ..varforward]), e, yunit = yunit,
-                ylims = ylims, modus = modus, ci = ci,
-                leg_labs = leg_labs, leg_vals = leg_vals)
+        p <- plot_grandavg_ci(
+                df = cbind(data[, ..cols], data[, ..varforward]),
+                ttl = e,
+                yunit = yunit,
+                ylims = ylims,
+                modus = modus,
+                ci = ci,
+                leg_labs = leg_labs,
+                leg_vals = leg_vals)
     } else if (modus %in% c("Quantile", "Condition")) {
         varforward <- c(e, paste0(e, "_CI"))
-        p <- plot_grandavg_ci(cbind(data[, ..cols],
-                data[, ..varforward]), e, yunit = yunit,
-                ylims = ylims, modus = modus, ci = ci,
-                leg_labs = leg_labs, leg_vals = leg_vals)
+        p <- plot_grandavg_ci(
+                df = cbind(data[, ..cols], data[, ..varforward]),
+                ttl = e,
+                yunit = yunit,
+                ylims = ylims,
+                modus = modus,
+                ci = ci,
+                leg_labs = leg_labs,
+                leg_vals = leg_vals)
     }
 
-    if (file) {
+    if (file != FALSE) {
         gg <- p
         gg <- gg + theme(legend.key.size = unit(0.5, 'cm'), # lgnd key size
             legend.key.height = unit(0.5, 'cm'),            # lgnd key height
@@ -205,7 +220,7 @@ plot_nine_elec <- function(
     e,
     file = FALSE,
     title = "ERPs",
-    yunit = paste0("Amplitude (", "\u03BC", "Volt\u29"),
+    yunit = "Amplitude (\U00B5Volt)",
     ylims = NULL,
     modus = "Condition",
     tws = list(c(250, 400), c(600, 1000)),
@@ -270,7 +285,7 @@ plot_nine_elec <- function(
         plotlist[[9]] + nl
             + labs(y = ""),
         layout_matrix = matrix(1:9, ncol = 3, byrow = TRUE)), legend,
-            heights = c(10, 1), top = textGrob(title))
+            heights = c(10, 1), top = ggtitle(title))
     if (file != FALSE) {
        ggsave(file, gg, device = cairo_pdf, width = 7, height = 7)
     } else {
@@ -283,7 +298,7 @@ plot_full_elec <- function(
     e,
     file = FALSE,
     title = "ERPs",
-    yunit = paste0("Amplitude (", "\u03BC", "Volt\u29"),
+    yunit = "Amplitude (\U00B5Volt)",
     ylims = NULL,
     modus = "Condition",
     tws = list(c(300, 500), c(600, 1000)),
@@ -341,8 +356,8 @@ plot_full_elec <- function(
                    panel.grid.minor.x = element_blank(),
                    panel.grid.major.y = element_blank(),
                    panel.grid.minor.y = element_blank())
-    axes <- theme(axis.line.x = element_line(color = "black", size = 0.2),
-                  axis.line.y = element_line(color = "black", size = 0.2))
+    axes <- theme(axis.line.x = element_line(color = "black", linewidth = 0.2),
+                  axis.line.y = element_line(color = "black", linewidth = 0.2))
     for (i in 1:length(e)) {
         plotlist[[i]] <- plotlist[[i]] + nl + nla + ngrid + axes
     }
@@ -385,7 +400,10 @@ plot_full_elec <- function(
         no,
         layout_matrix = matrix(1:35, ncol = 5, byrow = TRUE)),
             legend,
-            heights = c(15, 1), top = textGrob(title, gp = gpar(fontsize = 20)))
+            heights = c(15, 1),
+            top = ggtitle(title) + theme(plot.title = element_text(size = 20))
+        )
+
     if (file != FALSE) {
        ggsave(file, gg, device = cairo_pdf, width = 12, height = 12)
     } else {
@@ -400,7 +418,7 @@ plot_topo <- function(
     tw = c(600, 1000),
     cond_man,
     cond_base,
-    label = "Amplitude (μV)",
+    label = "Amplitude (\U00B5Volt)",
     add_title = "",
     omit_legend = FALSE,
     save_legend = FALSE
@@ -506,23 +524,23 @@ generate_topo <- function(
     # create a circle round the outside of the plotting area
     # to mask the jagged edges of the interpolation
     mask_ring <- circle_fun(diameter = 1.42)
-    
+
     ###### Plot
     p <- ggplot(interpol_m, aes(x = x, y = y, fill = EEG))
     p <- p + geom_raster() + stat_contour(aes(z = EEG), binwidth = 0.5)
     p <- p + theme_topo()
     p <- p + labs(title = title, subtitle = paste0(tw[1], "-", tw[2], "ms"))
     p <- p + geom_path(data = mask_ring, aes(x, y, z = NULL, fill = NULL),
-              colour = "white", size = 6)
+              colour = "white", linewidth = 6)
     p <- p + scale_fill_gradientn(colours = my_spectrum(10),
                     limits = amplim_plusmin, guide = "colourbar",
                     oob = scales::squish, name = label)
     # Add electrode positions
     p <- p + geom_point(data = data_diff_locs, aes(x, y), size = 1)
     p <- p + geom_path(data = head_shape, aes(x, y, z = NULL, fill = NULL),
-                       size = 1.5)
+                        linewidth = 1.5)
     p <- p + geom_path(data = nose, aes(x, y, z = NULL, fill = NULL),
-                       size = 1.5)
+                        linewidth = 1.5)
     p <- p + coord_equal()
     if (omit_legend) {
         if (save_legend) {
@@ -631,6 +649,12 @@ plot_rSPR <- function(
     leg_labs,
     leg_vals
 ) {
+    # always exclude the word two words before
+    data <- data[Region != "Pre-critical-2",]
+    data$Region <- factor(data$Region,
+            levels = c("Pre-critical", "Critical",
+                       "Spillover", "Post-spillover"))
+
     if (modus == "t-value"){
         #data$sig <- data$sig_average < 0.05
         sig_dt <- data[, c("Region", "Spec", "sig")]
@@ -646,10 +670,10 @@ plot_rSPR <- function(
 
     # For all plots
     p <- ggplot(data, aes(x = Region, y = logRT, color = Spec, group = Spec)) +
-            geom_point(size = 2.5, shape = "cross") + geom_line(size = 0.5)
+            geom_point(size = 2.5, shape = "cross") + geom_line(linewidth = 0.5)
     p <- p + theme_minimal()
     p <- p + geom_errorbar(aes(ymin = logRT - logRT_CI,
-                ymax = logRT + logRT_CI), width = .1, size = 0.3)
+                ymax = logRT + logRT_CI), width = .1, linewidth = 0.3)
     # Conditional modifications 
     if (modus == "coefficients") { # coefficients
         p <- p + scale_color_manual(name = "Coefficients",

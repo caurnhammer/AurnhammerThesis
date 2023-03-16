@@ -27,7 +27,7 @@ plot_lmerRT <- function(
     name,
     leg_labs,
     leg_vals
-) { 
+) {
     # always exclude the word two words before
     data <- data[Region != "Pre-critical-2",]
     data$Region <- factor(data$Region,

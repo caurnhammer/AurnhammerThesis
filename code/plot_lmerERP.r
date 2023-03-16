@@ -34,7 +34,7 @@ get_legend<-function(
 
 # For a single Electrode, plot per-grouping mean.
 # Bootstrapped confidence intervals optional (slow).
-plot_grandavg_ci <- function(
+plot_grandavg_ci_lmer <- function(
     dt,                         # data
     ttl,                        # title
     yunit = paste0("Amplitude (", "\u03BC", "Volt\u29"), # y-axis unit
@@ -103,20 +103,38 @@ plot_grandavg_ci <- function(
                     color = dt[[grouping]], fill = dt[[grouping]]))
     }
 
-    # y-lims
-    if (is.vector(ylims) == TRUE) {
-            plt <- plt + ylim(ylims[1], ylims[2])
-    }
+    plt <- plt + geom_line()
+    plt <- plt + geom_hline(yintercept = 0, linetype = "dashed")
+    plt <- plt + geom_vline(xintercept = 0, linetype = "dashed")
+    plt <- plt + theme(panel.background = element_rect(
+                        fill = "#FFFFFF",
+                        color = "#000000",
+                        linewidth = 0.1,
+                        linetype = "solid"),
+                        panel.grid.major = element_line(
+                        linewidth = 0.3,
+                        linetype = "solid",
+                        color = "#A9A9A9"),
+                        panel.grid.minor = element_line(
+                        linewidth = 0.15,
+                        linetype = "solid",
+                        color = "#A9A9A9"),
+                        legend.position = "top")
+    plt <- plt + labs(y = yunit, x = "Time (ms)", title = ttl)
 
     # Error ribbons
     if (ci == TRUE) {
             plt <- plt + geom_ribbon(aes(x = Timestamp,
-                                ymax = V2 + SE, ymin = V2 - SE),
-                                alpha = 0.20, color = NA)
+                                         ymax = V2 + SE,
+                                        ymin = V2 - SE),
+                                    alpha = 0.20,
+                                    color = NA)
     } else if (grouping == "Coefficient") {
             plt <- plt + geom_ribbon(aes(x = Timestamp,
-                                ymax = V2 + V3, ymin = V2 - V3),
-                                alpha = 0.20, color = NA)
+                                         ymax = V2 + V3,
+                                         ymin = V2 - V3),
+                                    alpha = 0.20,
+                                    color = NA)
     }
 
     # Grouping color + fill
@@ -125,52 +143,42 @@ plot_grandavg_ci <- function(
                                             labels = leg_labs,
                                             values = leg_vals)
             plt <- plt + scale_fill_manual(name = "Predictor",
-                        labels = leg_labs, values = leg_vals)
-            plt <- plt + geom_point(data = df, aes(x = Timestamp,
-                        y = posit, shape = sig))
+                                            labels = leg_labs,
+                                            values = leg_vals)
+            plt <- plt + geom_point(data = df,
+                                    aes(x = Timestamp,
+                                        y = posit,
+                                        shape = sig))
             plt <- plt + scale_shape_manual(values = c(20, 32),
                     name = "Corrected p-values",
                     labels = c("Significant", "Nonsignificant"))
             plt <- plt + annotate("rect",
-                        xmin = tws[1][[1]][1],
-                        xmax = tws[1][[1]][2],
-                        ymin = ylims[1],
-                        ymax = ylims[2],
-                        alpha = .15)
+                                    xmin = tws[1][[1]][1],
+                                    xmax = tws[1][[1]][2],
+                                    ymin = ylims[1],
+                                    ymax = ylims[2],
+                                    alpha = .15)
             plt <- plt + annotate("rect",
-                        xmin = tws[2][[1]][1],
-                        xmax = tws[2][[1]][2],
-                        ymin = ylims[1],
-                        ymax = ylims[2],
-                        alpha = .15)
+                                    xmin = tws[2][[1]][1],
+                                    xmax = tws[2][[1]][2],
+                                    ymin = ylims[1],
+                                    ymax = ylims[2],
+                                    alpha = .15)
     } else {
             plt <- plt + scale_color_manual(name = "log(Cloze)",
-                                    labels = leg_labs,
-                                    values = leg_vals)
+                                            labels = leg_labs,
+                                            values = leg_vals)
             plt <- plt + scale_fill_manual(name = "log(Cloze)",
-                                    labels = leg_labs,
-                                    values = leg_vals)
+                                            labels = leg_labs,
+                                            values = leg_vals)
     }
 
-    plt <- plt + scale_y_reverse()
-    plt <- plt + geom_line()
-    plt <- plt + geom_hline(yintercept = 0, linetype = "dashed")
-    plt <- plt + geom_vline(xintercept = 0, linetype = "dashed")
-    plt <- plt + theme(panel.background = element_rect(
-                            fill = "#FFFFFF",
-                            color = "#000000",
-                            linewidth = 0.1,
-                            linetype = "solid"),
-                           panel.grid.major = element_line(
-                            linewidth = 0.3,
-                            linetype = "solid",
-                            color = "#A9A9A9"),
-                           panel.grid.minor = element_line(
-                            linewidth = 0.15,
-                            linetype = "solid",
-                            color = "#A9A9A9"),
-                           legend.position = "top")
-    plt <- plt + labs(y = yunit, x = "Time (ms)", title = ttl)
+    # y-lims
+    if (is.vector(ylims) == TRUE) {
+        plt <- plt + scale_y_reverse(limits = ylims)
+    } else {
+        plt <- plt + scale_y_reverse()
+    }
 
     plt
 }
@@ -197,53 +205,110 @@ plot_midline <- function(
 
     # Make individual plots
     if (grouping == "zvalue") {
-        Fzplt <- plot_grandavg_ci(cbind(data[, ..cols],
-                        data[, c("zval_Fz", "sig_Fz")]), "Fz",
-                        yunit = yunit, subject_avg = subject_avg, ci = ci,
-                        ylims = ylims, grouping = grouping,
-                        leg_labs = leg_labs, leg_vals = leg_vals)
-        Czplt <- plot_grandavg_ci(cbind(data[, ..cols],
-                        data[, c("zval_Cz", "sig_Cz")]), "Cz",
-                        yunit = yunit, subject_avg = subject_avg, ci = ci,
-                        ylims = ylims, grouping = grouping,
-                        leg_labs = leg_labs, leg_vals = leg_vals)
-        Pzplt <- plot_grandavg_ci(cbind(data[, ..cols],
-                        data[, c("zval_Pz", "sig_Pz")]), "Pz",
-                        yunit = yunit, subject_avg = subject_avg, ci = ci,
-                        ylims = ylims, grouping = grouping,
-                        leg_labs = leg_labs, leg_vals = leg_vals)
+        Fzplt <- plot_grandavg_ci_lmer(
+                    dt = cbind(data[, ..cols],
+                            data[, c("zval_Fz", "sig_Fz")]),
+                    ttl = "Fz",
+                    yunit = yunit,
+                    subject_avg = subject_avg,
+                    ci = ci,
+                    ylims = ylims,
+                    grouping = grouping,
+                    leg_labs = leg_labs,
+                    leg_vals = leg_vals)
+        Czplt <- plot_grandavg_ci_lmer(
+                    dt = cbind(data[, ..cols],
+                            data[, c("zval_Cz", "sig_Cz")]),
+                    ttl = "Cz",
+                    yunit = yunit,
+                    subject_avg = subject_avg,
+                    ci = ci,
+                    ylims = ylims,
+                    grouping = grouping,
+                    leg_labs = leg_labs,
+                    leg_vals = leg_vals)
+        Pzplt <- plot_grandavg_ci_lmer(
+                    dt = cbind(data[, ..cols],
+                            data[, c("zval_Pz", "sig_Pz")]),
+                    ttl = "Pz",
+                    yunit = yunit,
+                    subject_avg = subject_avg,
+                    ci = ci,
+                    ylims = ylims,
+                    grouping = grouping,
+                    leg_labs = leg_labs,
+                    leg_vals = leg_vals)
     } else if (grouping == "Coefficient") {
-        Fzplt <- plot_grandavg_ci(cbind(data[, ..cols],
-                        data[, c("coefval_Fz", "seval_Fz")]), "Fz",
-                        yunit = yunit, subject_avg = subject_avg, ci = ci,
-                        ylims = ylims, grouping = grouping,
-                        leg_labs = leg_labs, leg_vals = leg_vals)
-        Czplt <- plot_grandavg_ci(cbind(data[, ..cols],
-                        data[, c("coefval_Cz", "seval_Cz")]), "Cz",
-                        yunit = yunit, subject_avg = subject_avg, ci = ci,
-                        ylims = ylims, grouping = grouping,
-                        leg_labs = leg_labs, leg_vals = leg_vals)
-        Pzplt <- plot_grandavg_ci(cbind(data[, ..cols], 
-                    data[, c("coefval_Pz", "seval_Pz")]), "Pz",
-                    yunit = yunit, subject_avg = subject_avg, ci = ci,
-                    ylims = ylims, grouping = grouping,
-                    leg_labs = leg_labs, leg_vals = leg_vals)
+        Fzplt <- plot_grandavg_ci_lmer(
+                    dt = cbind(data[, ..cols],
+                            data[, c("coefval_Fz", "seval_Fz")]),
+                    ttl = "Fz",
+                    yunit = yunit,
+                    subject_avg = subject_avg,
+                    ci = ci,
+                    ylims = ylims,
+                    grouping = grouping,
+                    leg_labs = leg_labs,
+                    leg_vals = leg_vals)
+        Czplt <- plot_grandavg_ci_lmer(
+                    dt = cbind(data[, ..cols],
+                            data[, c("coefval_Cz", "seval_Cz")]),
+                    ttl = "Cz",
+                    yunit = yunit,
+                    subject_avg = subject_avg,
+                    ci = ci,
+                    ylims = ylims,
+                    grouping = grouping,
+                    leg_labs = leg_labs,
+                    leg_vals = leg_vals)
+        Pzplt <- plot_grandavg_ci_lmer(
+                    dt = cbind(data[, ..cols],
+                            data[, c("coefval_Pz", "seval_Pz")]),
+                    ttl = "Pz",
+                    yunit = yunit,
+                    subject_avg = subject_avg,
+                    ci = ci,
+                    ylims = ylims,
+                    grouping = grouping,
+                    leg_labs = leg_labs,
+                    leg_vals = leg_vals)
     } else {
-        Fzplt <- plot_grandavg_ci(cbind(data[, ..cols], data[, "Fz"]), "Fz",
-                    yunit = yunit, subject_avg = subject_avg, ci = ci,
-                    ylims = ylims, grouping = grouping,
-                    leg_labs = leg_labs, leg_vals = leg_vals)
-        Czplt <- plot_grandavg_ci(cbind(data[, ..cols], data[, "Cz"]), "Cz",
-                    yunit = yunit, subject_avg = subject_avg, ci = ci,
-                    ylims = ylims, grouping = grouping,
-                    leg_labs = leg_labs, leg_vals = leg_vals)
-        Pzplt <- plot_grandavg_ci(cbind(data[, ..cols], data[, "Pz"]), "Pz",
-                    yunit = yunit, subject_avg = subject_avg, ci = ci,
-                    ylims = ylims, grouping = grouping,
-                    leg_labs = leg_labs, leg_vals = leg_vals)
+        Fzplt <- plot_grandavg_ci_lmer(
+                    dt = cbind(data[, ..cols], data[, "Fz"]),
+                    ttl = "Fz",
+                    yunit = yunit,
+                    subject_avg = subject_avg,
+                    ci = ci,
+                    ylims = ylims,
+                    grouping = grouping,
+                    leg_labs = leg_labs,
+                    leg_vals = leg_vals)
+        Czplt <- plot_grandavg_ci_lmer(
+                    dt = cbind(data[, ..cols], data[, "Cz"]),
+                    ttl = "Cz",
+                    yunit = yunit,
+                    subject_avg = subject_avg,
+                    ci = ci,
+                    ylims = ylims,
+                    grouping = grouping,
+                    leg_labs = leg_labs,
+                    leg_vals = leg_vals)
+        Pzplt <- plot_grandavg_ci_lmer(
+                    dt = cbind(data[, ..cols], data[, "Pz"]),
+                    ttl = "Pz",
+                    yunit = yunit,
+                    subject_avg = subject_avg,
+                    ci = ci,
+                    ylims = ylims,
+                    grouping = grouping,
+                    leg_labs = leg_labs,
+                    leg_vals = leg_vals)
     }
 
     # Get the legend
+    Fzplt <- Fzplt + theme(
+                    legend.title = element_text(size = 10),
+                    legend.text = element_text(size = 8))
     legend <- get_legend(Fzplt)
 
     # Arrange

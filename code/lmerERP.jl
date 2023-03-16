@@ -6,7 +6,6 @@
 
 using CSV
 using DataFrames
-using DataFramesMeta
 using MixedModels
 using PooledArrays
 using Distributed
@@ -65,7 +64,7 @@ function subj_coef(b_array,index,n_sub,n_it,n_pred)
     repeat(reshape(b_array,(n_sub*n_pred))[index:n_pred:(n_sub*n_pred)], inner=(n_it))
 end
 
-function fit_models(data, form, f_contr ; parallel)
+function fit_lmer_models(data, form, f_contr ; parallel)
     ## Allocate output df, run models, enter numsub * numitems rows into output in one go.
     # output alloction
     num_groupings = length(f_contr);             # number of grouping factors (in ranefs)
