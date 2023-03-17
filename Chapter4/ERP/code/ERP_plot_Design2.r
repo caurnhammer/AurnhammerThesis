@@ -234,11 +234,11 @@ elec_all <- c("Fp1", "Fp2", "F7", "F3", "Fz", "F4", "F8", "FC5",
                 "FC1", "FC2", "FC6", "C3", "Cz", "C4", "CP5", "CP1",
                 "CP2", "CP6", "P7", "P3", "Pz", "P4", "P8", "O1", "Oz", "O2")
 
-make_plots("Design2_Plaus_Clozedist", elec_all,
+make_plots("rERP_Plaus_Clozedist", elec_all,
      predictor = c("Intercept", "Plaus", "Cloze_distractor"))
 
-make_plots("Design2_Plaus_Clozedist_across",
+make_plots("rERP_Plaus_Clozedist_across",
     predictor = c("Intercept", "Plaus", "Cloze_distractor"))
 
-make_plots("Design2_RT", elec_all,
+make_plots("rERP_RT", elec_all,
    predictor = c("Intercept", "ReadingTime"))

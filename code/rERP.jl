@@ -71,9 +71,7 @@ function process_data(infile, outfile, models; baseline_corr = false, sampling_r
     # Collect component predictor
     if components != false
         # Add an electrode specific component predictors
-        # data = collect_component(data, "TimeWindow", models; tws=time_windows[1], twe=time_windows[2]);
         data = collect_component(data, "N400", models ; tws=300, twe=500);
-        # data = collect_component(data, "P600", models ; tws=600, twe=800);        
         data = collect_component(data, "Segment", models ; tws=0, twe=1200);
     end
     

@@ -6,14 +6,14 @@ elec = [:Fp1, :Fp2, :F7, :F3, :Fz, :F4, :F8, :FC5, :FC1, :FC2, :FC6, :C3,
 # Within-subjects regression
 models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Intercept, :Plaus, :Cloze_distractor]);
 dt = process_data("../../../data/ERP_Design2.csv", false, models, invert_preds=[:Plaus]);
-@time fit_models(dt, models, "Design2_Plaus_Clozedist");
+@time fit_models(dt, models, "rERP_Plaus_Clozedist");
 
 # Across-subjects regression, yielding a single-tvalue for each electrode and time-step
 dts = dt
 dts.Subject = ones(nrow(dts))
-@time fit_models(dts, models, "Design2_Plaus_Clozedist_across");
+@time fit_models(dts, models, "rERP_Plaus_Clozedist_across");
 
 # Predict EEG by ReadingTimes (from separate Exp)
 models = make_models([:Subject, :Timestamp], [:Item, :Condition], elec, [:Intercept, :ReadingTime]);
 @time dtrt = process_data("../../../data/ERP_Design2.csv", false, models);
-@time fit_models(dtrt, models, "Design2_RT");
+@time fit_models(dtrt, models, "rERP_RT");

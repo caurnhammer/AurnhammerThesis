@@ -49,12 +49,15 @@ function exclude_trial(df, lower, upper, lower_rc, upper_rc)
         end
     end
 
-    println(nrow(df)-nrow(df_out), " / ", nrow(df), " excluded (", (nrow(df)-nrow(df_out))*100/nrow(df) ,"%).")
+    before = nrow(df)
+    after = nrow(df_out)
+    numreg = length(unique(df.Region))
+    println((before-after)/numreg, " / ", before/numreg, " excluded (", (before-after)*100/before ,"%).")
     
     df_out
 end
 
-function read_spr_data(path, conds)
+function read_spr_data(path, preds; invert_preds = false, conds = false)
     data = DataFrame(CSV.File(path))
     
     # Take condition subsets at this point (i.e. before any z-scoring takes place)
@@ -62,14 +65,16 @@ function read_spr_data(path, conds)
         data = data[subset_inds(data, conds),:]
     end
 
-    data.logCloze = zscore(data.logCloze)
-    data.Association_Noun = zscore(data.Association_Noun)
+    # Z-standardise predictors (always on)
+    data = standardise(data, preds);
+    
+    # Invert predictors
+    if (invert_preds != false)
+        data = invert(data, invert_preds)
+    end
 
-    data.logCloze = data.logCloze .* -1
-    data.Association_Noun = data.Association_Noun .* -1
-
-    data = data[:,[:Condition, :Item, :Subject, :Region, :Duplicated, :logRT,
-                   :ReadingTime, :ReactionTime, :logCloze, :Association_Noun]]
+    data = data[:,vcat([:Condition, :Item, :Subject, :Region, :logRT,
+                   :ReadingTime, :ReactionTime], preds)]
 
     data = transform!(data,
             :Subject => PooledArray => :Subject,
@@ -86,6 +91,22 @@ function subset_inds(data, conds)
     end
 
     Bool.(ind)
+end
+
+function standardise(data, preds)
+    for x in preds
+        data[!,x] = zscore(data[!,x])
+    end
+
+    data
+end
+
+function invert(data, invert_preds)
+    for x in invert_preds
+        data[!,x] = (data[!,x]) .* -1
+    end
+    
+    data
 end
 
 function item_coef(b_array,index,n_sub,n_it,n_pred)
@@ -153,7 +174,7 @@ end
 function generate_results(fitted, form, output_path)
     # prepare data
     numpred = length(form.rhs) - 2;
-    coefs = [Symbol(x) for x in string.(f.rhs[1:numpred])];
+    coefs = [Symbol(x) for x in string.(form.rhs[1:numpred])];
     fitted = combine_datasets(dt, fitted, coefs[2:length(coefs)]);
     
     # compute estimates & residuals & add coefs to intercept
