@@ -87,7 +87,9 @@ plot_lmerRT <- function(
             width = .1, linewidth = 0.3)
         p <- p + scale_color_manual(name = "Coefficients",
             values = leg_vals, labels = leg_labs)
-        p <- p + guides(color = guide_legend(nrow = 2, byrow = TRUE))
+        if ("Distractor Cloze" %in% leg_labs) {
+            p <- p + guides(color = guide_legend(nrow = 2, byrow = TRUE))
+        }
     } else if (DV == "zvalue") { # Z-values
         p <- p + geom_hline(yintercept = 0, linetype = "dashed")
         p <- p + scale_color_manual(name = "Z-value",
@@ -111,7 +113,7 @@ plot_lmerRT <- function(
     if ((is.vector(ylims) == TRUE) & (DV != "zvalue")) {
         p <- p + ylim(ylims[1], ylims[2])
     }
-    if (title == "Observed RTs"){
+    if (title == "Observed RTs" & "A: Plausible" %in% leg_labs) {
         p <- p + guides(color = guide_legend(nrow = 3,
                                              byrow = TRUE))
     }

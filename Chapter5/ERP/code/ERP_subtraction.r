@@ -3,6 +3,7 @@
 # Generate N400s bins by N400-Segment
 library(data.table)
 library(dplyr)
+system("mkdir -p ../plots/Subtraction")
 source("../../../code/plot_rERP.r")
 
 # helper function to average data down to the level of one value per condition,
@@ -50,38 +51,6 @@ cond_values <- c("black", "#004488")
 quart_labels <- c(1, 2, 3)
 quart_values <- c("#E69F00", "black", "#009E73")
 
-############################
-# Plot a few single trials #
-############################
-n <- 4
-dt_condc <- dt[Condition %in% cond, ]
-rand_trials <- sample(dt_condc$TrialNum, n)
-dt_rtrials <- dt_condc[TrialNum %in% rand_trials,]
-dt_rtrials$TrialNum <- factor(dt_rtrials$TrialNum)
-p_list <- vector(mode = "list", length = length(n))
-lims <- c(max(dt_rtrials$Pz), min(dt_rtrials$Pz))
-for (i in 1:n) {
-    single_trial <- dt_rtrials[TrialNum == unique(dt_rtrials$TrialNum)[i], ]
-    p_list[[i]] <- ggplot(single_trial, aes(x = Timestamp, y = Pz,
-            color = TrialNum, group = TrialNum)) + geom_line() +
-            theme_minimal() + scale_y_reverse(limits = c(lims[1], lims[2])) +
-            theme(legend.position = "none") +
-            scale_color_manual(values = "black") +
-            geom_hline(yintercept = 0, linetype = "dashed") +
-            geom_vline(xintercept = 0, linetype = "dashed") +
-            stat_smooth(method = "lm", se = FALSE, size = 0.5) +
-            labs(y = paste0("Amplitude (", "\u03BC", "Volt\u29"), title = "Pz")
-}
-gg <- arrangeGrob(p_list[[1]] + labs(x = ""),
-                  p_list[[2]] + labs(x = "", y = ""),
-                  p_list[[3]] + labs(title = "") +
-                  theme(plot.margin = margin(t = -20, r = 5, b = 0, l = 5)),
-                  p_list[[4]] + labs(y = "", title = "") +
-                  theme(plot.margin = margin(t = -20, r = 5, b = 0, l = 5)),
-        layout_matrix = matrix(1:4, ncol = 2, byrow = TRUE))
-ggsave("../plots/Subtraction/adsbc21_randtrials_AC_Pz.pdf", gg,
-    device = cairo_pdf, width = 5, height = 5)
-
 ##########################
 # Plot Design 1 Cond A/C #
 ##########################
@@ -92,10 +61,49 @@ dt_c <- dt_c_s[Condition %in% c("A", "C"), lapply(.SD, mean),
 dt_c$Pz_CI <- dt_c_s[Condition %in% c("A", "C"), lapply(.SD, ci),
     by = list(Condition, Timestamp), .SDcols = elec][,..elec]
 dt_c$Spec <- dt_c$Condition
-plot_single_elec(dt_c, elec,
-    file = paste0("../plots/Subtraction/adsbc21_AC_Pz.pdf"),
-    modus = "Condition", ylims = c(9, -5),
-    leg_labs = cond_labels, leg_vals = cond_values)
+plot_single_elec(
+    data = dt_c,
+    e = elec,
+    file = paste0("../plots/Subtraction/Design1_AC_Pz.pdf"),
+    modus = "Condition",
+    ylims = c(9, -5),
+    leg_labs = cond_labels,
+    leg_vals = cond_values)
+
+############################
+# Plot a few single trials #
+############################
+n <- 4
+dt_condc <- dt[Condition %in% cond, ]
+set.seed(420)
+rand_trials <- sample(dt_condc$TrialNum, n)
+dt_rtrials <- dt_condc[TrialNum %in% rand_trials,]
+dt_rtrials$TrialNum <- factor(dt_rtrials$TrialNum)
+p_list <- vector(mode = "list", length = length(n))
+lims <- c(max(dt_rtrials$Pz), min(dt_rtrials$Pz))
+for (i in 1:n) {
+    single_trial <- dt_rtrials[TrialNum == unique(dt_rtrials$TrialNum)[i], ]
+    p_list[[i]] <- ggplot(single_trial, 
+            aes(x = Timestamp, y = Pz, color = TrialNum, group = TrialNum)) + 
+            geom_line() +
+            theme_minimal() + 
+            scale_y_reverse(limits = c(lims[1], lims[2])) +
+            theme(legend.position = "none") +
+            scale_color_manual(values = "black") +
+            geom_hline(yintercept = 0, linetype = "dashed") +
+            geom_vline(xintercept = 0, linetype = "dashed") +
+            stat_smooth(method = "lm", se = FALSE, linewidth = 0.5) +
+            labs(y = paste0("Amplitude (", "\u03BC", "Volt\u29"), title = "Pz")
+}
+gg <- arrangeGrob(p_list[[1]] + labs(x = ""),
+                  p_list[[2]] + labs(x = "", y = ""),
+                  p_list[[3]] + labs(title = "") +
+                  theme(plot.margin = margin(t = -20, r = 5, b = 0, l = 5)),
+                  p_list[[4]] + labs(y = "", title = "") +
+                  theme(plot.margin = margin(t = -20, r = 5, b = 0, l = 5)),
+        layout_matrix = matrix(1:4, ncol = 2, byrow = TRUE))
+ggsave("../plots/Subtraction/Design1_randtrials_AC_Pz.pdf", gg,
+    device = cairo_pdf, width = 5, height = 5)
 
 #####################################
 # Plot Quantile bins computed from  #
@@ -109,10 +117,14 @@ n400$Quantile <- ntile(n400[,..elec], 3)
 dt_cond <- merge(dt_cond, n400[, c("Trial", "Quantile")], on = "Trial")
 
 dt_avg <- avg_quart_dt(dt_cond, elec)
-plot_single_elec(dt_avg, elec,
-    file = paste0("../plots/Subtraction/Subtraction_adsbc21_RawN400_Tertiles.pdf"),
-    modus = "Quantile", ylims = c(18, -14),
-    leg_labs = quart_labels, leg_vals = quart_values)
+plot_single_elec(
+    data = dt_avg,
+    e = elec,
+    file = paste0("../plots/Subtraction/Subtraction_Design1_RawN400.pdf"),
+    modus = "Quantile",
+    ylims = c(18, -14),
+    leg_labs = quart_labels,
+    leg_vals = quart_values)
 
 #####################################
 # Plot Quantile bins computed from  #
@@ -132,10 +144,14 @@ n4seg$Quantile <- ntile(n4seg$N4minSeg, 3)
 dt_cond <- merge(dt_cond, n4seg[, c("Trial", "Quantile")], by = "Trial")
 
 dt_avg <- avg_quart_dt(dt_cond, elec)
-plot_single_elec(dt_avg, elec,
-    file = paste0("../plots/Subtraction/Subtraction_adsbc21_N400minusSegment_Tertiles_AC.pdf"),
-    modus = "Quantile", ylims = c(18, -14),
-    leg_labs = quart_labels, leg_vals = quart_values)
+plot_single_elec(
+    data = dt_avg,
+    e = elec,
+    file = paste0("../plots/Subtraction/Subtraction_Design1_N400minusSegment.pdf"),
+    modus = "Quantile",
+    ylims = c(18, -14),
+    leg_labs = quart_labels,
+    leg_vals = quart_values)
 
 ##########################
 # (Partial) Correlations #
@@ -179,7 +195,11 @@ dt_avg <- dt_s[, lapply(.SD, mean),
 dt_avg$Pz_CI <- dt_s[, lapply(.SD, ci),
     by = list(Condition, Timestamp), .SDcols = elec][,..elec]
 dt_avg$Spec <- dt_avg$Condition
-plot_single_elec(dt_avg, elec,
+plot_single_elec(
+    data = dt_avg, 
+    e = elec,
     file = paste0("../plots/Subtraction/dbc19_Pz.pdf"),
-    modus = "Condition", ylims = c(9, -5),
-    leg_labs = cond_labels, leg_vals = cond_values)
+    modus = "Condition",
+    ylims = c(9, -5),
+    leg_labs = cond_labels,
+    leg_vals = cond_values)

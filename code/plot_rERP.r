@@ -206,14 +206,17 @@ plot_single_elec <- function(
             legend.text = element_text(size = 6))           # lgnd el font size
         gg <- gg + theme(plot.title = element_text(size = 7.5))
 
+        # Save legend to file
+        if (save_legend) {
+            lgnd <- get_legend(gg)
+            file_trimmed <- strtrim(file, nchar(file) - 4)
+            ggsave(paste0(file_trimmed, "_wavelegend.pdf"),
+                    lgnd, device = cairo_pdf,
+                    width = 4.5, height = 0.5)
+        }
+
+        # Add legend or not
         if (omit_legend) {
-            if (save_legend) {
-                lgnd <- get_legend(gg)
-                file_trimmed <- strtrim(file, nchar(file) - 4)
-                ggsave(paste0(file_trimmed, "_wavelegend.pdf"),
-                        lgnd, device = cairo_pdf,
-                        width = 4.5, height = 0.5)
-            }
             gg <- gg + theme(legend.position = "none")
             gg <- arrangeGrob(gg + ggtitle(paste0(e, ": ", title)),
                     heights = c(10, 0.25))
