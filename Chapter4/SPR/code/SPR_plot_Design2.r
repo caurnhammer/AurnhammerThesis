@@ -22,18 +22,33 @@ produce_spr_plots <- function(
     }
 
     # Observed Data
-    plot_lmerRT(
-        data = lmerRT,
-        DV = "logRT",
-        yunit = "logRT",
-        title = "Observed RTs",
-        ylims = c(5.5, 5.8),
-        grouping = "Condition",
-        name = path,
-        leg_labs = data_labs,
-        leg_vals = data_vals,
-        omit_legend = FALSE,
-        save_legend = FALSE)
+    if (path == "rRT_Plaus_Clozedist") {
+        plot_lmerRT(
+            data = lmerRT,
+            DV = "logRT",
+            yunit = "logRT",
+            title = "Observed RTs",
+            ylims = c(5.5, 5.8),
+            grouping = "Condition",
+            name = path,
+            leg_labs = data_labs,
+            leg_vals = data_vals,
+            omit_legend = FALSE,
+            save_legend = FALSE)
+    } else {
+        plot_lmerRT(
+            data = lmerRT,
+            DV = "logRT",
+            yunit = "logRT",
+            title = "Observed RTs",
+            ylims = c(5.5, 5.8),
+            grouping = "Condition",
+            name = path,
+            leg_labs = data_labs,
+            leg_vals = data_vals,
+            omit_legend = TRUE,
+            save_legend = FALSE)
+    }
 
     # Estimated RTs
     estimates <- colnames(lmerRT)[which(grepl("est_", colnames(lmerRT)))]

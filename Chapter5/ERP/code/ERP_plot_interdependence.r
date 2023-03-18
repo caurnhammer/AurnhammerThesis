@@ -54,8 +54,10 @@ make_plots <- function(
 
     # Estimates
     est <- eeg[Type == "est", ]
-    pred <- c("ŷ = b0 + b1 * 0 + b2 * 0", "ŷ = b0 + b1 * N400 + b2 * 0",
-        "ŷ = b0 + b1 * 0 + b2 * Segment", "ŷ = b0 + b1 * N400 + b2 * Segment")
+    pred <- c("ŷ = β0 + β1 * 0 + β2 * 0",
+              "ŷ = β0 + β1 * N400 + β2 * 0",
+              "ŷ = β0 + β1 * 0 + β2 * Segment",
+              "ŷ = β0 + β1 * N400 + β2 * Segment")
     for (i in seq(1, length(unique(est$Spec)))) {
         spec <- unique(est$Spec)[i]
         est_set <- est[Spec == spec, ]
@@ -72,14 +74,25 @@ make_plots <- function(
             leg_vals = data_vals,
             omit_legend = TRUE,
             save_legend = FALSE)
+
+        if (i == 2) {
+        plot_single_elec(
+            data = est_set,
+            e = elec,
+            file = paste0("../plots/", file, "/Estimated_", name,
+                            "_withlegend.pdf"),
+            title = paste0("Estimates ", pred[i]),
+            modus = "Condition",
+            ylims = c(8.5, -5),
+            leg_labs = data_labs,
+            leg_vals = data_vals,
+            omit_legend = FALSE,
+            save_legend = FALSE)
+        }
     }
 
     # Residual
     res <- eeg[Type == "res", ]
-    pred <- c("ŷ = b0 + b1 * 0 + b2 * 0",
-              "ŷ = b0 + b1 * N400 + b2 * 0",
-              "ŷ = b0 + b1 * 0 + b2 * Segment",
-              "ŷ = b0 + b1 * N400 + b2 * Segment")
     pred <- rep("y - ŷ", 4)
     for (i in seq(1, length(unique(res$Spec)))) {
         spec <- unique(res$Spec)[i]

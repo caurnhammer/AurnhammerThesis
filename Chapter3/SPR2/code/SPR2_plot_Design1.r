@@ -15,12 +15,26 @@ produce_rt_plots <- function(
 
     # Observed Data
     plot_lmerRT(lmerRT, "logRT",
-                 yunit = "logRT",
-                 title = "Observed RTs",
-                 ylims = c(5.72, 5.87),
-                 name = name,
-                 leg_labs = data_labs,
-                 leg_vals = data_vals)
+                yunit = "logRT",
+                title = "Observed RTs",
+                ylims = c(5.72, 5.87),
+                name = name,
+                leg_labs = data_labs,
+                leg_vals = data_vals,
+                omit_legend = FALSE,
+                save_legend = FALSE)
+
+    # Observed Data
+    plot_lmerRT(lmerRT,
+                "logRT",
+                yunit = "logRT",
+                title = "Observed Reading Times",
+                ylims = c(5.72, 5.87),
+                name = name,
+                leg_labs = data_labs,
+                leg_vals = data_vals,
+                omit_legend = TRUE,
+                save_legend = TRUE)
 
     # Estimated RTs
     estimates <- colnames(lmerRT)[which(grepl("est_", colnames(lmerRT)))]

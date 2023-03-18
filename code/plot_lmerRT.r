@@ -141,6 +141,8 @@ plot_lmerRT <- function(
         p <- p + theme(legend.position = "none")
     }
 
+    if (title == "Observed Reading Times") {DV <- paste0(DV, "_nolegend")}
+
     if (grouping == "estimate") {
         outpath <- paste0("../plots/", name, "/RT_A_estimate_", DV, ".pdf")
     } else {

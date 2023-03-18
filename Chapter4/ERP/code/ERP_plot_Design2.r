@@ -108,7 +108,9 @@ make_plots <- function(
         ylims = c(10.5, -5.5),
         modus = "Condition",
         leg_labs = data_labs,
-        leg_vals = data_vals)
+        leg_vals = data_vals,
+        omit_legend = TRUE,
+        save_legend = FALSE)
 
     plot_topo(
         data = obs,
