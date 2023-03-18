@@ -202,8 +202,8 @@ plot_single_elec <- function(
         gg <- gg + theme(legend.key.size = unit(0.5, 'cm'), # lgnd key size
             legend.key.height = unit(0.5, 'cm'),            # lgnd key height
             legend.key.width = unit(0.5, 'cm'),             # lgnd key width
-            legend.title = element_text(size = 8),          # lgnd ttl font size
-            legend.text = element_text(size = 7))
+            legend.title = element_text(size = 7),          # lgnd ttl font size
+            legend.text = element_text(size = 6))           # lgnd el font size
         gg <- gg + theme(plot.title = element_text(size = 7.5))
 
         if (omit_legend) {
@@ -663,7 +663,9 @@ plot_rSPR <- function(
     ylims = NULL,
     modus = "Condition",
     leg_labs,
-    leg_vals
+    leg_vals,
+    omit_legend = FALSE,
+    save_legend = FALSE
 ) {
     # always exclude the word two words before
     data <- data[Region != "Pre-critical-2",]
@@ -715,12 +717,23 @@ plot_rSPR <- function(
                     axis.text.x = element_text(size = 7),
                     legend.position = "bottom",
                     legend.text = element_text(size = 5),
-                    legend.title = element_text(size = 4),
+                    legend.title = element_text(size = 6),
                     legend.box = "vertical",
                     legend.spacing.y = unit(-0.2, "cm"),
                     legend.margin = margin(0, 0, 0, 0),
                     legend.box.margin = margin(-10, -10, -10, -50))
     p <- p + labs(x = "Region", y = yunit, title = title)
+
+    if (omit_legend) {
+        if (save_legend) {
+            lgnd <- get_legend(p)
+            file_trimmed <- strtrim(file, nchar(file) - 4)
+            ggsave(paste0(file_trimmed, "_rtlegend.pdf"),
+                    lgnd, device = cairo_pdf,
+                    width = 3.5, height = 0.5)
+        }
+        p <- p + theme(legend.position = "none")
+    }
 
     if (file != FALSE) {
        ggsave(file, p, device = cairo_pdf, width = 3, height = 3)

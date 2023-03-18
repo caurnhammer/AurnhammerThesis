@@ -34,15 +34,27 @@ make_plots <- function(
     coef$Condition <- coef$Spec
     model_vals <- c("black", "#E349F6", "#00FFFF")
 
-    plot_single_elec(data = coef, e = c("Pz"), 
+    plot_single_elec(
+        data = coef,
+        e = c("Pz"),
         file = paste0("../plots/", file, "/Waveforms/Coefficients.pdf"),
-        title = "Coefficients", modus = "Coefficient",
-        ylims = c(10, -5), leg_labs = model_labs, leg_vals = model_vals)
+        title = "Coefficients",
+        modus = "Coefficient",
+        ylims = c(9, -5.5),
+        leg_labs = model_labs,
+        leg_vals = model_vals)
 
-    plot_full_elec(data = coef, e = elec, file = paste0("../plots/", file,
+    plot_full_elec(
+        data = coef,
+        e = elec,
+        file = paste0("../plots/",
+        file,
         "/Waveforms/Coefficients_Full.pdf"),
-        title = "Coefficients", modus = "Coefficient",
-        ylims = c(7, -5), leg_labs = model_labs, leg_vals = model_vals)
+        title = "Coefficients",
+        modus = "Coefficient",
+        ylims = c(7, -5),
+        leg_labs = model_labs,
+        leg_vals = model_vals)
 
     # Models: t-value
     if (inferential == TRUE) {
@@ -56,10 +68,14 @@ make_plots <- function(
         sigcols <- grepl("_sig", colnames(sig_corr))
         tval <- cbind(tval, sig_corr[, ..sigcols])
         tval$Condition <- tval$Spec
-        plot_nine_elec(tval, elec_nine,
+        plot_nine_elec(
+            data = tval, 
+            e = elec_nine,
             file = paste0("../plots/", file, "/Waveforms/t-values.pdf"),
             title = "Inferential Statistics",
-            modus = "t-value", ylims = c(8, -9), tws = time_windows,
+            modus = "t-value",
+            ylims = c(8, -9),
+            tws = time_windows,
             leg_labs = model_labs[2:length(model_labs)],
             leg_vals = model_vals[2:length(model_vals)])
     }
@@ -100,7 +116,9 @@ make_plots <- function(
         modus = "Condition",
         ci = ci,
         leg_labs = data_labs,
-        leg_vals = data_vals)
+        leg_vals = data_vals,
+        omit_legend = TRUE,
+        save_legend = TRUE)
     plot_full_elec(
         data = obs, 
         e = elec_all, 
@@ -113,13 +131,23 @@ make_plots <- function(
         leg_vals = data_vals)
 
     if (design == "Design1_AC") {
-        plot_topo(obs, file = paste0("../plots/", file, "/Topos/Observed"),
-                tw = c(300, 500), cond_man = "C", cond_base = "A",
-                omit_legend = TRUE, save_legend = TRUE)
+        plot_topo(
+            data = obs, 
+            file = paste0("../plots/", file, "/Topos/Observed"),
+            tw = c(300, 500),
+            cond_man = "C",
+            cond_base = "A",
+            omit_legend = TRUE,
+            save_legend = TRUE)
     } else if (design == "Design2") {
-        plot_topo(obs, file = paste0("../plots/", file, "/Topos/Observed"),
-                tw = c(600, 1000), cond_man = "B", cond_base = "A",
-                omit_legend = TRUE, save_legend = TRUE)
+        plot_topo(
+            data = obs,
+            file = paste0("../plots/", file, "/Topos/Observed"),
+            tw = c(600, 1000),
+            cond_man = "B",
+            cond_base = "A",
+            omit_legend = TRUE,
+            save_legend = TRUE)
     }
 
     # Data: Estimated
@@ -141,48 +169,88 @@ make_plots <- function(
         est_set <- est[Spec == spec, ]
         spec <- unique(est_set$Spec)
         name <- gsub("\\[|\\]|:|,| ", "", spec)
-        plot_single_elec(
-            data = est_set,
-            e = c("Pz"),
-            file = paste0("../plots/", file, 
-                    "/Waveforms/Estimated_", name, ".pdf"),
-            title = paste("Estimates", combo[i]),
-            modus = "Condition",
-            ci = ci,
-            ylims = c(9, -5.5),
-            leg_labs = data_labs,
-            leg_vals = data_vals)
+        if (design == "Design1") {
+            plot_single_elec(
+                data = est_set,
+                e = c("Pz"),
+                file = paste0("../plots/", file, 
+                        "/Waveforms/Estimated_", name, ".pdf"),
+                title = paste("Estimates", combo[i]),
+                modus = "Condition",
+                ci = ci,
+                ylims = c(9, -5.5),
+                leg_labs = data_labs,
+                leg_vals = data_vals,
+                omit_legend = TRUE,
+                save_legend = FALSE)
+        } else {
+            plot_single_elec(
+                data = est_set,
+                e = c("Pz"),
+                file = paste0("../plots/", file, 
+                        "/Waveforms/Estimated_", name, ".pdf"),
+                title = paste("Estimates", combo[i]),
+                modus = "Condition",
+                ci = ci,
+                ylims = c(9, -5.5),
+                leg_labs = data_labs,
+                leg_vals = data_vals)
+        }
         if (design == "Design2") {
-            plot_topo(est_set,
-            file = paste0("../plots/", file, "/Topos/Estimated_", name),
-            tw = c(600, 1000), cond_man = "B", cond_base = "A",
-            add_title = paste("\nEstimate", pred[i]), omit_legend = TRUE)
+            plot_topo(
+                data = est_set,
+                file = paste0("../plots/", file, "/Topos/Estimated_", name),
+                tw = c(600, 1000),
+                cond_man = "B",
+                cond_base = "A",
+                add_title = paste("\nEstimate", pred[i]),
+                omit_legend = TRUE)
         }
     }
 
     # Data: Residual
     res <- eeg[Type == "res", ]
     for (i in seq(1, length(unique(res$Spec)))) {
-        spec = unique(res$Spec)[i]
+        spec <- unique(res$Spec)[i]
         res_set <- res[Spec == spec, ]
-        spec = unique(res_set$Spec)
+        spec <- unique(res_set$Spec)
         name <- gsub("\\[|\\]|:|,| ", "", spec)
-        plot_single_elec(
-            data = res_set, 
-            e = c("Pz"),
-            file = paste0("../plots/", file, 
-                    "/Waveforms/Residual_", name, ".pdf"), 
-            title = paste("Residuals", combo[i]),
-            modus = "Condition",
-            ci = ci,
-            ylims = c(3.5, -3.5),
-            leg_labs = data_labs,
-            leg_vals = data_vals)
+        if (design == "Design1") {
+            plot_single_elec(
+                data = res_set,
+                e = c("Pz"),
+                file = paste0("../plots/", file,
+                        "/Waveforms/Residual_", name, ".pdf"),
+                title = paste("Residuals", combo[i]),
+                modus = "Condition",
+                ci = ci,
+                ylims = c(3.5, -3.5),
+                leg_labs = data_labs,
+                leg_vals = data_vals,
+                omit_legend = TRUE,
+                save_legend = FALSE)
+        } else {
+            plot_single_elec(
+                data = res_set,
+                e = c("Pz"),
+                file = paste0("../plots/", file,
+                        "/Waveforms/Residual_", name, ".pdf"),
+                title = paste("Residuals", combo[i]),
+                modus = "Condition",
+                ci = ci,
+                ylims = c(3.5, -3.5),
+                leg_labs = data_labs,
+                leg_vals = data_vals)
+        }
         if (design == "Design2") {
-            plot_topo(res_set,
+            plot_topo(
+                data = res_set,
                 file = paste0("../plots/", file, "/Topos/Residual_", name),
-                tw = c(600, 1000), cond_man = "B", cond_base = "A",
-                add_title = paste("\nResidual", pred[i]), omit_legend = TRUE)
+                tw = c(600, 1000),
+                cond_man = "B",
+                cond_base = "A",
+                add_title = paste("\nResidual", pred[i]), 
+                omit_legend = TRUE)
         }
     }
 }

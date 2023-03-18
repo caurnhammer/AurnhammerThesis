@@ -70,7 +70,10 @@ make_plots <- function(
         yunit = "logRT",
         title = "Observed RTs",
         ylims = c(5.685, 5.865),
-        leg_labs = data_labs, leg_vals = data_vals)
+        leg_labs = data_labs,
+        leg_vals = data_vals,
+        omit_legend = FALSE,
+        save_legend = TRUE)
 
     combo <- c("Intercept", "Intercept + Cloze", "Intercept + Noun Assoc.",
             "Intercept + Cloze + Noun Assoc.")
@@ -80,13 +83,17 @@ make_plots <- function(
         spec <- unique(est$Spec)[i]
         est_set <- est[Spec == spec, ]
         name <- gsub("\\[|\\]|:|,| ", "", spec)
-        plot_rSPR(est_set,
+        plot_rSPR(
+            data = est_set,
             file = paste0("../plots/", file, "/Estimated_",
                 name, ".pdf"),
             yunit = "logRT",
             title = paste0("Estimates: ", combo[i]),
             ylims = c(5.685, 5.865),
-            leg_labs = data_labs, leg_vals = data_vals)
+            leg_labs = data_labs,
+            leg_vals = data_vals,
+            omit_legend = TRUE,
+            save_legend = FALSE)
     }
 
     # Residual
@@ -95,13 +102,17 @@ make_plots <- function(
         spec <- unique(res$Spec)[i]
         res_set <- res[Spec == spec, ]
         name <- gsub("\\[|\\]|:|,| ", "", spec)
-        plot_rSPR(res_set,
+        plot_rSPR(
+            data = res_set,
             file = paste0("../plots/", file, "/Residual_",
                 name, ".pdf"),
             yunit = "logRT",
             title = paste0("Residuals: ", combo[i]),
             ylims = c(-0.05, 0.05),
-            leg_labs = data_labs, leg_vals = data_vals)
+            leg_labs = data_labs,
+            leg_vals = data_vals,
+            omit_legend = TRUE,
+            save_legend = FALSE)
     }
 }
 
