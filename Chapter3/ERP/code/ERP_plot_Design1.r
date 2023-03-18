@@ -45,7 +45,7 @@ lmerERPplot <- function(
                         value.var = c("coefval", "seval"))
         plot_midline(data = data1, 
                      file = paste0(name, "/coefficients.pdf"),
-                     title = "lmerERP Coefficients",
+                     title = "Coefficients",
                      yunit = "Intercept + coefficient",
                      subject_avg = subject_avg,
                      ci = ci,
@@ -79,7 +79,7 @@ lmerERPplot <- function(
                         value.var = c("zval", "sig"))
         plot_midline(data = data1,
                      file = paste0(name, "/zvalues.pdf"),
-                     title = "lmerERP Effect Sizes",
+                     title = "Z-values",
                      yunit = "Z-value",
                      subject_avg = FALSE,
                      ci = FALSE,
@@ -165,39 +165,51 @@ produce_lmer_plots <- function(
     lmerERPplot(lmerERP,
                 "EEG",
                 yunit = "Amplitude (μVolt)",
-                title = "Observed ERP",
+                title = "Observed ERPs",
                 ylims = c(9, -7),
                 ci = TRUE,
                 leg_labs = data_labs,
                 leg_vals = data_vals,
                 name = name)
 
+    if (length(model_labs) == 3) {
+        preds <- c("Intercept", "Intercept + logCloze",
+                    "Intercept + Noun Association",
+                    "Intercept + logCloze + Noun Association")
+    } else {
+        preds <- c("Intercept", paste0("Intercept + ", model_labs[2]))
+    }
+
     # Estimated Waveforms
     estimates <- colnames(lmerERP)[which(grepl("est_", colnames(lmerERP)))]
+    i <- 1
     for (x in estimates) {
         lmerERPplot(lmerERP,
                     x,
                     yunit = "Amplitude (μVolt)",
-                    title = "Estimated ERPs",
+                    title = paste("Estimates:", preds[i]),
                     ylims = c(9, -7),
                     ci = TRUE,
                     leg_labs = data_labs,
                     leg_vals = data_vals,
                     name = name)
+        i <- i + 1
     }
 
     # Residuals
     residuals <- colnames(lmerERP)[which(grepl("res_", colnames(lmerERP)))]
+    i <- 1
     for (x in residuals) {
         lmerERPplot(lmerERP,
                     x,
                     yunit = "Amplitude (μVolt)",
-                    title = "Residuals: Noun Association",
+                    title = paste("Residuals:", preds[i]),
                     ci = TRUE,
                     ylims = c(4.5, -4.5),
                     leg_labs = data_labs,
                     leg_vals = data_vals,
                     name = name)
+        i <- i + 1
     }
 
     # Coefficients
@@ -230,8 +242,9 @@ produce_lmer_plots <- function(
                     mode = "A_estimates",
                     ci = TRUE,
                     subject_avg = TRUE,
-                    ylims = c(8, -6),
+                    yunit = "Amplitude (μVolt)",
                     title = "Estimated ERPs: Log(Cloze) Levels",
+                    ylims = c(8, -6),
                     leg_labs = data_labs,
                     leg_vals = data_vals,
                     name = name)
@@ -278,7 +291,7 @@ produce_lmer_plots(
     "../data/lmerERP_AC_logCloze.csv",
     c("A: A+E+", "C: A+E-"),
     c("#000000", "#004488"),
-    c("Intercept", "logCloze"),
+    c("Intercept", "log(Cloze)"),
     c("#000000", "#E349F6")
 )
 

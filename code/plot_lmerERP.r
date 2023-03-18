@@ -33,7 +33,6 @@ get_legend<-function(
 }
 
 # For a single Electrode, plot per-grouping mean.
-# Bootstrapped confidence intervals optional (slow).
 plot_grandavg_ci_lmer <- function(
     dt,                         # data
     ttl,                        # title
@@ -126,7 +125,7 @@ plot_grandavg_ci_lmer <- function(
     if (ci == TRUE) {
             plt <- plt + geom_ribbon(aes(x = Timestamp,
                                          ymax = V2 + SE,
-                                        ymin = V2 - SE),
+                                         ymin = V2 - SE),
                                     alpha = 0.20,
                                     color = NA)
     } else if (grouping == "Coefficient") {
@@ -165,10 +164,10 @@ plot_grandavg_ci_lmer <- function(
                                     ymax = ylims[2],
                                     alpha = .15)
     } else {
-            plt <- plt + scale_color_manual(name = "log(Cloze)",
+            plt <- plt + scale_color_manual(name = grouping,
                                             labels = leg_labs,
                                             values = leg_vals)
-            plt <- plt + scale_fill_manual(name = "log(Cloze)",
+            plt <- plt + scale_fill_manual(name = grouping,
                                             labels = leg_labs,
                                             values = leg_vals)
     }
@@ -315,10 +314,11 @@ plot_midline <- function(
     gg <- arrangeGrob(arrangeGrob(Fzplt + theme(legend.position = "none"),
                                  Czplt + theme(legend.position = "none"),
                                  Pzplt + theme(legend.position = "none"),
-                                 layout_matrix = matrix(seq_len(3 * 1))),
+                                 layout_matrix = matrix(1:3)),
                                  legend,
                                  heights = c(10, 1.2),
-                                 top = ggtitle(title))
+                                 top = title)
+
     if (file != FALSE) {
         ggsave(file, gg, device = cairo_pdf, width = 4, height = 7)
     } else {
