@@ -5,6 +5,7 @@
 
 ### SESSION PREPARATION
 # load plotting functions into workspace
+system("mkdir -p ../plots")
 source("../../../code/plot_lmerERP.r")
 source("../../../code/benjamini-hochberg.r")
 source("../../../code/plot_rERP.r")
