@@ -286,53 +286,107 @@ make_grid_topo <- function(
     # N400
     plot_topo(
         data = obs,
-        file = paste0("../plots/", path, "/Topos/N400_B.pdf"),
+        file = paste0("../plots/", path, "/Topos/N400"),
         tw = c(300, 500),
         cond_man = "B",
         cond_base = "A",
-        add_title = "B (A-E+) minus A",
+        title = "B (A-E+) minus A",
         omit_legend = TRUE,
         save_legend = TRUE,
     )
 
     plot_topo(
         data = obs,
-        file = paste0("../plots/", path, "/Topos/N400_C.pdf"),
+        file = paste0("../plots/", path, "/Topos/N400"),
         tw = c(300, 500),
         cond_man = "C",
         cond_base = "A",
-        add_title = "C (A+E-) minus A",
+        title = "C (A+E-) minus A",
         omit_legend = TRUE,
         save_legend = FALSE,
     )
 
     plot_topo(
         data = obs,
-        file = paste0("../plots/", path, "/Topos/N400_D.pdf"),
+        file = paste0("../plots/", path, "/Topos/N400"),
         tw = c(300, 500),
         cond_man = "D",
         cond_base = "A",
-        add_title = "D (A-E-) minus A",
+        title = "D (A-E-) minus A",
         omit_legend = TRUE,
         save_legend = FALSE,
     )
 
     plot_topo(
         data = obs,
-        file = paste0("../plots/", path, "/Topos/N400_DC.pdf"),
+        file = paste0("../plots/", path, "/Topos/N400_DC"),
         tw = c(300, 500),
         cond_man = "D",
         cond_base = "C",
-        add_title = "D (A-E-) minus C",
+        title = "D (A-E-) minus C",
         omit_legend = TRUE,
         save_legend = FALSE,
     )
-}
 
-make_grid_topo("ERP_Design1_rERP",
-    data_labs = c("A: A+E+", "B: A-E+", "C: A+E-", "D: A-E-"),
-    data_vals = c("#000000", "#BB5566", "#004488", "#DDAA33")
-)
+    # P600
+    plot_topo(
+        data = obs,
+        file = paste0("../plots/", path, "/Topos/P600"),
+        tw = c(600, 1000),
+        cond_man = "B",
+        cond_base = "A",
+        title = "B (A-E+) minus A",
+        omit_legend = TRUE,
+        save_legend = FALSE,
+    )
+
+    plot_topo(
+        data = obs,
+        file = paste0("../plots/", path, "/Topos/P600"),
+        tw = c(600, 1000),
+        cond_man = "C",
+        cond_base = "A",
+        title = "C (A+E-) minus A",
+        omit_legend = TRUE,
+        save_legend = FALSE,
+    )
+
+    plot_topo(
+        data = obs,
+        file = paste0("../plots/", path, "/Topos/P600"),
+        tw = c(600, 1000),
+        cond_man = "D",
+        cond_base = "A",
+        title = "D (A-E-) minus A",
+        omit_legend = TRUE,
+        save_legend = FALSE,
+    )
+
+    plot_topo(
+        data = obs,
+        file = paste0("../plots/", path, "/Topos/P600_DC"),
+        tw = c(600, 1000),
+        cond_man = "D",
+        cond_base = "C",
+        title = "D (A-E-) minus C",
+        omit_legend = TRUE,
+        save_legend = FALSE,
+    )
+
+    text_N400 <- ggplot() + annotate("text", x = 1, y = 1, size = 10,
+                label = "N400") + theme_void()
+    text_P600 <- ggplot() + annotate("text", x = 1, y = 1, size = 10,
+                label = "P600") + theme_void()
+
+    ggsave(paste0("../plots/", path, "/Topos/N400text.pdf"),
+        text_N400,
+        device = cairo_pdf,
+        width = 4, height = 4)
+    ggsave(paste0("../plots/", path, "/Topos/P600text.pdf"),
+        text_P600,
+        device = cairo_pdf,
+        width = 4, height = 4)
+}
 
 produce_lmer_plots(
     "../data/lmerERP_AC_Cloze.csv",
@@ -382,3 +436,7 @@ produce_lmer_plots(
     c("#000000", "#E349F6")
 )
 
+make_grid_topo("ERP_Design1_rERP",
+    data_labs = c("A: A+E+", "B: A-E+", "C: A+E-", "D: A-E-"),
+    data_vals = c("#000000", "#BB5566", "#004488", "#DDAA33")
+)
