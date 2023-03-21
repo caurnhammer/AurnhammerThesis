@@ -1,4 +1,4 @@
-mkdir -p Stimuli ERP SPR1 SPR2
+mkdir -p tmp Stimuli ERP SPR1 SPR2
 
 ## Stimuli
 
@@ -107,3 +107,6 @@ pdfjam -q	../SPR2/plots/lmerRT_A_logCloze/RT_coefficients.pdf \
 			--nup 2x1 --landscape \
 			--outfile SPR2/RT_2_exploratory.pdf \
 			--papersize '{8cm,15cm}'
+
+## cleanup
+rm -r tmp
