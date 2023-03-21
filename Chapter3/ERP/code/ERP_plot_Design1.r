@@ -251,12 +251,14 @@ produce_lmer_plots <- function(
     }
 }
 
-make_grid_plot <- function(
+make_grid_topo <- function(
     path,
     data_labs,
     data_vals
 ) {
     system(paste0("mkdir -p ../plots/", path))
+    system(paste0("mkdir -p ../plots/", path, "/Waveforms"))
+    system(paste0("mkdir -p ../plots/", path, "/Topos"))
 
     elec_all <- c("Fp1", "Fp2", "F7", "F3", "Fz", "F4", "F8", "FC5",
                 "FC1", "FC2", "FC6", "C3", "Cz", "C4", "CP5", "CP1",
@@ -267,17 +269,69 @@ make_grid_plot <- function(
                      c("B", "A", "C", "D")), levels = c("A", "B", "C", "D"))
     obs <- eeg[Type == "EEG", ]
 
+    # Full electrode grid
     plot_full_elec(
-        data = obs, 
-        e = elec_all, 
-        file = paste0("../plots/", path, "/Observed_Full.pdf"),
+        data = obs,
+        e = elec_all,
+        file = paste0("../plots/", path, "/Waveforms/Observed_Full.pdf"),
         title = "Observed",
         modus = "Condition",
         ci = FALSE,
         ylims = c(9, -5.5),
         leg_labs = data_labs,
         leg_vals = data_vals)
+
+    ## Topos
+    # N400
+    plot_topo(
+        data = obs,
+        file = paste0("../plots/", path, "/Topos/N400_B.pdf"),
+        tw = c(300, 500),
+        cond_man = "B",
+        cond_base = "A",
+        add_title = "B (A-E+) minus A",
+        omit_legend = TRUE,
+        save_legend = TRUE,
+    )
+
+    plot_topo(
+        data = obs,
+        file = paste0("../plots/", path, "/Topos/N400_C.pdf"),
+        tw = c(300, 500),
+        cond_man = "C",
+        cond_base = "A",
+        add_title = "C (A+E-) minus A",
+        omit_legend = TRUE,
+        save_legend = FALSE,
+    )
+
+    plot_topo(
+        data = obs,
+        file = paste0("../plots/", path, "/Topos/N400_D.pdf"),
+        tw = c(300, 500),
+        cond_man = "D",
+        cond_base = "A",
+        add_title = "D (A-E-) minus A",
+        omit_legend = TRUE,
+        save_legend = FALSE,
+    )
+
+    plot_topo(
+        data = obs,
+        file = paste0("../plots/", path, "/Topos/N400_DC.pdf"),
+        tw = c(300, 500),
+        cond_man = "D",
+        cond_base = "C",
+        add_title = "D (A-E-) minus C",
+        omit_legend = TRUE,
+        save_legend = FALSE,
+    )
 }
+
+make_grid_topo("ERP_Design1_rERP",
+    data_labs = c("A: A+E+", "B: A-E+", "C: A+E-", "D: A-E-"),
+    data_vals = c("#000000", "#BB5566", "#004488", "#DDAA33")
+)
 
 produce_lmer_plots(
     "../data/lmerERP_AC_Cloze.csv",
@@ -327,7 +381,3 @@ produce_lmer_plots(
     c("#000000", "#E349F6")
 )
 
-make_grid_plot("ERP_Design1_rERP",
-    data_labs = c("A: A+E+", "B: A-E+", "C: A+E-", "D: A-E-"),
-    data_vals = c("#000000", "#BB5566", "#004488", "#DDAA33")
-)
