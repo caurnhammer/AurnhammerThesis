@@ -438,6 +438,7 @@ plot_topo <- function(
     cond_man,
     cond_base,
     label = "Amplitude (µVolt)",
+    title = "",
     add_title = "",
     omit_legend = FALSE,
     save_legend = FALSE
@@ -458,10 +459,24 @@ plot_topo <- function(
     # select time and descriptors
     data_m_tw <- data_m[(Timestamp >= tw[1] & Timestamp <= tw[2]), ]
 
-    generate_topo(data_m_tw, file, tw, cond_man, cond_base,
-                amplim = 2.8, elec = electrodes,
-                title = paste0(cond_man, " minus ", cond_base, add_title),
-                label = label, omit_legend, save_legend)
+    if (title == "") {
+        ttl <- paste0(cond_man, " minus ", cond_base, add_title)
+    } else {
+        ttl <- title
+    }
+
+    generate_topo(
+                data_m_tw,
+                file,
+                tw,
+                cond_man,
+                cond_base,
+                amplim = 2.8,
+                elec = electrodes,
+                title = ttl,
+                label = label,
+                omit_legend,
+                save_legend)
 }
 
 generate_topo <- function(
@@ -536,11 +551,22 @@ generate_topo <- function(
     # my_spectrum <- colorRampPalette(c("#00007F", "blue", "#0080ff", "white",
     #                         "white", "white", "#ff6969", "red", "#a90101"))
     my_spectrum <- colorRampPalette(c(
-                    "#202245", "#45428A", "#645FD1", "#8980FF",
-                    "#A29EFF", "#C3C4FF", "#E4E7FF",
-                    "white", "white", "white",
-                    "#FBE4E6", "#FDBDC3", "#FF989F",
-                    "#FF7681", "#CF5861", "#9E2626", "#651313"))
+                "#01015e", "#3434ff", "#0080ff",
+                "#7fbfff", "white", "#fcd4d4",
+                "#ff6969", "#ca2c2c", "#750202"))
+    # my_spectrum <- colorRampPalette(c(
+    #                 "#202245", "#45428A", "#645FD1", "#8980FF",
+    #                 "#A29EFF", "#C3C4FF", "#E4E7FF",
+    #                 "white",
+    #                 "#FBE4E6", "#FDBDC3", "#FF989F",
+    #                 "#FF7681", "#CF5861", "#9E2626", "#651313"))
+    # my_spectrum <- colorRampPalette(c(
+    #                 "#132f4b", "#1c4269", "#4877a6", "#5285b9",
+    #                 "#6ea3d8", "#8ebce9", "#9ccbfa",
+    #                 "white",
+    #                 "#FBE4E6", "#FDBDC3", "#FF989F",
+    #                 "#FF7681", "#CF5861", "#9E2626", "#651313"
+    # ))
 
     # Create head and nose shape
     head_shape <- circle_fun(c(0, 0), round(max(data_diff_locs$x) * 2.35, 4),
@@ -555,7 +581,7 @@ generate_topo <- function(
     p <- ggplot(interpol_m, aes(x = x, y = y, fill = EEG))
     p <- p + geom_raster() + stat_contour(aes(z = EEG), binwidth = 0.5)
     p <- p + theme_topo()
-    p <- p + labs(title = title, subtitle = paste0(tw[1], "-", tw[2], "ms"))
+    p <- p + labs(title = title, subtitle = paste0(tw[1], "-", tw[2], " ms"))
     p <- p + geom_path(data = mask_ring, aes(x, y, z = NULL, fill = NULL),
               colour = "white", linewidth = 6)
     p <- p + scale_fill_gradientn(colours = my_spectrum(10),
@@ -568,6 +594,7 @@ generate_topo <- function(
     p <- p + geom_path(data = nose, aes(x, y, z = NULL, fill = NULL),
                         linewidth = 1.5)
     p <- p + coord_equal()
+    # Optional legend processing
     if (omit_legend) {
         if (save_legend) {
             lgnd <- get_legend(p)
@@ -684,7 +711,6 @@ plot_rSPR <- function(
                        "Spillover", "Post-spillover"))
 
     if (modus == "t-value"){
-        #data$sig <- data$sig_average < 0.05
         sig_dt <- data[, c("Region", "Spec", "sig")]
         sig_dt$posit <- rep(seq(ylims[1] + 2, ylims[1] + 4,
                 length = length(unique(data$Spec))),
@@ -734,21 +760,26 @@ plot_rSPR <- function(
                     legend.box.margin = margin(-10, -10, -10, -50))
     p <- p + labs(x = "Region", y = yunit, title = title)
 
-    
     if (save_legend) {
         lgnd <- get_legend(p)
         file_trimmed <- strtrim(file, nchar(file) - 4)
         ggsave(paste0(file_trimmed, "_rtlegend.pdf"),
-                lgnd, device = cairo_pdf,
-                width = 3.5, height = 0.5)
+                lgnd,
+                device = cairo_pdf,
+                width = 3.5,
+                height = 0.5)
     }
     if (omit_legend) {
         p <- p + theme(legend.position = "none")
     }
-    
 
     if (file != FALSE) {
-       ggsave(file, p, device = cairo_pdf, width = 3, height = 3)
+       ggsave(
+            file,
+            p, 
+            device = cairo_pdf, 
+            width = 3, 
+            height = 3)
     } else {
        p
     }

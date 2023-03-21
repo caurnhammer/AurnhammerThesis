@@ -81,8 +81,8 @@ plot_grandavg_ci_lmer <- function(
                 df$posit <- rep(seq(ylims[1] - 2, ylims[1],
                                 length = length(unique(df$zvalue))),
                                 length(unique(df$Timestamp)))
-                df$sig <- factor(df$sig, levels=c("1", "0"),
-                                 labels = c("sign", "insign"))
+                df$sig <- factor(df$sig, levels = c(0, 1),
+                                 labels = c("insign", "sign"))
         } else if (grouping == "logCloze") {
                 colnames(dt)[3] <- "V2"
         } else {
@@ -148,9 +148,9 @@ plot_grandavg_ci_lmer <- function(
                                     aes(x = Timestamp,
                                         y = posit,
                                         shape = sig))
-            plt <- plt + scale_shape_manual(values = c(20, 32),
+            plt <- plt + scale_shape_manual(values = c(32, 20),
                     name = "Corrected p-values",
-                    labels = c("Significant", "Nonsignificant"))
+                    labels = c("Nonsignificant", "Significant"))
             plt <- plt + annotate("rect",
                                     xmin = tws[1][[1]][1],
                                     xmax = tws[1][[1]][2],
