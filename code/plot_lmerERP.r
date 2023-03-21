@@ -36,7 +36,7 @@ get_legend<-function(
 plot_grandavg_ci_lmer <- function(
     dt,                         # data
     ttl,                        # title
-    yunit = paste0("Amplitude (μVolt)"), # y-axis unit
+    yunit = paste0("Amplitude (µVolt)"), # y-axis unit
     subject_avg = TRUE,         # first average across subjects
     ci = FALSE,                 # add bootrs. conf. intervals
     ylims = NULL,               # optional length=2 vector, desc order
@@ -187,7 +187,7 @@ plot_midline <- function(
     data,                     # input data
     file = FALSE,             # where to store. If FALSE, display.
     title = "Midline ERPs",   # Add title
-    yunit = paste0("Amplitude (μVolt)"), # y-axis label
+    yunit = paste0("Amplitude (µVolt)"), # y-axis label
     subject_avg = TRUE,       # Compute subject-average before plotting
     ci = FALSE,               # include conf interval
     ylims = NULL,             # custom ylims (desc order)

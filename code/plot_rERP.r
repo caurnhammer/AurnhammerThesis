@@ -36,7 +36,7 @@ get_legend <- function(
 plot_grandavg_ci <- function(
     df,
     ttl,
-    yunit = "Amplitude (μVolt)",
+    yunit = "Amplitude (µVolt)",
     ylims = NULL,
     modus = "Condition",
     tws = list(c(300, 500), c(600, 1000)),
@@ -142,7 +142,7 @@ plot_single_elec <- function(
     e,
     file = FALSE,
     title = "ERPs",
-    yunit = "Amplitude (μVolt)",
+    yunit = "Amplitude (µVolt)",
     ylims = NULL,
     modus = "Condition",
     tws = list(c(250, 400), c(600, 1000)),
@@ -239,7 +239,7 @@ plot_nine_elec <- function(
     e,
     file = FALSE,
     title = "ERPs",
-    yunit = "Amplitude (μVolt)",
+    yunit = "Amplitude (µVolt)",
     ylims = NULL,
     modus = "Condition",
     tws = list(c(250, 400), c(600, 1000)),
@@ -317,7 +317,7 @@ plot_full_elec <- function(
     e,
     file = FALSE,
     title = "ERPs",
-    yunit = "Amplitude (μVolt)",
+    yunit = "Amplitude (µVolt)",
     ylims = NULL,
     modus = "Condition",
     tws = list(c(300, 500), c(600, 1000)),
@@ -437,7 +437,7 @@ plot_topo <- function(
     tw = c(600, 1000),
     cond_man,
     cond_base,
-    label = "Amplitude (μVolt)",
+    label = "Amplitude (µVolt)",
     add_title = "",
     omit_legend = FALSE,
     save_legend = FALSE
@@ -509,14 +509,15 @@ generate_topo <- function(
 
     # create the interpolation grid
     rmax <- .75  # specify a maximum boundary for the grid
-    grid_res <- 67 # specify the interpolation grid resolution
+    grid_res <- 134 # specify the interpolation grid resolution
     xo <- seq(min(-rmax, interprep$x), max(rmax, interprep$x),
                 length = grid_res)
     yo <- seq(max(rmax, interprep$y), min(-rmax, interprep$y),
                 length = grid_res)
 
     # TODO clean up v4_interp
-    interpol <- data.table(v4_interp(interprep, xo, yo))
+    interpol <- data.table(v4_interp(interprep, xo, yo, 
+                            rmax = rmax, gridRes = grid_res))
     interpol_m <- melt(interpol, id.vars = "x", variable.name = "y",
                        value.name = "EEG")
     interpol_m$y <- as.numeric(as.character(interpol_m$y))
@@ -532,8 +533,14 @@ generate_topo <- function(
     amplim_plusmin <- c(-amplim, amplim) # compute limits
 
     # Define color spectrum
-    my_spectrum <- colorRampPalette(c("#00007F", "blue", "#0080ff", "white",
-                            "white", "white", "#ff6969", "red", "#a90101"))
+    # my_spectrum <- colorRampPalette(c("#00007F", "blue", "#0080ff", "white",
+    #                         "white", "white", "#ff6969", "red", "#a90101"))
+    my_spectrum <- colorRampPalette(c(
+                    "#202245", "#45428A", "#645FD1", "#8980FF",
+                    "#A29EFF", "#C3C4FF", "#E4E7FF",
+                    "white", "white", "white",
+                    "#FBE4E6", "#FDBDC3", "#FF989F",
+                    "#FF7681", "#CF5861", "#9E2626", "#651313"))
 
     # Create head and nose shape
     head_shape <- circle_fun(c(0, 0), round(max(data_diff_locs$x) * 2.35, 4),
@@ -595,7 +602,7 @@ circle_fun <- function(
   return(data.table(x = xx, y = yy))
 }
 
-v4_interp <- function(df, xo, yo, rmax = .75, gridRes = 67) {
+v4_interp <- function(df, xo, yo, rmax = .75, gridRes = gridRes) {
   xo <- matrix(rep(xo, length(yo)), nrow = length(xo), ncol = length(yo))
   yo <- t(matrix(rep(yo, length(xo)), nrow = length(yo), ncol = length(xo)))
   xy <- df$x + df$y * sqrt(as.complex(-1))
@@ -727,16 +734,18 @@ plot_rSPR <- function(
                     legend.box.margin = margin(-10, -10, -10, -50))
     p <- p + labs(x = "Region", y = yunit, title = title)
 
+    
+    if (save_legend) {
+        lgnd <- get_legend(p)
+        file_trimmed <- strtrim(file, nchar(file) - 4)
+        ggsave(paste0(file_trimmed, "_rtlegend.pdf"),
+                lgnd, device = cairo_pdf,
+                width = 3.5, height = 0.5)
+    }
     if (omit_legend) {
-        if (save_legend) {
-            lgnd <- get_legend(p)
-            file_trimmed <- strtrim(file, nchar(file) - 4)
-            ggsave(paste0(file_trimmed, "_rtlegend.pdf"),
-                    lgnd, device = cairo_pdf,
-                    width = 3.5, height = 0.5)
-        }
         p <- p + theme(legend.position = "none")
     }
+    
 
     if (file != FALSE) {
        ggsave(file, p, device = cairo_pdf, width = 3, height = 3)

@@ -4,7 +4,7 @@
 ##
 
 ## SESSION PREPARATION
-# load lmerERP functions
+run(`mkdir -p ../data`)
 include("../../../code/lmerERP.jl");
 contr = Dict(:Item => Grouping(), :Subject => Grouping());
 
