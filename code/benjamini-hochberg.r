@@ -1,6 +1,11 @@
 # Benjamini-Hochberg procedure
 
-bh_apply_wide <- function(data, elec, alpha=0.05, tws=list(c(300, 500), c(600, 1000))) {
+bh_apply_wide <- function(
+        data,
+        elec,
+        alpha = 0.05,
+        tws = list(c(300, 500), c(600, 1000))
+) {
         preds <- unique(data$Spec)
         keep_ts <- c()
         for (tw in tws) {
@@ -8,6 +13,10 @@ bh_apply_wide <- function(data, elec, alpha=0.05, tws=list(c(300, 500), c(600, 1
                 for (p in preds) {
                         df <- data[Spec == p & Timestamp >= tw[1] &
                                         Timestamp <= tw[2], c(4:29)]
+                        if (p == "Association_Noun") {
+                                print(data[Timestamp == 420,])
+                                print("\n\n")
+                        }
                         uncorrected <- unlist(df)
                         corrected <- p.adjust(uncorrected, method = 'fdr')
                         corrected_matrix <- matrix(corrected,
@@ -17,6 +26,10 @@ bh_apply_wide <- function(data, elec, alpha=0.05, tws=list(c(300, 500), c(600, 1
                         data[Spec == p & Timestamp >= tw[1] &
                                 Timestamp <= tw[2], c(4:29)] <- data.table(
                                                         corrected_matrix)
+                        if (p == "Association_Noun") {
+                                print(data[Timestamp == 420,])
+                                print("\n\n")
+                        }
                         data[Spec == p & Timestamp >= tw[1] &
                             Timestamp <= tw[2],
                             paste0(colnames(data)[4:29],
@@ -31,7 +44,8 @@ bh_apply_wide <- function(data, elec, alpha=0.05, tws=list(c(300, 500), c(600, 1
 bh_apply <- function(
         data,
         alpha = 0.05,
-        time_windows = list(c(300, 500), c(600, 1000))) {
+        time_windows = list(c(300, 500), c(600, 1000))
+) {
         tws <- time_windows
         dt <- data[, lapply(.SD, mean), by = list(Timestamp, Electrode),
                 .SDcols = colnames(data)[grep("pval", colnames(data))]]

@@ -69,7 +69,7 @@ make_plots <- function(
         tval <- cbind(tval, sig_corr[, ..sigcols])
         tval$Condition <- tval$Spec
         plot_nine_elec(
-            data = tval, 
+            data = tval,
             e = elec_nine,
             file = paste0("../plots/", file, "/Waveforms/t-values.pdf"),
             title = "Inferential Statistics",

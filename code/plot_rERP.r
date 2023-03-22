@@ -12,7 +12,7 @@ library(gridExtra)
 se <- function(
     x,
     na_rm = FALSE
-) { 
+) {
     if (na_rm == TRUE) {
         sd(x, na.rm = TRUE) / sqrt(length(x[!is.na(x)]))
     } else {
