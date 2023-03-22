@@ -124,8 +124,9 @@ plot_grandavg_ci <- function(
         p <- p + scale_fill_manual(name = "Predictor",
                 labels = leg_labs, values = leg_vals)
         p <- p + geom_point(data = sig_dt,
-                    aes(x = Timestamp, y = posit, shape = sig), size = 2)
-        p <- p + scale_shape_manual(values = c(32, 108),
+                    aes(x = Timestamp, y = posit, shape = sig),
+                    size = 1)
+        p <- p + scale_shape_manual(values = c(32, 124),
                     name = "Corrected p-values",
                     labels = c("Nonsignificant", "Significant"))
         p <- p + annotate("rect", xmin = tws[1][[1]][1], xmax = tws[1][[1]][2],

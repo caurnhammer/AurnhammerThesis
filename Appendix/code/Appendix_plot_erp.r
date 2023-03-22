@@ -15,8 +15,6 @@ make_plots <- function(
     system(paste0("mkdir -p ../plots/", file, "/Waveforms"))
     system(paste0("mkdir -p ../plots/", file, "/Topos"))
 
-    elec_nine <- c("F3", "Fz", "F4", "C3", "Cz", "C4", "P3", "Pz", "P4")
-
     if (grepl("across", file)) {
         ci = FALSE
     } else {
@@ -58,19 +56,29 @@ make_plots <- function(
 
     # Models: t-value
     if (inferential == TRUE) {
+        # Specify subsets of time-windows and 
+        # electrodes within which to correct
         time_windows <- list(c(300, 500), c(600, 1000))
+        elec_corr <- c("F3", "Fz", "F4", "C3", "Cz", "C4", "P3", "Pz", "P4")
+        cols <- c("Timestamp", "Type", "Spec",
+                elec_corr, paste0(elec_corr, "_CI"))
+        mod <- mod[, ..cols]
         tval <- mod[Type == "t-value" & Spec != "Intercept", ]
         sig <- mod[Type == "p-value" & Spec != "Intercept", ]
         colnames(sig) <- gsub("_CI", "_sig", colnames(sig))
 
-        sig_corr <- bh_apply_wide(sig, elec_nine, alpha = 0.05,
+        # Apply correction
+        sig_corr <- bh_apply_wide(
+                        sig,
+                        elec_corr,
+                        alpha = 0.05,
                         tws = time_windows)
         sigcols <- grepl("_sig", colnames(sig_corr))
         tval <- cbind(tval, sig_corr[, ..sigcols])
         tval$Condition <- tval$Spec
         plot_nine_elec(
             data = tval,
-            e = elec_nine,
+            e = elec_corr,
             file = paste0("../plots/", file, "/Waveforms/t-values.pdf"),
             title = "Inferential Statistics",
             modus = "t-value",
@@ -120,8 +128,8 @@ make_plots <- function(
         omit_legend = TRUE,
         save_legend = TRUE)
     plot_full_elec(
-        data = obs, 
-        e = elec_all, 
+        data = obs,
+        e = elec_all,
         file = paste0("../plots/", file, "/Waveforms/Observed_Full.pdf"),
         title = "Observed",
         modus = "Condition",
@@ -249,7 +257,7 @@ make_plots <- function(
                 tw = c(600, 1000),
                 cond_man = "B",
                 cond_base = "A",
-                add_title = paste("\nResidual", pred[i]), 
+                add_title = paste("\nResidual", pred[i]),
                 omit_legend = TRUE)
         }
     }

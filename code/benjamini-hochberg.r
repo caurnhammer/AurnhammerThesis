@@ -1,46 +1,51 @@
 # Benjamini-Hochberg procedure
+# Both functions apply correction to all electrodes they receive.
+# If correction should be applied to a subset of electrodes
+# this subset has the be taken before the function call
 
+# Apply bh correction to data in wide format (electrodes in columns)
 bh_apply_wide <- function(
         data,
-        elec,
+        elec_corr,
         alpha = 0.05,
         tws = list(c(300, 500), c(600, 1000))
 ) {
         preds <- unique(data$Spec)
+        end_elec <- 4 + length(elec_corr) - 1
+        elec_indices <- c(4:end_elec)
         keep_ts <- c()
         for (tw in tws) {
                 keep_ts <- c(keep_ts, seq(tw[1], tw[2]))
                 for (p in preds) {
+                        # Select current predictor, and timewindow
                         df <- data[Spec == p & Timestamp >= tw[1] &
-                                        Timestamp <= tw[2], c(4:29)]
-                        if (p == "Association_Noun") {
-                                print(data[Timestamp == 420,])
-                                print("\n\n")
-                        }
+                                        Timestamp <= tw[2], ..elec_indices]
                         uncorrected <- unlist(df)
+                        # Apply correction to vector containing
+                        # all current p-values
                         corrected <- p.adjust(uncorrected, method = 'fdr')
                         corrected_matrix <- matrix(corrected,
-                                                        nrow = nrow(df),
-                                                        ncol = 26)
+                                                nrow = nrow(df),
+                                                ncol = length(elec_corr))
 
+                        # Replace uncorrected with corrected pvalues
                         data[Spec == p & Timestamp >= tw[1] &
-                                Timestamp <= tw[2], c(4:29)] <- data.table(
+                                Timestamp <= tw[2], elec_indices] <- data.table(
                                                         corrected_matrix)
-                        if (p == "Association_Noun") {
-                                print(data[Timestamp == 420,])
-                                print("\n\n")
-                        }
+                        # Store binary significance
                         data[Spec == p & Timestamp >= tw[1] &
                             Timestamp <= tw[2],
-                            paste0(colnames(data)[4:29],
+                            paste0(colnames(data)[elec_indices],
                                 "_sig")] <- data.table(corrected_matrix < alpha)
                 }
         }
+        # Set everything outside of time-windows to nonsignificant
         sigcols <- grep("_sig", colnames(data))
-        data[!(Timestamp %in% keep_ts), c(c(4:29), sigcols)] <- 0
+        data[!(Timestamp %in% keep_ts), c(elec_indices, sigcols)] <- 0
         data
 }
 
+# Apply bh correction to data in long format (electrodes in rows)
 bh_apply <- function(
         data,
         alpha = 0.05,
@@ -63,5 +68,5 @@ bh_apply <- function(
 
         cols <- c("Timestamp", "Electrode",
                 colnames(dt)[grep("sig", colnames(dt))])
-        merge(data, dt[,..cols], by=c("Timestamp", "Electrode"))
+        merge(data, dt[,..cols], by = c("Timestamp", "Electrode"))
 }
