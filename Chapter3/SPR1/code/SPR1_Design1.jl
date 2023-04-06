@@ -10,7 +10,7 @@ dt = read_spr_data("../../../data/SPR1_Design1.csv",
         invert_preds = [:logCloze, :Association_Noun]);
 
 # exclude data
-dt = exclude_trial(dt[(dt.Region .!== "Pre-critical-2"),:], 50, 2500, 50, 6000);
+dt = exclude_trial(dt[(dt.Region .!= "Pre-critical-2"),:], 50, 2500, 50, 6000);
 
 # Model fitting
 f = @formula(logRT ~ 1 + logCloze + Association_Noun + 

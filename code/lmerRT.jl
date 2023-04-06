@@ -34,13 +34,7 @@ function exclude_trial(df, lower, upper, lower_rc, upper_rc)
         for i in unique(dts[!,:Item])
             # subset current item
             dti = dts[(dts.Item .== i),:];
-            
-            if sum(dti.ReactionTime .=== missing) > 1
-                exc = sum((dti.ReadingTime .> upper) .| (dti.ReadingTime .< lower)) > 0;
-                if exc == true
-                    df_out = df_out[.!((df_out.Subject .== s) .& (df_out.Item .== i)),:];
-                end
-            elseif sum(dti.ReactionTime .=== missing) == 0
+            if !(dti[1,:Accuracy] .=== missing)
                 exc = sum((dti.ReadingTime .> upper) .| (dti.ReadingTime .< lower) .| (dti.ReactionTime .> upper_rc) .| (dti.ReactionTime .< lower_rc)) > 0;
                 if exc == true
                     df_out = df_out[.!((df_out.Subject .== s) .& (df_out.Item .== i)),:];
@@ -74,7 +68,7 @@ function read_spr_data(path, preds; invert_preds = false, conds = false)
     end
 
     data = data[:,vcat([:Condition, :Item, :Subject, :Region, :logRT,
-                   :ReadingTime, :ReactionTime], preds)]
+                   :ReadingTime, :ReactionTime, :Accuracy], preds)]
 
     data = transform!(data,
             :Subject => PooledArray => :Subject,

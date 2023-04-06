@@ -8,7 +8,7 @@ contr = Dict(:Subject => Grouping(), :Item => Grouping());
 dt = read_spr_data("../../../data/SPR2_Design1.csv",
     [:logCloze, :Association_Noun];
     invert_preds = [:logCloze, :Association_Noun]);
-dt = exclude_trial(dt[(dt.Region .!== "Pre-critical-2"),:], 50, 2500, 50, 6000);
+dt = exclude_trial(dt[(dt.Region .!= "Pre-critical-2"),:], 50, 2500, 50, 6000);
 f = @formula(logRT ~ 1 + logCloze + Association_Noun + 
     (1 + logCloze + Association_Noun | Item) + 
     (1 + logCloze + Association_Noun | Subject));

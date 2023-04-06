@@ -421,7 +421,7 @@ make_plots("ERP_Design1_AC_CondCode_rERP", elec_all,
 
 make_plots("ERP_Design1_AC_Cloze_rERP", elec_all,
     predictor = c("Intercept", "Cloze"), design = "Design1_AC",
-    inferential = TRUE, model_labs = c("Intercept", "Cloze"))
+    model_labs = c("Intercept", "Cloze"))
 
 make_plots("ERP_Design1_AC_logCloze_rERP", elec_all,
     predictor = c("Intercept", "logCloze"), design = "Design1_AC_log",
