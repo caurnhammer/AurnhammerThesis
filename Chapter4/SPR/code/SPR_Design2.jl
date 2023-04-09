@@ -8,7 +8,7 @@ dt = read_spr_data("../../../data/SPR_Design2.csv",
     invert_preds = [:Plaus]);
 
 # exclude data
-dt = exclude_trial(dt[((dt.Region .!= "Pre-critical-2")),:], 50, 2500, 50, 10000);
+dt = exclude_trial(dt[((dt.Region .!= "Pre-critical-2")),:], 50, 2500, 50, 6000);
 
 # Plaus + Distractor Cloze
 f1 = @formula(logRT ~ 1 + Plaus + Cloze_distractor + 

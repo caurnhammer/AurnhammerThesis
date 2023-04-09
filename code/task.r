@@ -38,12 +38,7 @@ read_task_data <- function(
 
     # Exclude trial for SPR data
     if (grepl("SPR", path)) {
-        # if (grepl("Design2", path)) {
-        #     dt <- exclude_trial(dt[Region != "Pre-critical-2", ],
-        #             upper_rc = 10000)
-        # } else {
-            dt <- exclude_trial(dt[Region != "Pre-critical-2", ])
-        # }
+        dt <- exclude_trial(dt[Region != "Pre-critical-2", ])
     }
 
     # For comprehension questions, not every trial had a task.
@@ -101,7 +96,7 @@ exclude_trial <- function(
     diff_trial <- diff / length(unique(dt$Region))
 
     cat("Excluded ", diff_trial, "out of", before / numreg, "TRIALS (",
-        round(diff_trial * 100 / before, 2), "% )\n")
+        round(diff_trial * 100 / (before / numreg), 2), "% )\n")
 
     return(dt_out)
 }
@@ -186,17 +181,8 @@ print_task_stats <- function(
     stats_condition(dt)
 }
 
-# print_task_stats("../data/ERP_Design1.csv")
-# print_task_stats("../data/SPR1_Design1.csv")
-# print_task_stats("../data/SPR2_Design1.csv")
-# print_task_stats("../data/SPR_Design2.csv")
+print_task_stats("../data/ERP_Design1.csv")
+print_task_stats("../data/SPR1_Design1.csv")
+print_task_stats("../data/SPR2_Design1.csv")
+print_task_stats("../data/SPR_Design2.csv")
 print_task_stats("../data/ERP_Design2.csv")
-
-# TODO:
-# - crossref with Chapters
-
-# [X] ERP Design 1
-# [X] SPR1 Design 1
-# [X] SPR2 Design 1
-# [ ] SPR Design 2
-# [ ] ERP Design 2
