@@ -41,7 +41,7 @@ pdfjam -q   ../ERP/plots/rERP_N400Segment_A/Coefficients_Pz.pdf \
             --papersize '{7.5cm,15cm}'
 
 # Reg_dbc19_Pz
-cp ../ERP/plots/Subtraction/ERP_dbc19_Midline.pdf Ch5/Reg_dbc19_Pz.pdf
+cp ../ERP/plots/Subtraction/ERP_dbc19_Midline.pdf Ch5/Reg_dbc19_Midline.pdf
 
 # Reg_dbc19_analyses
 pdfjam -q   ../ERP/plots/rERP_dbc19_N400Segment_A/Coefficients_Pz.pdf \
