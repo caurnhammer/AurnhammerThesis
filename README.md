@@ -27,6 +27,7 @@ The data are provided as a release within this repository and to be placed in th
 
 ```data.table v1.14.8```
 ```ggplot2 v3.4.1```
+```grid (base)```
 ```gridExtra v2.3```
 
 **```zsh v5.8```**
