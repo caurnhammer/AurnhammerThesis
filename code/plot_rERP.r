@@ -6,6 +6,7 @@
 
 library(data.table)
 library(ggplot2)
+library(grid)
 library(gridExtra)
 
 # compute standard error
@@ -231,6 +232,72 @@ plot_single_elec <- function(
         ggsave(file, gg, device = cairo_pdf, width = 3, height = 3)
     } else {
         p
+    }
+}
+
+
+# Plot three midline electrodes
+plot_midline <- function(
+    data,
+    e,
+    file = FALSE,
+    title = "ERPs",
+    yunit = paste0("Amplitude (", "\u03BC", "Volt\u29"),
+    ylims = NULL,
+    modus = "Condition",
+    tws = list(c(250, 400), c(600, 1000)),
+    ci = TRUE,
+    leg_labs,
+    leg_vals
+) {
+    if (modus %in% c("Tertile", "Quantile", "Condition")) {
+        cols <- c("Spec", "Timestamp", modus)
+    } else if (modus %in% c("Coefficient", "t-value")) {
+        data[,"Spec"] <- as.factor(data$Spec)
+        cols <- c("Spec", "Timestamp")
+    }
+
+    # Make individual plots
+    plotlist <- vector(mode = "list", length = length(e))
+    if (modus == "t-value") {
+        for (i in 1:length(e)) {
+            varforward <- c(e[i], paste0(e[i], "_CI"), paste0(e[i], "_sig"))
+            plotlist[[i]] <- plot_grandavg_ci(cbind(data[, ..cols],
+                    data[, ..varforward]), e[i], yunit,
+                    ylims, modus, tws, ci = FALSE,
+                    leg_labs = leg_labs, leg_vals = leg_vals)
+        }
+    } else if (modus %in% c("Coefficient", "Tertile")) {
+        for (i in 1:length(e)) {
+            varforward <- c(e[i], paste0(e[i], "_CI"))
+            plotlist[[i]] <- plot_grandavg_ci(cbind(data[, ..cols],
+                    data[, ..varforward]), e[i], yunit = yunit,
+                    ylims = ylims, modus = modus, ci = ci,
+                    leg_labs = leg_labs, leg_vals = leg_vals)
+        }
+    } else if (modus %in% c("Tertile", "Quantile", "Condition")) {
+        for (i in 1:length(e)) {
+            varforward <- c(e[i], paste0(e[i], "_CI"))
+            plotlist[[i]] <- plot_grandavg_ci(cbind(data[, ..cols],
+                    data[, ..varforward]), e[i], yunit = yunit,
+                    ylims = ylims, modus = modus, ci = ci,
+                    leg_labs = leg_labs, leg_vals = leg_vals)
+        }
+    }
+    # Get the legend
+    legend <- get_legend(plotlist[[1]])
+    # Arrange
+    nl <- theme(legend.position = "none")
+    gg <- arrangeGrob(arrangeGrob(
+        plotlist[[1]] + nl,
+        plotlist[[2]] + nl,
+        plotlist[[3]] + nl,
+        layout_matrix = matrix(1:3, ncol = 1, byrow = TRUE)), legend,
+            heights = c(10, 1), top = textGrob(title))
+    if (file != FALSE) {
+       ggsave(file, gg, device = cairo_pdf, width = 4, height = 7)
+    } else {
+       gg
     }
 }
 

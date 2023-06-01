@@ -48,7 +48,7 @@ pdfjam -q   tmp/Design2_Results_2.pdf \
 # Single-trial dynamics
 pdfjam -q   ../../Chapter5/ERP/plots/Subtraction/Subtraction_Design1_N400minusSegment.pdf \
             ../../Chapter5/ERP/plots/rERP_N400Segment_AC/Coefficients_Pz.pdf \
-            ../../Chapter5/ERP/plots/rERP_N400Segment_AC/Estimated_InterceptPzN400_withlegend.pdf \
+            ../../Chapter5/ERP/plots/rERP_N400Segment_AC/Estimated_InterceptFzN400_withlegend.pdf \
             --nup 3x1 --landscape \
             --outfile Ch6/SingleTrial_Results.pdf \
             --papersize '{5cm,15cm}'

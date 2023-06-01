@@ -42,7 +42,7 @@ ci <- function(vec) {
 
 # Load data of Aurnhammer et al. (2021)
 dt <- fread("../../../data/ERP_Design1.csv")
-elec <- "Pz"
+elec <- c("Fz", "Cz", "Pz")
 cond <- c("A", "C")
 # Condition plotting properties
 cond_labels <- c("A: Expected", "C: Unexpected")
@@ -54,19 +54,21 @@ quart_values <- c("#E69F00", "black", "#009E73")
 ##########################
 # Plot Design 1 Cond A/C #
 ##########################
-dt_c_s <- dt[Condition %in% c("A", "C"), lapply(.SD, mean),
+dt_cond_s <- dt[Condition %in% c("A", "C"), lapply(.SD, mean),
     by = list(Subject, Condition, Timestamp), .SDcols = elec]
-dt_c <- dt_c_s[Condition %in% c("A", "C"), lapply(.SD, mean),
+dt_cond <- dt_cond_s[Condition %in% c("A", "C"), lapply(.SD, mean),
     by = list(Condition, Timestamp), .SDcols = elec]
-dt_c$Pz_CI <- dt_c_s[Condition %in% c("A", "C"), lapply(.SD, ci),
-    by = list(Condition, Timestamp), .SDcols = elec][,..elec]
-dt_c$Spec <- dt_c$Condition
-plot_single_elec(
-    data = dt_c,
-    e = elec,
-    file = paste0("../plots/Subtraction/Design1_AC_Pz.pdf"),
+dt_cond[, paste0(elec, "_CI")] <- dt_cond_s[Condition %in% c("A", "C"),
+    lapply(.SD, ci),
+    by = list(Condition, Timestamp), .SDcols = elec][, ..elec]
+dt_cond$Spec <- dt_cond$Condition
+
+plot_midline(
+    dt_cond,
+    elec,
+    file = paste0("../plots/Subtraction/Design1_AC_Midline.pdf"),
     modus = "Condition",
-    ylims = c(9, -5),
+    ylims = c(9, -6),
     leg_labs = cond_labels,
     leg_vals = cond_values)
 
@@ -109,17 +111,17 @@ ggsave("../plots/Subtraction/Design1_randtrials_AC_Pz.pdf", gg,
 # Plot Quantile bins computed from  #
 # raw N400 per-trial averages       #
 #####################################
-dt_cond <- dt[Condition %in% cond,]
+dt_cond <- dt[Condition %in% cond, ]
 dt_cond$Trial <- paste(dt_cond$Item, dt_cond$Subject)
-n400 <- dt_cond[(Timestamp > 300 & Timestamp < 500), lapply(.SD, mean),
-    by = list(Trial, Subject, Item, Condition), .SDcols = elec]
-n400$Quantile <- ntile(n400[,..elec], 3)
+n400 <- dt_cond[(Timestamp >= 300 & Timestamp <= 500), lapply(.SD, mean),
+    by = list(Trial, Subject, Item, Condition), .SDcols = "Pz"]
+n400$Quantile <- ntile(n400[, "Pz"], 3)
 dt_cond <- merge(dt_cond, n400[, c("Trial", "Quantile")], on = "Trial")
+dt_avg <- avg_quart_dt(dt_cond, "Pz")
 
-dt_avg <- avg_quart_dt(dt_cond, elec)
 plot_single_elec(
     data = dt_avg,
-    e = elec,
+    e = "Pz",
     file = paste0("../plots/Subtraction/Subtraction_Design1_RawN400.pdf"),
     modus = "Quantile",
     ylims = c(18, -14),
@@ -132,21 +134,20 @@ plot_single_elec(
 #####################################
 dt_cond <- dt[Condition %in% cond, ]
 dt_cond$Trial <- paste(dt_cond$Item, dt_cond$Subject)
-
-n400 <- dt_cond[(Timestamp > 300 & Timestamp < 500), lapply(.SD, mean),
-    by = list(Trial), .SDcols = elec]
+n400 <- dt_cond[(Timestamp >= 300 & Timestamp <= 500), lapply(.SD, mean),
+    by = list(Trial), .SDcols = "Pz"]
 segment <- dt_cond[(Timestamp > 0), lapply(.SD, mean),
-    by = list(Trial), .SDcols = elec]
+    by = list(Trial), .SDcols = "Pz"]
 n4seg <- merge(n400, segment, by = "Trial")
 colnames(n4seg)[2:3] <- c("N400", "Segment")
 n4seg$N4minSeg <- n4seg$N400 - n4seg$Segment
 n4seg$Quantile <- ntile(n4seg$N4minSeg, 3)
 dt_cond <- merge(dt_cond, n4seg[, c("Trial", "Quantile")], by = "Trial")
+dt_avg <- avg_quart_dt(dt_cond, "Pz")
 
-dt_avg <- avg_quart_dt(dt_cond, elec)
 plot_single_elec(
     data = dt_avg,
-    e = elec,
+    e = "Pz",
     file = paste0("../plots/Subtraction/Subtraction_Design1_N400minusSegment.pdf"),
     modus = "Quantile",
     ylims = c(18, -14),
@@ -159,10 +160,10 @@ plot_single_elec(
 dt_cond <- dt[Condition %in% cond, ]
 dt_cond$Trial <- paste(dt_cond$Item, dt_cond$Subject)
 
-n400 <- dt_cond[(Timestamp > 300 & Timestamp < 500), lapply(.SD, mean),
+n400 <- dt_cond[(Timestamp >= 300 & Timestamp <= 500), lapply(.SD, mean),
     by = list(Trial), .SDcols = elec]
 colnames(n400)[2] <- "N400"
-p600 <- dt_cond[(Timestamp > 600 & Timestamp < 1000), lapply(.SD, mean),
+p600 <- dt_cond[(Timestamp >= 600 & Timestamp <= 1000), lapply(.SD, mean),
     by = list(Trial), .SDcols = elec]
 colnames(p600)[2] <- "P600"
 segment <- dt_cond[(Timestamp > 0), lapply(.SD, mean),
@@ -172,17 +173,18 @@ colnames(segment)[2] <- "Segment"
 n4p6 <- merge(n400, p600, by = "Trial")
 n4p6seg <- merge(n4p6, segment, by = "Trial")
 
-round(cor(n4p6seg$N400, n4p6seg$P600), 3)
+round(cor(n4p6seg$N400, n4p6seg$P600), 2)
 
 library(ppcor)
 pcor.test(n4p6seg$N400, n4p6seg$P600, n4p6seg$Segment)
+
+round(cor(n4p6seg$Segment, n4p6seg$P600), 2)
 
 #####################
 # DELOGU ET AL 2019 #
 #####################
 dt <- fread("../../../data/dbc19_data.csv")
-elec <- "Pz"
-cond <- "C"
+elec <- c("Fz", "Cz", "Pz")
 # Condition plotting properties
 cond_labels <- c("Baseline", "Event-rel.", "Event-unrel.")
 cond_values <- c("black", "red", "blue")
@@ -192,14 +194,15 @@ dt_s <- dt[, lapply(.SD, mean),
     by = list(Subject, Condition, Timestamp), .SDcols = elec]
 dt_avg <- dt_s[, lapply(.SD, mean),
     by = list(Condition, Timestamp), .SDcols = elec]
-dt_avg$Pz_CI <- dt_s[, lapply(.SD, ci),
-    by = list(Condition, Timestamp), .SDcols = elec][,..elec]
+dt_avg[, paste0(elec, "_CI")] <- dt_s[, lapply(.SD, ci),
+    by = list(Condition, Timestamp), .SDcols = elec][, ..elec]
 dt_avg$Spec <- dt_avg$Condition
-plot_single_elec(
-    data = dt_avg, 
-    e = elec,
-    file = paste0("../plots/Subtraction/dbc19_Pz.pdf"),
+
+plot_midline(
+    dt_avg,
+    elec,
+    file = paste0("../plots/Subtraction/ERP_dbc19_Midline.pdf"),
     modus = "Condition",
-    ylims = c(9, -5),
+    ylims = c(9, -6),
     leg_labs = cond_labels,
     leg_vals = cond_values)

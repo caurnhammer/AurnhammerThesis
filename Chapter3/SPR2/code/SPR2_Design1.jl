@@ -2,6 +2,7 @@
 # Apply (lme)rRT analysis to SPR1 Design 1
 ##
 include("../../../code/lmerRT.jl");
+run(`mkdir  -p ../data`) 
 contr = Dict(:Subject => Grouping(), :Item => Grouping());
 
 # logCloze + Association_Noun in all condition

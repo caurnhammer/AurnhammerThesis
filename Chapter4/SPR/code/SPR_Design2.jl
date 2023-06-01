@@ -1,4 +1,5 @@
 include("../../../code/lmerRT.jl");
+run(`mkdir -p ../data`)
 contr = Dict(:Subject => Grouping(), :Item => Grouping());
 
 ## Data Preparation
