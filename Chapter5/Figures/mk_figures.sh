@@ -2,7 +2,7 @@ mkdir -p tmp Ch5
 
 ## Intro
 # Bin_AC_Pz
-cp ../ERP/plots/Subtraction/Design1_AC_Midline.pdf Ch5/Bin_AC_Pz_Midline.pdf
+cp ../ERP/plots/Subtraction/Design1_AC_Midline.pdf Ch5/Bin_AC_Midline.pdf
 
 ## Binning based approach
 # Bin_AC_randtrials
