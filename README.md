@@ -32,4 +32,4 @@ The data are provided as a release within this repository and to be placed in th
 
 **```zsh v5.8```**
 
-```ImagemMagick v7.1.0-62```
+```pdfjam 3.03```
