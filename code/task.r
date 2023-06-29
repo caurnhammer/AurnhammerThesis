@@ -98,6 +98,18 @@ exclude_trial <- function(
     cat("Excluded ", diff_trial, "out of", before / numreg, "TRIALS (",
         round(diff_trial * 100 / (before / numreg), 2), "% )\n")
 
+    dt <- dt[Condition=="A",]
+    dt_out <- dt_out[Condition=="A",]
+    before <- nrow(dt)
+    after <- nrow(dt_out)
+    diff <- before - after
+    numreg <- length(unique(dt$Region))
+    diff_trial <- diff / length(unique(dt$Region))
+
+    cat("Condition A: Excluded ", diff_trial, "out of", before / numreg, "TRIALS (",
+        round(diff_trial * 100 / (before / numreg), 2), "% )\n")
+
+
     return(dt_out)
 }
 
