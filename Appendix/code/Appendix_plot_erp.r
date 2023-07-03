@@ -127,6 +127,18 @@ make_plots <- function(
         leg_vals = data_vals,
         omit_legend = TRUE,
         save_legend = TRUE)
+    plot_single_elec(
+        data = obs,
+        e = c("Pz"),
+        file = paste0("../plots/", file,  "/Waveforms/Observed_legend.pdf"),
+        title = "Observed",
+        ylims = c(9, -5.5),
+        modus = "Condition",
+        ci = ci,
+        leg_labs = data_labs,
+        leg_vals = data_vals,
+        omit_legend = FALSE,
+        save_legend = FALSE)
     plot_full_elec(
         data = obs,
         e = elec_all,
