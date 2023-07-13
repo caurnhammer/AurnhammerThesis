@@ -27,7 +27,7 @@ pdfjam -q	../plots/ERP_Design1_AC_Cloze_rERP/Waveforms/Residual_InterceptCloze.p
 			--outfile App/ERP_Res_Cloze_logCloze.pdf \
 			--papersize '{8cm,15cm}'
 
-pdfjam -q	../plots/ERP_Design1_Cloze_Assocnoun_rERP/Waveforms/Observed.pdf \
+pdfjam -q	../plots/ERP_Design1_Cloze_Assocnoun_rERP/Waveforms/Observed_legend.pdf \
 			../plots/ERP_Design1_Cloze_Assocnoun_rERP/Waveforms/Coefficients.pdf \
 			--nup 2x1 --landscape \
 			--outfile App/ERP_Data_Coef_Full.pdf \
