@@ -34,6 +34,13 @@ read_task_data <- function(
         diff_trial <- before - after
         cat("Excluded ", diff_trial, "out of", before, "TRIALS (",
             round(diff_trial * 100 / before, 2), "% )\n")
+
+        before <- length(unique(dt$Subject)) * length(unique(dt$Item)) / 4
+        after <- nrow(dt[Condition == "A", lapply(.SD, mean),
+                    by = list(Subject, Item), .SDcols = "Pz"])
+        diff_trial <- before - after
+        cat("Condition A: Excluded ", diff_trial, "out of", before, "TRIALS (",
+            round(diff_trial * 100 / before, 2), "% )\n")
     }
 
     # Exclude trial for SPR data
@@ -82,8 +89,14 @@ exclude_trial <- function(
                     sum(dtsi[1,]$ReactionTime < lower_rc) +
                     sum(dtsi[1,]$ReactionTime > upper_rc))
                     > 0) {
-                    exc_trial <- dtsi[1, ]$Trial
-                    dt_out <- dt_out[(Subject != s | Item != i), ]
+                    dt_out <- dt_out[!(Subject == s & Item == i), ]
+                }
+            } else {
+                if ((sum(dtsi$ReadingTime < lower) +
+                    sum(dtsi$ReadingTime > upper))
+                    > 0) {
+                        exc_trial <- dtsi[1, ]$Trial
+                        dt_out <- dt_out[!(Subject == s & Item == i), ]
                 }
             }
         }
@@ -98,17 +111,16 @@ exclude_trial <- function(
     cat("Excluded ", diff_trial, "out of", before / numreg, "TRIALS (",
         round(diff_trial * 100 / (before / numreg), 2), "% )\n")
 
-    dt <- dt[Condition=="A",]
-    dt_out <- dt_out[Condition=="A",]
-    before <- nrow(dt)
-    after <- nrow(dt_out)
+    dt_a <- dt[Condition=="A",]
+    dt_out_a <- dt_out[Condition=="A",]
+    before <- nrow(dt_a)
+    after <- nrow(dt_out_a)
     diff <- before - after
-    numreg <- length(unique(dt$Region))
-    diff_trial <- diff / length(unique(dt$Region))
+    numreg <- length(unique(dt_a$Region))
+    diff_trial <- diff / length(unique(dt_a$Region))
 
     cat("Condition A: Excluded ", diff_trial, "out of", before / numreg, "TRIALS (",
         round(diff_trial * 100 / (before / numreg), 2), "% )\n")
-
 
     return(dt_out)
 }
