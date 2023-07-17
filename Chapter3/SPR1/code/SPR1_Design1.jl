@@ -1,6 +1,7 @@
 ##
 # Apply (lme)rRT analysis to SPR1 Design 1
 ##
+run(`mkdir -p ../data`)
 include("../../../code/lmerRT.jl");
 contr = Dict(:Subject => Grouping(), :Item => Grouping());
 

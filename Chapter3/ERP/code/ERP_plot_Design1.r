@@ -8,7 +8,6 @@
 system("mkdir -p ../plots")
 source("../../../code/plot_lmerERP.r")
 source("../../../code/benjamini-hochberg.r")
-source("../../../code/plot_rERP.r")
 
 # produce single midline plot.
 lmerERPplot <- function(
@@ -257,6 +256,7 @@ make_grid_topo <- function(
     data_labs,
     data_vals
 ) {
+    source("../../../code/plot_rERP.r")
     system(paste0("mkdir -p ../plots/", path))
     system(paste0("mkdir -p ../plots/", path, "/Waveforms"))
     system(paste0("mkdir -p ../plots/", path, "/Topos"))

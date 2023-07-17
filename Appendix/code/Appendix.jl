@@ -3,6 +3,7 @@
 
 # Load the functions in rERPs.jl
 # Packages are loaded from within rERPs.jl
+run(`mkdir -p ../data`)
 include("../../code/rERP.jl");
 
 # Define an array of electrodes on which to fit the models.
