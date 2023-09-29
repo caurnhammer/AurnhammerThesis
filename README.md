@@ -1,9 +1,9 @@
-This repository contains the code and data necessary to reproduce the analyses of my PhD thesis.
+This repository contains the code and data necessary to reproduce the analyses of my PhD thesis (submitted).
 
 # Code
 
 The ```code/``` directory contains experiment-independent code to run and visualize regression analyses following the idea of rERPs. There are implementations of both least-squares regression and linear mixed effects regression and specifications for electroencephalography (EEG) and self-paced reading data.
-Regressions are computed in ```julia```, visualisation and multiple comparisons correction are in ```R```.  Shell commands and ```pdfjam''' are used to arrange graphs into the final figures.
+Regressions are computed in ```julia```, visualisation and multiple comparisons correction are in ```R```.  Unix shell commands and ```pdfjam``` are used to arrange graphs into the final figures.
 
 # Data
 
@@ -30,6 +30,6 @@ The data are provided as a release within this repository and to be placed in th
 ```grid (base)```
 ```gridExtra v2.3```
 
-**```zsh v5.8```**
+**```zsh v5.9```**
 
 ```pdfjam 3.03```

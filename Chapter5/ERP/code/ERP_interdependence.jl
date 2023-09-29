@@ -1,4 +1,5 @@
 # If components are provided, they are automatically inverted. I.e. no need to provide them to invert_preds argument
+run(`mkdir -p ../data`)
 include("../../../code/rERP.jl");
 
 # Aurnhammer et al. (2021), Condition A & C
