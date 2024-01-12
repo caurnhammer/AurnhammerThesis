@@ -531,9 +531,12 @@ function write_data(out_data, models, file)
     out_data = combine(groupby(out_data_cp, [:Timestamp, :Type, :Spec, :Condition]), [x => mean => x for x in models.Electrodes])
     
     for x in models.Electrodes
-        out_data[!,Symbol(x, "_CI")] = zeros(nrow(out_data));    
+        out_data[!,Symbol(x, "_CI")] = zeros(nrow(out_data)); 
         out_data_subj = combine(groupby(out_data_cp, [:Timestamp, :Type, :Spec, :Condition, :Subject]), [x => mean => x])
-        out_data[!,Symbol(x, "_CI")] = combine(groupby(out_data_subj, [:Timestamp, :Type, :Spec, :Condition]), [x => ci => x])[!,x]
+        error_ribbons = combine(groupby(out_data_subj, [:Timestamp, :Type, :Spec, :Condition]), [x => ci => x])
+        # Mysteriously, the output df of the previous line is not always sorted the same way. Hence, sort.
+        sort!(error_ribbons, [:Timestamp, :Type, :Spec, :Condition])
+        out_data[!,Symbol(x, "_CI")] = error_ribbons[!,x]
     end
 
     dtype_dict = Dict(1 => "EEG", 2 => "est", 3 => "res");
