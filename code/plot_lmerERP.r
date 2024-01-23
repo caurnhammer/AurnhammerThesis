@@ -148,7 +148,8 @@ plot_grandavg_ci_lmer <- function(
                                     aes(x = Timestamp,
                                         y = posit,
                                         shape = sig))
-            plt <- plt + scale_shape_manual(values = c(32, 20),
+            # plt <- plt + scale_shape_manual(values = c(32, 20),
+            plt <- plt + scale_shape_manual(values = c(32, 124),
                     name = "Corrected p-values",
                     labels = c("Nonsignificant", "Significant"))
             plt <- plt + annotate("rect",
