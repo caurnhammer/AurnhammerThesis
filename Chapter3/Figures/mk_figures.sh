@@ -18,8 +18,8 @@ pdfjam  -q	../ERP/plots/ERP_Design1_rERP/Topos/N400text.pdf \
 			../ERP/plots/ERP_Design1_rERP/Topos/N400_DC_D_300-500.pdf \
 			../ERP/plots/ERP_Design1_rERP/Topos/P600text.pdf \
 			../ERP/plots/ERP_Design1_rERP/Topos/P600_B_600-1000.pdf \
-			../ERP/plots/ERP_Design1_rERP/Topos/P600_D_600-1000.pdf \
 			../ERP/plots/ERP_Design1_rERP/Topos/P600_C_600-1000.pdf \
+			../ERP/plots/ERP_Design1_rERP/Topos/P600_D_600-1000.pdf \
 			../ERP/plots/ERP_Design1_rERP/Topos/P600_DC_D_600-1000.pdf \
 			--nup 5x2 --landscape \
 			--outfile tmp/ERP_topo.pdf \
@@ -31,7 +31,7 @@ pdfjam	-q	tmp/ERP_topo.pdf \
 			--papersize '{5cm,15cm}'
 pdfjam	-q	tmp/ERP_topo_2.pdf \
 			--landscape \
-			--outfile ERP/ERP_topo.pdf \
+			--outfile ERP/ERP_Topo.pdf \
 			--papersize '{5.75cm,15cm}' \
 			--trim '1cm 0.5cm 4.5cm 0.5cm' 
 

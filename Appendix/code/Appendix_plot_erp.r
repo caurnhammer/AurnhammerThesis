@@ -1,6 +1,5 @@
 source("../../code/plot_rERP.r")
 source("../../code/benjamini-hochberg.r")
-source("../../code/plot_lmerERP.r")
 
 make_plots <- function(
     file,
@@ -139,6 +138,16 @@ make_plots <- function(
         leg_vals = data_vals,
         omit_legend = FALSE,
         save_legend = FALSE)
+    plot_midline(
+        data = obs,
+        e = c("Fz", "Cz", "Pz"),
+        file = paste0("../plots/", file,  "/Waveforms/Observed_Midline.pdf"),
+        title = "Observed",
+        ylims = c(9, -5.5),
+        modus = "Condition",
+        ci = ci,
+        leg_labs = data_labs,
+        leg_vals = data_vals)
     plot_full_elec(
         data = obs,
         e = elec_all,
@@ -391,6 +400,9 @@ produce_lmer_plots <- function(
     model_labs,
     model_vals
 ) {
+    # Source lmer plot functions only now
+    source("../../code/plot_lmerERP.r")
+
     # Create output dir
     name = paste0("../plots/", substr(path, 9, nchar(path) - 4))
     system(paste("mkdir -p", name))

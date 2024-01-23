@@ -101,6 +101,14 @@ make_plots <- function(
         modus = "Condition",
         leg_labs = data_labs,
         leg_vals = data_vals)
+    plot_midline(
+        data = obs,
+        e = c("Fz", "Cz", "Pz"),
+        file = paste0("../plots/", file, "/Waveforms/Observed_Midline.pdf"),
+        ylims = c(10.5, -5.5),
+        modus = "Condition",
+        leg_labs = data_labs,
+        leg_vals = data_vals)
     plot_single_elec(
         data = obs,
         e = "Pz",
