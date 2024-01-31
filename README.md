@@ -1,4 +1,4 @@
-This repository contains the code and data necessary to reproduce the analyses of my PhD thesis (submitted).
+This repository contains the code and data necessary to reproduce the analyses of my PhD thesis (2024, in press).
 
 # Code
 
