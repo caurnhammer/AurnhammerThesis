@@ -1,4 +1,8 @@
-This repository contains the code and data necessary to reproduce the analyses of my PhD thesis (2024, in press).
+This repository contains the code and data necessary to reproduce the analyses of my <a href = https://dx.doi.org/10.22028/D291-41500>PhD thesis (Aurnhammer, 2024).</a>
+
+<p align=center>
+<img src="https://caurnhammer.github.io/docs/assets/images/240120_thesis_chr_A4.png" width=40% height=40%>
+</p>
 
 # Code
 
